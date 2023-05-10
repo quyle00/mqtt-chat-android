@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/loginFragment">
+
+    <fragment
+        android:id="@+id/conversationDetailFragment"
+        android:name="com.quyt.mqttchat.presentation.ui.home.message.detail.ConversationDetailFragment"
+        android:label="fragment_conversion_detail"
+        tools:layout="@layout/fragment_conversion_detail" >
+        <argument
+            android:name="conversationId"
+            app:argType="integer" />
+    </fragment>
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.quyt.mqttchat.presentation.ui.auth.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_loginFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        tools:layout="@layout/fragment_home"
+        android:name="com.quyt.mqttchat.presentation.ui.home.HomeFragment"
+        android:label="HomeFragment" >
+        <action
+            android:id="@+id/action_homeFragment_to_conversationDetailFragment"
+            app:destination="@id/conversationDetailFragment" />
+    </fragment>
+</navigation>
