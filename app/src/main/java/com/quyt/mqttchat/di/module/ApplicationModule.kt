@@ -1,6 +1,7 @@
 package com.quyt.mqttchat.di.module
 
 import android.content.Context
+import com.google.gson.GsonBuilder
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.quyt.mqttchat.data.datasource.remote.interceptor.ConnectivityInterceptor
@@ -74,15 +75,22 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder().baseUrl("http://172.17.12.122:3000/").addConverterFactory(GsonConverterFactory.create()).client(okHttpClient).build()
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        val gson = GsonBuilder().serializeNulls().create()
+        return Retrofit.Builder()
+            .baseUrl("http://192.168.1.195:3000/")
+            .addConverterFactory(GsonConverterFactory.create(gson))
+            .client(okHttpClient)
+            .build()
+    }
+
 
     @Provides
     @Singleton
     fun provideMqttClient(): Mqtt3AsyncClient {
         return Mqtt3Client.builder()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("172.17.12.122")
+            .serverHost("192.168.1.195")
             .buildAsync()
     }
 

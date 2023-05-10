@@ -3,6 +3,7 @@ package com.quyt.mqttchat.di.module
 import com.quyt.mqttchat.data.datasource.remote.service.AccessService
 import com.quyt.mqttchat.data.datasource.remote.service.ContactService
 import com.quyt.mqttchat.data.datasource.remote.service.ConversationService
+import com.quyt.mqttchat.data.datasource.remote.service.MessageService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,4 +25,8 @@ class ServiceModule {
     @Provides
     @Singleton
     fun provideConversationServices(retrofit: Retrofit): ConversationService = retrofit.create(ConversationService::class.java)
+
+    @Provides
+    @Singleton
+    fun provideMessageServices(retrofit: Retrofit): MessageService = retrofit.create(MessageService::class.java)
 }

@@ -10,8 +10,10 @@ import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemMyMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageState
+import com.quyt.mqttchat.utils.DateUtils
 
-class MessageAdapter(private val currentUserId: Int) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val mListMessage = mutableListOf<Message>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -37,10 +39,17 @@ class MessageAdapter(private val currentUserId: Int) : RecyclerView.Adapter<Recy
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is MyMessageViewHolder) {
-            holder.bind(mListMessage[position])
-        } else if (holder is OtherMessageViewHolder) {
-            holder.bind(mListMessage[position])
+        val message = mListMessage[position]
+        val previousMessageTime = if (position < mListMessage.size - 1) mListMessage[position + 1].createdAt else null
+
+        when (holder) {
+            is MyMessageViewHolder -> {
+                holder.bind(message, previousMessageTime)
+            }
+
+            is OtherMessageViewHolder -> {
+                holder.bind(message, previousMessageTime)
+            }
         }
     }
 
@@ -55,12 +64,34 @@ class MessageAdapter(private val currentUserId: Int) : RecyclerView.Adapter<Recy
         if (mListMessage.isEmpty()) {
             mListMessage.add(0, message)
             notifyItemInserted(0)
-        }else if (!mListMessage[0].isTyping) {
+        } else if (!mListMessage[0].isTyping) {
             mListMessage.add(0, message)
             notifyItemInserted(0)
-        }else{
+        } else {
             mListMessage[0] = message
             notifyItemChanged(0)
+        }
+    }
+
+    fun setMessageSent(message: Message) {
+//        val index = mListMessage.indexOfFirst { it.id == message.id }
+//        if (index != -1) {
+//            message.state = MessageState.SENT.value
+//            mListMessage[index] = message
+//            notifyItemChanged(index)
+//        }
+        mListMessage.find { it.id == message.id }?.let {
+            it.state = MessageState.SENT.value
+            notifyItemChanged(mListMessage.indexOf(it))
+        }
+    }
+
+    fun setMessageFailed(message: Message) {
+        val index = mListMessage.indexOfFirst { it.id == message.id }
+        if (index != -1) {
+            message.state = MessageState.FAILED.value
+            mListMessage[index] = message
+            notifyItemChanged(index)
         }
     }
 
@@ -79,16 +110,45 @@ class MessageAdapter(private val currentUserId: Int) : RecyclerView.Adapter<Recy
             }
         }
     }
+
 }
 
 class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message) {
+    fun bind(message: Message, previousMessageTime: String?) {
+        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
+            binding.tvTime.visibility = View.VISIBLE
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
+        } else {
+            binding.tvTime.visibility = View.GONE
+        }
         binding.tvMessage.text = message.content
+        when (message.state) {
+            MessageState.SENDING.value -> {
+                binding.loading.visibility = View.VISIBLE
+                binding.ivRefresh.visibility = View.GONE
+            }
+
+            MessageState.SENT.value -> {
+                binding.loading.visibility = View.GONE
+                binding.ivRefresh.visibility = View.GONE
+            }
+
+            MessageState.FAILED.value -> {
+                binding.loading.visibility = View.GONE
+                binding.ivRefresh.visibility = View.VISIBLE
+            }
+        }
     }
 }
 
 class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message) {
+    fun bind(message: Message, previousMessageTime: String?) {
+        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
+            binding.tvTime.visibility = View.VISIBLE
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
+        } else {
+            binding.tvTime.visibility = View.GONE
+        }
         binding.tvMessage.text = message.content
         if (message.isTyping) {
             binding.tvMessage.visibility = View.GONE
@@ -98,6 +158,7 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
             binding.lavTyping.visibility = View.GONE
         }
     }
+
 }
 
 enum class MessageType(val value: Int) {

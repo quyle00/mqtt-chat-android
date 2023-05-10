@@ -1,9 +1,10 @@
 package com.quyt.mqttchat.domain.model
 
-class Event {
-    var type: Int? = 0
-    var message: Message? = null
-}
+class Event (
+    var publisherId: String?,
+    var type: Int?,
+    var message: Message?
+    )
 
 enum class EventType(val value: Int) {
     NEW_MESSAGE(0),

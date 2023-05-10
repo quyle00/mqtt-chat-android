@@ -4,6 +4,7 @@ import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.repository.AccessRepository
 import com.quyt.mqttchat.domain.repository.ConversationRepository
 import com.quyt.mqttchat.domain.repository.IMqttClient
+import com.quyt.mqttchat.domain.repository.MessageRepository
 import com.quyt.mqttchat.domain.repository.UserRepository
 import com.quyt.mqttchat.domain.usecase.ListenConversationEventUseCase
 import com.quyt.mqttchat.domain.usecase.SendConversationEventUseCase
@@ -12,6 +13,8 @@ import com.quyt.mqttchat.domain.usecase.contact.GetListContactUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
+import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -62,6 +65,18 @@ class UseCaseModule {
     @Singleton
     fun provideGetConversationDetailUseCase(repository: ConversationRepository): GetConversationDetailUseCase {
         return GetConversationDetailUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetListMessageUseCase(repository: MessageRepository): GetListMessageUseCase {
+        return GetListMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCreateMessageUseCase(repository: MessageRepository): CreateMessageUseCase {
+        return CreateMessageUseCase(repository)
     }
 
 }

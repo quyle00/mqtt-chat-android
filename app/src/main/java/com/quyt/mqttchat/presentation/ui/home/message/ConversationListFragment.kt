@@ -2,12 +2,14 @@ package com.quyt.mqttchat.presentation.ui.home.message
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversationListBinding
 import com.quyt.mqttchat.presentation.adapter.ConversationAdapter
 import com.quyt.mqttchat.presentation.adapter.OnConversationListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
+import com.quyt.mqttchat.presentation.ui.home.HomeFragmentDirections
 import com.quyt.mqttchat.utils.view.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -53,9 +55,9 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
         }
     }
 
-    override fun onConversationClick(conversationId: Int) {
-//        findNavController().navigate(
-//            ConversationListFragmentDirections.actionConversationListFragmentToConversationDetailFragment(conversationId)
-//        )
+    override fun onConversationClick(conversationId: String?) {
+        findNavController().navigate(
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(conversationId?:"")
+        )
     }
 }

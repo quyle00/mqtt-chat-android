@@ -46,9 +46,9 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_message"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_above="@id/rl_message_type"
-            android:layout_below="@id/ll_action_bar" />
+            android:layout_below="@id/ll_action_bar"/>
 
         <RelativeLayout
             android:id="@+id/rl_message_type"

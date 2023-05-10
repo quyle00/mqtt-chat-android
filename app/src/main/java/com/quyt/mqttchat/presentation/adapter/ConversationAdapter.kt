@@ -35,5 +35,5 @@ class ConversationViewHolder(private val binding: ItemConversationBinding, priva
 }
 
 interface OnConversationListener {
-    fun onConversationClick(conversationId: Int)
+    fun onConversationClick(conversationId: String?)
 }
