@@ -3,6 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.quyt.mqttchat.presentation.ui.home.message.detail.ConversationDetailViewModel" />
+    </data>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,20 +20,19 @@
             android:id="@+id/ll_action_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp">
+            android:layout_margin="16dp"
+            android:gravity="center_vertical">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/baseline_arrow_back_ios_24" />
+                android:src="@drawable/baseline_arrow_back_ios_24"
+                android:tint="@color/normal_text" />
 
             <androidx.cardview.widget.CardView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                app:cardCornerRadius="24dp">
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                app:cardCornerRadius="32dp">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="match_parent"
@@ -34,13 +40,42 @@
                     android:src="@drawable/ic_launcher_background" />
             </androidx.cardview.widget.CardView>
 
-            <androidx.appcompat.widget.AppCompatTextView
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="Thanh Quý"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:orientation="vertical">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{viewModel.partnerName}"
+                    android:textColor="@color/title_text"
+                    android:textSize="14sp"
+                    tools:text="Thanh Quý" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical">
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        app:cardBackgroundColor="#4CAF50"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Active"
+                        android:textColor="@color/normal_text"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -48,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/rl_message_type"
-            android:layout_below="@id/ll_action_bar"/>
+            android:layout_below="@id/ll_action_bar" />
 
         <RelativeLayout
             android:id="@+id/rl_message_type"

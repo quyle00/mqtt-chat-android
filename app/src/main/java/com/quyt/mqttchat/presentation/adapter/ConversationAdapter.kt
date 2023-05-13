@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemConversationBinding
 import com.quyt.mqttchat.domain.model.Conversation
@@ -27,7 +28,7 @@ class ConversationAdapter(private val listener: OnConversationListener) : BaseRe
 
 class ConversationViewHolder(private val binding: ItemConversationBinding, private val listener: OnConversationListener) : RecyclerView.ViewHolder(binding.root) {
     fun bind(conversation: Conversation) {
-        binding.tvName.text = conversation.name
+        binding.conversation = conversation
         binding.rlRoot.setOnClickListener {
             listener.onConversationClick(conversation.id)
         }

@@ -3,23 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
+        android:id="@+id/ll_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
         android:gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:animateLayoutChanges="true"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
             android:visibility="gone"
             tools:text="00:00" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:background="@color/white">
 
             <RelativeLayout
@@ -37,7 +39,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:layout_margin="8dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
                     android:textAlignment="center"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -62,6 +67,26 @@
                 android:layout_toStartOf="@id/rl_message"
                 android:src="@drawable/baseline_refresh_24"
                 android:tint="#FF0000" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_sent"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@id/rl_message"
+                android:src="@drawable/ic_check_circle_outline_24"
+                android:tint="#4CAF50" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_seen"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:layout_toStartOf="@id/rl_message"
+                android:src="@drawable/ic_check_circle_24"
+                android:tint="#4CAF50" />
 
         </RelativeLayout>
     </LinearLayout>

@@ -15,6 +15,7 @@ import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCas
 import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -77,6 +78,12 @@ class UseCaseModule {
     @Singleton
     fun provideCreateMessageUseCase(repository: MessageRepository): CreateMessageUseCase {
         return CreateMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSeenMessageUseCase(repository: MessageRepository): SeenMessageUseCase {
+        return SeenMessageUseCase(repository)
     }
 
 }

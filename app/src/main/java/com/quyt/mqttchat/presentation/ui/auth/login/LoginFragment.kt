@@ -5,11 +5,9 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentLoginBinding
-import com.quyt.mqttchat.domain.repository.SharedPreferences
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
-import com.quyt.mqttchat.utils.view.LoadingDialog
+import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 
 @AndroidEntryPoint

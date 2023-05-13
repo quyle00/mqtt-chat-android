@@ -1,5 +1,6 @@
 package com.quyt.mqttchat.presentation.ui.home.message.detail
 
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
@@ -16,25 +17,21 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-
 @AndroidEntryPoint
 class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>() {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
+    private lateinit var messageAdapter: MessageAdapter
+
+    //    private var listMessage = ArrayList<Message>()
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
-
-    private lateinit var mMessageAdapter: MessageAdapter
-    private var mListMessage = ArrayList<Message>()
-    private lateinit var mManager: LinearLayoutManager
-
-
     override fun setupView() {
+        binding.viewModel = viewModel
+        viewModel.getConversationDetail(args.conversationId, args.partnerId)
         initConversationList()
         observeState()
         handleTyping()
-        viewModel.getListMessage(args.conversationId)
-        viewModel.subscribeConversation(args.conversationId)
         binding.ivSend.setOnClickListener {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             val messageContent = binding.etMessage.text.toString()
@@ -45,14 +42,11 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     this.content = messageContent
                     this.state = MessageState.SENDING.value
                     this.createdAt = sdf.format(Date())
+                    this.sendTime = Date().time
                 }
-                // Add message to view
-                mMessageAdapter.addMessage(newMessage)
+                messageAdapter.addMessage(newMessage)
                 binding.rvMessage.scrollToPosition(0)
-//                binding.rvMessage.layoutManager?.smoothScrollToPosition(binding.rvMessage, null, 0)
-//                binding.rvMessage.scrollToPosition(0)
-                //
-                viewModel.sendMessage(args.conversationId, newMessage)
+                viewModel.sendMessage(newMessage)
                 binding.etMessage.setText("")
             }
         }
@@ -66,32 +60,36 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.Success -> {
-                    mMessageAdapter.setListMessage(state.data)
+                    messageAdapter.setListMessage(state.data)
                     binding.rvMessage.scrollToPosition(0)
                 }
 
                 is ConversationDetailState.Error -> {
-
+                    Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
                 }
 
                 is ConversationDetailState.NewMessage -> {
-                    mMessageAdapter.addMessage(state.message)
+                    messageAdapter.addMessage(state.message)
                     binding.rvMessage.scrollToPosition(0)
                 }
 
                 is ConversationDetailState.Typing -> {
                     if (state.message.sender?.id != viewModel.getCurrentUser()?.id) {
-                        mMessageAdapter.setTyping(state.message.isTyping)
+                        messageAdapter.setTyping(state.message.isTyping)
                         binding.rvMessage.scrollToPosition(0)
                     }
                 }
 
+                is ConversationDetailState.SeenMessage -> {
+                    messageAdapter.seenMessage()
+                }
+
                 is ConversationDetailState.SendMessageSuccess -> {
-                    mMessageAdapter.setMessageSent(state.message)
+                    messageAdapter.setMessageSent(state.message)
                 }
 
                 is ConversationDetailState.SendMessageError -> {
-                    mMessageAdapter.setMessageFailed(state.message)
+                    messageAdapter.setMessageFailed(state.message)
                 }
             }
         }
@@ -99,23 +97,27 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     private fun handleTyping() {
         binding.etMessage.addTextChangedListener {
-            if (it.toString().isNotEmpty() && !viewModel.mTyping) {
-                viewModel.mTyping = true
-                viewModel.sendTyping(viewModel.getCurrentUser(), args.conversationId, true)
+            if (it.toString().isNotEmpty() && !viewModel.isTyping) {
+                viewModel.isTyping = true
+                viewModel.sendTyping(true)
             }
-            if (it.toString().isEmpty() && viewModel.mTyping) {
-                viewModel.mTyping = false
-                viewModel.sendTyping(viewModel.getCurrentUser(), args.conversationId, false)
+            if (it.toString().isEmpty() && viewModel.isTyping) {
+                viewModel.isTyping = false
+                viewModel.sendTyping(false)
             }
         }
     }
 
     private fun initConversationList() {
-        mMessageAdapter = MessageAdapter(viewModel.getCurrentUser()?.id)
-        binding.rvMessage.adapter = mMessageAdapter
+        messageAdapter = MessageAdapter(viewModel.getCurrentUser()?.id)
+        binding.rvMessage.adapter = messageAdapter
         binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        mMessageAdapter.setListMessage(mListMessage)
+        messageAdapter.setListMessage(ArrayList())
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        viewModel.sendEventInConversationScreen(false)
+    }
 }

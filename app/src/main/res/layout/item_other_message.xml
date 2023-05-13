@@ -8,6 +8,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:gravity="center_horizontal"
+        android:animateLayoutChanges="true"
         android:orientation="vertical">
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -15,6 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="14sp"
+            android:layout_marginBottom="4dp"
             android:visibility="gone"
             tools:text="00:00" />
 
@@ -22,7 +24,6 @@
             android:id="@+id/ll_root"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:background="@color/white">
 
 

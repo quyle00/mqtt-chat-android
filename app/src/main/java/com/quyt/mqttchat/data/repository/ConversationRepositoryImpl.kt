@@ -48,4 +48,17 @@ class ConversationRepositoryImpl @Inject constructor(
             Result.Error(e)
         }
     }
+
+    override suspend fun getConversationDetailByPartnerId(partnerId: String): Result<Conversation> {
+        return try {
+            val res = service.getConversationDetailByPartnerId(partnerId)
+            if (res.isSuccessful) {
+                Result.Success(res.body()?.data!!)
+            } else {
+                Result.Error(res.getError())
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 }

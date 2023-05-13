@@ -7,9 +7,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class GetConversationDetailUseCase(private val conversationRepository: ConversationRepository) {
-    suspend operator fun invoke(conversationId: String): Result<Conversation> {
+    suspend operator fun invoke(conversationId: String?,partnerId : String?=null): Result<Conversation> {
         return withContext(Dispatchers.IO) {
-            conversationRepository.getConversationDetail(conversationId)
+            if (!conversationId.isNullOrEmpty()) {
+                conversationRepository.getConversationDetail(conversationId)
+            } else {
+                conversationRepository.getConversationDetailByPartnerId(partnerId ?: "")
+            }
         }
     }
 }

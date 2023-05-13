@@ -1,22 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
+
+    <data>
+        <variable
+            name="conversation"
+            type="com.quyt.mqttchat.domain.model.Conversation" />
+    </data>
+
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/rl_root"
         android:layout_width="match_parent"
-        android:layout_height="88dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal">
 
         <androidx.cardview.widget.CardView
             android:id="@+id/cv_avatar"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:layout_margin="16dp"
+            android:layout_marginHorizontal="16dp"
             app:cardCornerRadius="28dp">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/iv_avatar"
+                imageUrl="@{conversation.participants[1].avatar}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_launcher_background" />
@@ -35,25 +44,30 @@
                 android:id="@+id/tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="@{conversation.name}"
+                android:textColor="@color/title_text"
                 android:textSize="16sp"
-                tools:text="Thanh Quý"
-                android:textColor="@color/title_text"/>
+                tools:text="Quý Lê" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                android:text="@{conversation.lastMessage.content}"
                 android:textColor="@color/normal_text"
-                android:text="Sample last message" />
+                android:textSize="14sp"
+                tools:text="Sample last message" />
         </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_time"
+            setTime="@{conversation.lastMessage.createdAt}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
+            android:textAlignment="textEnd"
             android:layout_marginEnd="16dp"
             android:textColor="@color/normal_text"
             tools:text="9:48" />

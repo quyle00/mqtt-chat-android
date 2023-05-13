@@ -78,8 +78,8 @@ class ApplicationModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         val gson = GsonBuilder().serializeNulls().create()
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.195:3000/")
-            .addConverterFactory(GsonConverterFactory.create(gson))
+            .baseUrl("http://172.17.12.122:3000/")
+            .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
     }
@@ -90,7 +90,7 @@ class ApplicationModule {
     fun provideMqttClient(): Mqtt3AsyncClient {
         return Mqtt3Client.builder()
             .identifier(UUID.randomUUID().toString())
-            .serverHost("192.168.1.195")
+            .serverHost("172.17.12.122")
             .buildAsync()
     }
 

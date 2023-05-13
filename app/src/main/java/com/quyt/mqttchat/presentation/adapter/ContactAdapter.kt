@@ -28,7 +28,7 @@ class ContactAdapter(private val listener: OnContactListener) : BaseRecyclerAdap
 
 class ContactViewHolder(private val binding: ItemContactBinding, private val listener: OnContactListener) : RecyclerView.ViewHolder(binding.root) {
     fun bind(item: User) {
-        binding.tvName.text = item.fullname
+        binding.contact = item
         binding.llRoot.setOnClickListener {
             listener.onContactClick(item)
         }

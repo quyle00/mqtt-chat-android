@@ -1,7 +1,7 @@
 package com.quyt.mqttchat.presentation.ui
 
 import android.os.Bundle
-import androidx.navigation.findNavController
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ActivityMainBinding
@@ -18,10 +18,10 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>() {
     override fun getLayoutId(): Int = R.layout.activity_main
 
     override fun onViewReady(savedInstance: Bundle?) {
-      if (sharedPreferences.getCurrentUser() != null) {
-           val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-           val navController = navHostFragment.navController
-          navController.navigate(R.id.action_loginFragment_to_homeFragment)
+        if (sharedPreferences.getCurrentUser() != null) {
+            val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+            val navController = navHostFragment.navController
+            navController.navigate(R.id.action_loginFragment_to_homeFragment)
         }
     }
 }

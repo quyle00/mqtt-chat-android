@@ -24,4 +24,9 @@ interface ConversationService {
     suspend fun getConversationDetail(
         @Path("id") id: String,
     ): Response<BaseResponse<Conversation>>
+
+    @GET("conversation/by-partner/{partnerId}")
+    suspend fun getConversationDetailByPartnerId(
+        @Path("partnerId") id: String,
+    ): Response<BaseResponse<Conversation>>
 }

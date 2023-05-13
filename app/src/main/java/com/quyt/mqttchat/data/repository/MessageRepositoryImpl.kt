@@ -33,4 +33,17 @@ class MessageRepositoryImpl @Inject constructor(private val service: MessageServ
             Result.Error(e)
         }
     }
+
+    override suspend fun updateSeenMessage(conversationId: String, messageIds: List<String>): Result<String> {
+        return try {
+            val res = service.updateSeenMessage(conversationId, messageIds)
+            if (res.isSuccessful) {
+                Result.Success(res.body()?.data!!)
+            } else {
+                Result.Error(res.getError())
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 }

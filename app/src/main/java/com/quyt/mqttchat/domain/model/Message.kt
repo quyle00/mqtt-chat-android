@@ -18,13 +18,15 @@ class Message {
     var content: String? = null
     var createdAt: String? = null
     var updatedAt: String? = null
+    var sendTime: Long = 0
 
     var isTyping: Boolean = false
-    var state : Int = MessageState.SENT.value
+    var state: Int = MessageState.SENT.value
 }
 
 enum class MessageState(val value: Int) {
     SENDING(0),
     SENT(1),
+    SEEN(2),
     FAILED(3),
 }

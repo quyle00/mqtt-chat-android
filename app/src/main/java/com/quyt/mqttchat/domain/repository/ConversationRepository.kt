@@ -7,4 +7,5 @@ interface ConversationRepository {
     suspend fun createConversation(participants: ArrayList<String>): Result<Conversation>
     suspend fun getListConversation(): Result<List<Conversation>>
     suspend fun getConversationDetail(id: String): Result<Conversation>
+    suspend fun getConversationDetailByPartnerId(partnerId: String): Result<Conversation>
 }

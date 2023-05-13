@@ -2,6 +2,7 @@ package com.quyt.mqttchat.presentation.ui.home.contact
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentContactBinding
@@ -9,7 +10,8 @@ import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.ContactAdapter
 import com.quyt.mqttchat.presentation.adapter.OnContactListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
-import com.quyt.mqttchat.utils.view.LoadingDialog
+import com.quyt.mqttchat.presentation.ui.home.HomeFragmentDirections
+import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,7 +27,9 @@ class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewM
     }
 
     override fun onContactClick(user: User) {
-
+        findNavController().navigate(
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(null, user.id)
+        )
     }
 
     private fun setupRecyclerView() {

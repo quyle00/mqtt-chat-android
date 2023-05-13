@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.utils.view
+package com.quyt.mqttchat.utils
 
 import android.app.AlertDialog
 import android.content.Context

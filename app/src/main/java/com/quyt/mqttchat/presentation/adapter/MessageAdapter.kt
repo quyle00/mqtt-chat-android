@@ -41,10 +41,11 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = mListMessage[position]
         val previousMessageTime = if (position < mListMessage.size - 1) mListMessage[position + 1].createdAt else null
+        val nextMessageTime = if (position > 0) mListMessage[position - 1].createdAt else null
 
         when (holder) {
             is MyMessageViewHolder -> {
-                holder.bind(message, previousMessageTime)
+                holder.bind(message, previousMessageTime, nextMessageTime)
             }
 
             is OtherMessageViewHolder -> {
@@ -61,37 +62,26 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     }
 
     fun addMessage(message: Message) {
-        if (mListMessage.isEmpty()) {
-            mListMessage.add(0, message)
-            notifyItemInserted(0)
-        } else if (!mListMessage[0].isTyping) {
-            mListMessage.add(0, message)
-            notifyItemInserted(0)
-        } else {
+        if (mListMessage.isNotEmpty() && mListMessage[0].isTyping) {
             mListMessage[0] = message
             notifyItemChanged(0)
+        } else {
+            mListMessage.add(0, message)
+            notifyItemInserted(0)
         }
     }
 
     fun setMessageSent(message: Message) {
-//        val index = mListMessage.indexOfFirst { it.id == message.id }
-//        if (index != -1) {
-//            message.state = MessageState.SENT.value
-//            mListMessage[index] = message
-//            notifyItemChanged(index)
-//        }
-        mListMessage.find { it.id == message.id }?.let {
-            it.state = MessageState.SENT.value
+        mListMessage.find { it.sendTime == message.sendTime }?.let {
+            it.state = message.state
             notifyItemChanged(mListMessage.indexOf(it))
         }
     }
 
     fun setMessageFailed(message: Message) {
-        val index = mListMessage.indexOfFirst { it.id == message.id }
-        if (index != -1) {
-            message.state = MessageState.FAILED.value
-            mListMessage[index] = message
-            notifyItemChanged(index)
+        mListMessage.find { it.sendTime == message.sendTime }?.let {
+            it.state = MessageState.FAILED.value
+            notifyItemChanged(mListMessage.indexOf(it))
         }
     }
 
@@ -111,31 +101,81 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         }
     }
 
+    fun seenMessage() {
+        val firstUnseenMessageIndex = mListMessage.indexOfFirst { it.state == MessageState.SENT.value }
+        if (firstUnseenMessageIndex != -1) {
+            for (i in firstUnseenMessageIndex until mListMessage.size) {
+                mListMessage[i].state = MessageState.SEEN.value
+            }
+            notifyItemRangeChanged(firstUnseenMessageIndex, mListMessage.size - firstUnseenMessageIndex)
+        }
+    }
+
 }
 
 class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message, previousMessageTime: String?) {
+    fun bind(message: Message, previousMessageTime: String?, nextMessageTime: String?) {
+        if (!message.isTyping) {
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
+        }
         if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
             binding.tvTime.visibility = View.VISIBLE
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
         } else {
             binding.tvTime.visibility = View.GONE
         }
+//        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) < 1) {
+//            val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
+//            params.topMargin = 4
+//            binding.llRoot.layoutParams = params
+//            //
+//            if (DateUtils.compareInMinutes(message.createdAt,nextMessageTime) < 1) {
+//                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_middle)
+//            } else {
+//                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_last)
+//            }
+//        } else {
+//            binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_first)
+//            //
+//            val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
+//            params.topMargin = 40
+//            binding.llRoot.layoutParams = params
+//        }
+
         binding.tvMessage.text = message.content
         when (message.state) {
             MessageState.SENDING.value -> {
                 binding.loading.visibility = View.VISIBLE
                 binding.ivRefresh.visibility = View.GONE
+                binding.ivSent.visibility = View.GONE
+                binding.ivSeen.visibility = View.GONE
             }
 
             MessageState.SENT.value -> {
                 binding.loading.visibility = View.GONE
                 binding.ivRefresh.visibility = View.GONE
+                binding.ivSent.visibility = View.VISIBLE
+                binding.ivSeen.visibility = View.GONE
+            }
+
+            MessageState.SEEN.value -> {
+                binding.loading.visibility = View.GONE
+                binding.ivRefresh.visibility = View.GONE
+                binding.ivSent.visibility = View.GONE
+                binding.ivSeen.visibility = View.VISIBLE
             }
 
             MessageState.FAILED.value -> {
                 binding.loading.visibility = View.GONE
                 binding.ivRefresh.visibility = View.VISIBLE
+                binding.ivSent.visibility = View.GONE
+                binding.ivSeen.visibility = View.GONE
+            }
+        }
+        binding.rlMessage.setOnClickListener {
+            if (binding.tvTime.visibility == View.VISIBLE) {
+                binding.tvTime.visibility = View.GONE
+            } else {
+                binding.tvTime.visibility = View.VISIBLE
             }
         }
     }
@@ -143,9 +183,11 @@ class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerV
 
 class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(message: Message, previousMessageTime: String?) {
+        if (!message.isTyping) {
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
+        }
         if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
             binding.tvTime.visibility = View.VISIBLE
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
         } else {
             binding.tvTime.visibility = View.GONE
         }
@@ -157,8 +199,14 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
             binding.tvMessage.visibility = View.VISIBLE
             binding.lavTyping.visibility = View.GONE
         }
+        binding.rlMessage.setOnClickListener {
+            if (binding.tvTime.visibility == View.VISIBLE) {
+                binding.tvTime.visibility = View.GONE
+            } else {
+                binding.tvTime.visibility = View.VISIBLE
+            }
+        }
     }
-
 }
 
 enum class MessageType(val value: Int) {

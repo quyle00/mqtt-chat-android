@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.viewpager.widget.ViewPager
+        <com.quyt.mqttchat.utils.NonSwipeViewPager
             android:id="@+id/vp_home"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
