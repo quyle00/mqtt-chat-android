@@ -52,7 +52,6 @@ class ConversationDetailViewModel @Inject constructor(
     var mPartnerID: String = ""
     var shouldCreateConversation = false
     var partnerName = MutableLiveData("")
-    var isPartnerInDetailScreen = false
     fun getConversationDetail(conversationId: String?, partnerId: String?) {
         viewModelScope.launch {
             getConversationDetailUseCase(conversationId, partnerId).let {
@@ -64,7 +63,6 @@ class ConversationDetailViewModel @Inject constructor(
                         currentConversation = it.data
                         getListMessage(currentConversation?.id ?: "")
                         subscribeConversation(currentConversation?.id ?: "")
-                        sendEventInConversationScreen(true)
                     }
 
                     is Result.Error -> {
@@ -129,6 +127,11 @@ class ConversationDetailViewModel @Inject constructor(
                     EventType.NEW_MESSAGE.value -> {
                         if (it.publisherId == getCurrentUser()?.id) return@listenConversationEventUseCase
                         uiState.postValue(ConversationDetailState.NewMessage(it.message!!))
+                        //
+                        val unSeenMessage = arrayListOf(it.message?.id ?: "")
+                        viewModelScope.launch {
+                            seenMessage(conversationId, unSeenMessage)
+                        }
                     }
 
                     EventType.TYPING.value -> {
@@ -139,11 +142,6 @@ class ConversationDetailViewModel @Inject constructor(
                     EventType.SEEN.value -> {
                         if (it.publisherId == getCurrentUser()?.id) return@listenConversationEventUseCase
                         uiState.postValue(ConversationDetailState.SeenMessage)
-                    }
-
-                    EventType.IN_CONVERSATION_SCREEN.value -> {
-                        if (it.publisherId == getCurrentUser()?.id) return@listenConversationEventUseCase
-                        isPartnerInDetailScreen = it.inConversationScreen
                     }
                 }
             }
@@ -182,12 +180,12 @@ class ConversationDetailViewModel @Inject constructor(
             when (result) {
                 is Result.Success -> {
                     val messageCreated = result.data
-                    if (isPartnerInDetailScreen) {
-                        messageCreated.state = MessageState.SEEN.value
-                    }
+//                    if (isPartnerInDetailScreen) {
+//                        messageCreated.state = MessageState.SEEN.value
+//                    }
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
                     // Send Mqtt event
-                    sendConversationEventUseCase(currentConversation?.id ?: "", Event(getCurrentUser()?.id, EventType.NEW_MESSAGE.value, message))
+                    sendConversationEventUseCase(currentConversation?.id ?: "", Event(getCurrentUser()?.id, EventType.NEW_MESSAGE.value, result.data))
                 }
 
                 is Result.Error -> {
@@ -209,19 +207,6 @@ class ConversationDetailViewModel @Inject constructor(
                         this.isTyping = isTyping
                     }
                 ))
-        }
-    }
-
-    fun sendEventInConversationScreen(inScreen: Boolean) {
-        viewModelScope.launch {
-            sendConversationEventUseCase(
-                currentConversation?.id ?: "", Event(
-                    getCurrentUser()?.id,
-                    EventType.IN_CONVERSATION_SCREEN.value,
-                    null,
-                    inScreen
-                )
-            )
         }
     }
 

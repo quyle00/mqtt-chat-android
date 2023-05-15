@@ -115,9 +115,4 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setListMessage(ArrayList())
     }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        viewModel.sendEventInConversationScreen(false)
-    }
 }
