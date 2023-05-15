@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemMyMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
@@ -41,16 +40,21 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = mListMessage[position]
-        val previousMessageTime = if (position < mListMessage.size - 1) mListMessage[position + 1].createdAt else null
-        val nextMessageTime = if (position > 0) mListMessage[position - 1].createdAt else null
+        // Because list reverse, so previous message is next message and next message is previous message
+        val previousMessage = if (position < mListMessage.size - 1) mListMessage[position + 1] else null
+        val nextMessage = if (position > 0) mListMessage[position - 1] else null
 
         when (holder) {
             is MyMessageViewHolder -> {
-                holder.bind(message, previousMessageTime, nextMessageTime)
+                val myPreviousMessageTime = previousMessage?.sender?.id?.takeIf { it == currentUserId }?.let { previousMessage.createdAt }
+                val myNextMessageTime = nextMessage?.sender?.id?.takeIf { it == currentUserId }?.let { nextMessage.createdAt }
+                holder.bind(message, myPreviousMessageTime, myNextMessageTime)
             }
 
             is OtherMessageViewHolder -> {
-                holder.bind(message, previousMessageTime)
+                val otherPreviousMessageTime = previousMessage?.sender?.id?.takeIf { it != currentUserId }?.let { previousMessage.createdAt }
+                val otherNextMessageTime = nextMessage?.sender?.id?.takeIf { it != currentUserId }?.let { nextMessage.createdAt }
+                holder.bind(message, otherPreviousMessageTime, otherNextMessageTime)
             }
         }
     }
@@ -69,19 +73,13 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         } else {
             mListMessage.add(0, message)
             notifyItemInserted(0)
+            notifyItemChanged(1)
         }
     }
 
-    fun setMessageSent(message: Message) {
+    fun updateMessage(message: Message) {
         mListMessage.find { it.sendTime == message.sendTime }?.let {
             it.state = message.state
-            notifyItemChanged(mListMessage.indexOf(it))
-        }
-    }
-
-    fun setMessageFailed(message: Message) {
-        mListMessage.find { it.sendTime == message.sendTime }?.let {
-            it.state = MessageState.FAILED.value
             notifyItemChanged(mListMessage.indexOf(it))
         }
     }
@@ -115,63 +113,37 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 }
 
 class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message, previousMessageTime: String?, nextMessageTime: String?) {
+    fun bind(message: Message, myPreviousMessageTime: String?, myNextMessageTime: String?) {
+        binding.message = message
         if (!message.isTyping) {
             binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
         }
-        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
-            binding.tvTime.visibility = View.VISIBLE
-        } else {
-            binding.tvTime.visibility = View.GONE
-        }
-//        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) < 1) {
-//            val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
-//            params.topMargin = 4
-//            binding.llRoot.layoutParams = params
-//            //
-//            if (DateUtils.compareInMinutes(message.createdAt,nextMessageTime) < 1) {
-//                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_middle)
-//            } else {
-//                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_last)
-//            }
-//        } else {
-//            binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_first)
-//            //
-//            val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
-//            params.topMargin = 40
-//            binding.llRoot.layoutParams = params
-//        }
-
-        binding.tvMessage.text = message.content
-        when (message.state) {
-            MessageState.SENDING.value -> {
-                binding.loading.visibility = View.VISIBLE
-                binding.ivRefresh.visibility = View.GONE
-                binding.ivSent.visibility = View.GONE
-                binding.ivSeen.visibility = View.GONE
+        //
+        val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
+        params.topMargin = 40
+        when (handleGroupMessage(myPreviousMessageTime, message.createdAt, myNextMessageTime)) {
+            GroupMessageState.SINGLE -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat)
+            }
+            GroupMessageState.FIRST -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_first)
+                if (DateUtils.compareInMinutes(myPreviousMessageTime, message.createdAt) > 1) {
+                    binding.tvTime.visibility = View.VISIBLE
+                } else {
+                    binding.tvTime.visibility = View.GONE
+                }
+            }
+            GroupMessageState.MIDDLE -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_middle)
+                params.topMargin = 4
             }
 
-            MessageState.SENT.value -> {
-                binding.loading.visibility = View.GONE
-                binding.ivRefresh.visibility = View.GONE
-                binding.ivSent.visibility = View.VISIBLE
-                binding.ivSeen.visibility = View.GONE
-            }
-
-            MessageState.SEEN.value -> {
-                binding.loading.visibility = View.GONE
-                binding.ivRefresh.visibility = View.GONE
-                binding.ivSent.visibility = View.GONE
-                binding.ivSeen.visibility = View.VISIBLE
-            }
-
-            MessageState.FAILED.value -> {
-                binding.loading.visibility = View.GONE
-                binding.ivRefresh.visibility = View.VISIBLE
-                binding.ivSent.visibility = View.GONE
-                binding.ivSeen.visibility = View.GONE
+            GroupMessageState.LAST -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_last)
+                params.topMargin = 4
             }
         }
+
         binding.rlMessage.setOnClickListener {
             if (binding.tvTime.visibility == View.VISIBLE) {
                 binding.tvTime.visibility = View.GONE
@@ -180,17 +152,38 @@ class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerV
             }
         }
     }
+
+
 }
 
 class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message, previousMessageTime: String?) {
+    fun bind(message: Message, myPreviousMessageTime: String?, myNextMessageTime: String?) {
+        //
+        val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
+        params.topMargin = 40
+        when (handleGroupMessage(myPreviousMessageTime, message.createdAt, myNextMessageTime)) {
+            GroupMessageState.SINGLE -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat)
+            }
+
+            GroupMessageState.FIRST -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_first)
+            }
+
+            GroupMessageState.MIDDLE -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_middle)
+                params.topMargin = 4
+            }
+
+            GroupMessageState.LAST -> {
+                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_last)
+                params.topMargin = 4
+            }
+        }
+        binding.llRoot.layoutParams = params
+        //
         if (!message.isTyping) {
             binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
-        }
-        if (DateUtils.compareInMinutes(previousMessageTime, message.createdAt) > 5) {
-            binding.tvTime.visibility = View.VISIBLE
-        } else {
-            binding.tvTime.visibility = View.GONE
         }
         binding.tvMessage.text = message.content
         if (message.isTyping) {
@@ -210,8 +203,36 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
     }
 }
 
+fun handleGroupMessage(previousMessageTime: String?, currentMessageTime: String?, nextMessageTime: String?): GroupMessageState {
+    if (previousMessageTime == null && nextMessageTime == null) {
+        return GroupMessageState.SINGLE
+    }
+    if (nextMessageTime == null) {
+        return GroupMessageState.LAST
+    }
+    if (previousMessageTime == null) {
+        return GroupMessageState.FIRST
+    }
+    return if (DateUtils.compareInMinutes(currentMessageTime, nextMessageTime) > 1) {
+        if (DateUtils.compareInMinutes(previousMessageTime, currentMessageTime) > 1) {
+            GroupMessageState.SINGLE
+        } else {
+            GroupMessageState.LAST
+        }
+    } else {
+        if (DateUtils.compareInMinutes(previousMessageTime, currentMessageTime) > 1) {
+            GroupMessageState.FIRST
+        } else {
+            GroupMessageState.MIDDLE
+        }
+    }
+}
+
+enum class GroupMessageState {
+    SINGLE, FIRST, MIDDLE, LAST
+}
+
 enum class MessageType(val value: Int) {
-    MY_MESSAGE(0),
-    OTHERS_MESSAGE(1)
+    MY_MESSAGE(0), OTHERS_MESSAGE(1)
 }
 

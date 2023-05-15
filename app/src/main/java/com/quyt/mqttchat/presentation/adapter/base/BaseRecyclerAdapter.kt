@@ -30,6 +30,13 @@ abstract class BaseRecyclerAdapter<T>(
         return items[position]
     }
 
+    protected fun updateAt(position: Int, item: T) {
+        items[position] = item
+        notifyItemChanged(position)
+    }
+
+    protected fun getItems() = items
+
     abstract override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder
 
     abstract override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int)

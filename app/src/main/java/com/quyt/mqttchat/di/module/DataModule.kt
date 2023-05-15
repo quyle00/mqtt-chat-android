@@ -16,7 +16,6 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class DataModule {
 
-
     @Provides
     @Singleton
     fun provideNetworkChecker(@ApplicationContext ctx: Context): NetworkChecker {

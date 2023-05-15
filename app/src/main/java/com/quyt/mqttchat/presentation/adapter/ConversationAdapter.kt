@@ -1,13 +1,15 @@
 package com.quyt.mqttchat.presentation.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemConversationBinding
 import com.quyt.mqttchat.domain.model.Conversation
+import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.base.BaseRecyclerAdapter
 
 class ConversationAdapter(private val listener: OnConversationListener) : BaseRecyclerAdapter<Conversation>(
@@ -24,11 +26,35 @@ class ConversationAdapter(private val listener: OnConversationListener) : BaseRe
             holder.bind(getItem(position))
         }
     }
+
+    fun updateLastMessage(conversationId: String?, lastMessage: Message?) {
+        getItems().indexOfFirst { it.id == conversationId }.let {
+           val conversation =  getItem(it)
+            conversation.lastMessage = lastMessage
+            updateAt(it, conversation)
+        }
+    }
 }
 
 class ConversationViewHolder(private val binding: ItemConversationBinding, private val listener: OnConversationListener) : RecyclerView.ViewHolder(binding.root) {
     fun bind(conversation: Conversation) {
         binding.conversation = conversation
+        if (conversation.lastMessage?.isMine == true) {
+            binding.ivState.visibility = View.VISIBLE
+            binding.ivState.setImageResource(when (conversation.lastMessage?.state) {
+                MessageState.SENT.value -> R.drawable.ic_check_circle_outline_24
+                MessageState.SEEN.value -> R.drawable.ic_eye_24
+                else -> -1
+            })
+        }else{
+            binding.ivState.visibility = View.GONE
+            if (conversation.lastMessage?.state == MessageState.SEEN.value){
+                binding.tvContent.setTypeface(null, android.graphics.Typeface.NORMAL)
+            }else{
+                binding.tvContent.setTypeface(null, android.graphics.Typeface.BOLD)
+            }
+        }
+
         binding.rlRoot.setOnClickListener {
             listener.onConversationClick(conversation.id)
         }

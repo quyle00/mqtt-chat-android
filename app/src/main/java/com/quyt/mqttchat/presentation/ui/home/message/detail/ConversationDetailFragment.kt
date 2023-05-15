@@ -3,6 +3,7 @@ package com.quyt.mqttchat.presentation.ui.home.message.detail
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -22,8 +23,6 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
-
-    //    private var listMessage = ArrayList<Message>()
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
     override fun setupView() {
@@ -34,7 +33,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         handleTyping()
         binding.ivSend.setOnClickListener {
             val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            val messageContent = binding.etMessage.text.toString()
+            val messageContent = binding.etMessage.text.toString().trim()
             if (messageContent.isNotEmpty()) {
                 // Create message model
                 val newMessage = Message().apply {
@@ -49,6 +48,9 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 viewModel.sendMessage(newMessage)
                 binding.etMessage.setText("")
             }
+        }
+        binding.ivBack.setOnClickListener {
+            findNavController().popBackStack()
         }
     }
 
@@ -85,11 +87,13 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.SendMessageSuccess -> {
-                    messageAdapter.setMessageSent(state.message)
+                    messageAdapter.updateMessage(state.message)
                 }
 
                 is ConversationDetailState.SendMessageError -> {
-                    messageAdapter.setMessageFailed(state.message)
+                    val failedMessage = state.message
+                    failedMessage.state = MessageState.FAILED.value
+                    messageAdapter.updateMessage(failedMessage)
                 }
             }
         }

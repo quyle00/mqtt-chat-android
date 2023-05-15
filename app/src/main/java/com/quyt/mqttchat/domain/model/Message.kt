@@ -19,6 +19,7 @@ class Message {
     var createdAt: String? = null
     var updatedAt: String? = null
     var sendTime: Long = 0
+    var isMine: Boolean = false
 
     var isTyping: Boolean = false
     var state: Int = MessageState.SENT.value

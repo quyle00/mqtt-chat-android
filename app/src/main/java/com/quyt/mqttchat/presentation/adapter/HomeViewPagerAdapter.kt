@@ -1,22 +1,25 @@
 package com.quyt.mqttchat.presentation.adapter
 
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager2.adapter.FragmentStateAdapter
 
-class HomeViewPagerAdapter(manager: FragmentManager) : FragmentPagerAdapter(manager) {
+class HomeViewPagerAdapter(fa: FragmentActivity) : FragmentStateAdapter(fa) {
 
     private val mFragmentList = ArrayList<Fragment>()
 
-    override fun getCount(): Int {
+    fun addFragment(fragment: Fragment) {
+        mFragmentList.add(fragment)
+    }
+
+    override fun getItemCount(): Int {
         return mFragmentList.size
     }
 
-    override fun getItem(position: Int): Fragment {
+    override fun createFragment(position: Int): Fragment {
         return mFragmentList[position]
-    }
-
-    fun addFragment(fragment: Fragment) {
-        mFragmentList.add(fragment)
     }
 }

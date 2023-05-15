@@ -2,6 +2,7 @@
 <layout>
 
     <data>
+
         <variable
             name="conversation"
             type="com.quyt.mqttchat.domain.model.Conversation" />
@@ -36,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_toStartOf="@id/tv_time"
+            android:layout_toStartOf="@id/ll_time"
             android:layout_toEndOf="@id/cv_avatar"
             android:orientation="vertical">
 
@@ -54,23 +55,41 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:text="@{conversation.lastMessage.content}"
                 android:textColor="@color/normal_text"
                 android:textSize="14sp"
-                tools:text="Sample last message" />
+                tools:text="Sample last message Sample last message Sample last message" />
         </LinearLayout>
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/tv_time"
-            setTime="@{conversation.lastMessage.createdAt}"
+        <LinearLayout
+            android:id="@+id/ll_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:textAlignment="textEnd"
             android:layout_marginEnd="16dp"
-            android:textColor="@color/normal_text"
-            tools:text="9:48" />
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_time"
+                setTime="@{conversation.lastMessage.createdAt}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAlignment="textEnd"
+                android:textColor="@color/normal_text"
+                tools:text="9:48" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_state"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="4dp"
+                android:src="@drawable/ic_eye_24"
+                android:visibility="gone" />
+        </LinearLayout>
 
     </RelativeLayout>
 </layout>

@@ -5,17 +5,19 @@ import com.quyt.mqttchat.domain.repository.AccessRepository
 import com.quyt.mqttchat.domain.repository.ConversationRepository
 import com.quyt.mqttchat.domain.repository.IMqttClient
 import com.quyt.mqttchat.domain.repository.MessageRepository
+import com.quyt.mqttchat.domain.repository.SharedPreferences
 import com.quyt.mqttchat.domain.repository.UserRepository
-import com.quyt.mqttchat.domain.usecase.ListenConversationEventUseCase
-import com.quyt.mqttchat.domain.usecase.SendConversationEventUseCase
 import com.quyt.mqttchat.domain.usecase.access.LoginUseCase
 import com.quyt.mqttchat.domain.usecase.contact.GetListContactUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
+import com.quyt.mqttchat.domain.usecase.conversation.ListenConversationEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendMessageEventUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,14 +30,14 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideSendConversationEventUseCase(client: IMqttClient, mapper: EventMapper): SendConversationEventUseCase {
-        return SendConversationEventUseCase(client, mapper)
+    fun provideSendMessageEventUseCase(client: IMqttClient, mapper: EventMapper): SendMessageEventUseCase {
+        return SendMessageEventUseCase(client, mapper)
     }
 
     @Provides
     @Singleton
-    fun provideListenConversationEventUseCase(client: IMqttClient, mapper: EventMapper): ListenConversationEventUseCase {
-        return ListenConversationEventUseCase(client, mapper)
+    fun provideListenMessageEventUseCase(client: IMqttClient, mapper: EventMapper): ListenMessageEventUseCase {
+        return ListenMessageEventUseCase(client, mapper)
     }
 
     @Provides
@@ -84,6 +86,12 @@ class UseCaseModule {
     @Singleton
     fun provideSeenMessageUseCase(repository: MessageRepository): SeenMessageUseCase {
         return SeenMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideListenConversationEventUseCase(sharedPreferences: SharedPreferences, client: IMqttClient, mapper: EventMapper): ListenConversationEventUseCase {
+        return ListenConversationEventUseCase(sharedPreferences, client, mapper)
     }
 
 }

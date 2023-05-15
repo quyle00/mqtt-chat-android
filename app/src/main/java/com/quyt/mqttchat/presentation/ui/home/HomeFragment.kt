@@ -20,23 +20,13 @@ class HomeFragment() : BaseBindingFragment<FragmentHomeBinding, HomeViewModel>()
     }
 
     private fun setupViewPager() {
-        mHomeViewPagerAdapter = HomeViewPagerAdapter(childFragmentManager)
+        mHomeViewPagerAdapter = HomeViewPagerAdapter(requireActivity())
         mHomeViewPagerAdapter.addFragment(ConversationListFragment())
         mHomeViewPagerAdapter.addFragment(ContactFragment())
         binding.vpHome.adapter = mHomeViewPagerAdapter
-//        binding.vpHome.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
-//            override fun onPageScrollStateChanged(state: Int) {}
-//
-//            override fun onPageScrolled(
-//                position: Int,
-//                positionOffset: Float,
-//                positionOffsetPixels: Int
-//            ) {}
-//
-//            override fun onPageSelected(position: Int) {
-//                binding.bnvHome.menu.getItem(position).isChecked = true
-//            }
-//        })
+        binding.vpHome.offscreenPageLimit = 2
+        binding.vpHome.isUserInputEnabled = false
+
     }
 
     private fun setupBottomNavigation(){

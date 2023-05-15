@@ -20,9 +20,10 @@ object DateUtils {
 
     fun compareInMinutes(previousTime: String?, currentTime: String?): Int {
         if (previousTime == null) return 0
+        if (currentTime == null) return Int.MAX_VALUE
         val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-        val previousDateTime = format.parse(previousTime) ?: return Int.MAX_VALUE
-        val currentDateTime = if (currentTime != null) format.parse(currentTime) else Date()
+        val previousDateTime = format.parse(previousTime) ?: return 0
+        val currentDateTime = format.parse(currentTime) ?: return Int.MAX_VALUE
         val timeDifference = currentDateTime.time - previousDateTime.time
         val minutesDifference = TimeUnit.MILLISECONDS.toMinutes(timeDifference)
 
