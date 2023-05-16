@@ -55,7 +55,7 @@
                     android:id="@+id/tv_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{viewModel.partner.fullname}"
+                    android:text="@{viewModel.MPartner.fullname}"
                     android:textColor="@color/title_text"
                     android:textSize="14sp"
                     tools:text="Thanh Quý" />

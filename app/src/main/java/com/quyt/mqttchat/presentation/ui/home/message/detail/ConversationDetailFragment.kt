@@ -8,10 +8,12 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
+import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.MessageAdapter
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,31 +31,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     override val viewModel: ConversationDetailViewModel by viewModels()
     override fun setupView() {
         binding.viewModel = viewModel
-        viewModel.getConversationDetail(args.conversationId, args.partnerId)
+        viewModel.getConversationDetail(args.conversationId, Gson().fromJson(args.partner, User::class.java))
         initConversationList()
         observeState()
-        handleTyping()
-        binding.ivSend.setOnClickListener {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            val messageContent = binding.etMessage.text.toString().trim()
-            if (messageContent.isNotEmpty()) {
-                // Create message model
-                val newMessage = Message().apply {
-                    this.sender = viewModel.getCurrentUser()
-                    this.content = messageContent
-                    this.state = MessageState.SENDING.value
-                    this.createdAt = sdf.format(Date())
-                    this.sendTime = Date().time
-                }
-                messageAdapter.addMessage(newMessage)
-                binding.rvMessage.scrollToPosition(0)
-                viewModel.sendMessage(newMessage)
-                binding.etMessage.setText("")
-            }
-        }
-        binding.ivBack.setOnClickListener {
-            findNavController().popBackStack()
-        }
+        handleAction()
     }
 
     private fun observeState() {
@@ -91,7 +72,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.SeenMessage -> {
-                    messageAdapter.seenMessage()
+                    messageAdapter.seenAllMessage()
                 }
 
                 is ConversationDetailState.SendMessageSuccess -> {
@@ -107,7 +88,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         }
     }
 
-    private fun handleTyping() {
+    private fun handleAction() {
+        binding.ivBack.setOnClickListener {
+            findNavController().popBackStack()
+        }
         binding.etMessage.addTextChangedListener {
             if (it.toString().isNotEmpty() && !viewModel.isTyping) {
                 viewModel.isTyping = true
@@ -116,6 +100,24 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             if (it.toString().isEmpty() && viewModel.isTyping) {
                 viewModel.isTyping = false
                 viewModel.sendTyping(false)
+            }
+        }
+        binding.ivSend.setOnClickListener {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            val messageContent = binding.etMessage.text.toString().trim()
+            if (messageContent.isNotEmpty()) {
+                // Create message model
+                val newMessage = Message().apply {
+                    this.sender = viewModel.getCurrentUser()
+                    this.content = messageContent
+                    this.state = MessageState.SENDING.value
+                    this.createdAt = sdf.format(Date())
+                    this.sendTime = Date().time
+                }
+                messageAdapter.addMessage(newMessage)
+                binding.rvMessage.scrollToPosition(0)
+                viewModel.sendMessage(newMessage)
+                binding.etMessage.setText("")
             }
         }
     }
@@ -138,7 +140,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                         isLoading = true
                         messageAdapter.loading(true)
                         viewModel.mCurrentPage++
-                        viewModel.getListMessage(viewModel.currentConversation?.id ?: "")
+                        viewModel.getListMessage(viewModel.mCurrentPage)
                     }
                 }
             }

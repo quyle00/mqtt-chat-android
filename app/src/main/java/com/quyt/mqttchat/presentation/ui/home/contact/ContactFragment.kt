@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentContactBinding
 import com.quyt.mqttchat.domain.model.User
@@ -28,7 +29,7 @@ class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewM
 
     override fun onContactClick(user: User) {
         findNavController().navigate(
-            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(null, user.id)
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(null, Gson().toJson(user))
         )
     }
 

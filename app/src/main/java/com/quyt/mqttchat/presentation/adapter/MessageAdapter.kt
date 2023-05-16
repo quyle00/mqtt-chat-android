@@ -90,6 +90,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         val diffResult = DiffUtil.calculateDiff(MessageDiffUtilsCallback(mListMessage, listMessage))
         mListMessage.addAll(listMessage)
         notifyItemRangeInserted(mListMessage.size - listMessage.size, listMessage.size)
+        notifyItemChanged(mListMessage.size - listMessage.size - 1)
 //        diffResult.dispatchUpdatesTo(this)
     }
 
@@ -137,7 +138,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         }
     }
 
-    fun seenMessage() {
+    fun seenAllMessage() {
         val firstUnseenMessageIndex = mListMessage.indexOfFirst { it?.state == MessageState.SENT.value }
         if (firstUnseenMessageIndex != -1) {
             for (i in firstUnseenMessageIndex until mListMessage.size) {

@@ -49,71 +49,78 @@ class ConversationDetailViewModel @Inject constructor(
     private val seenMessageUseCase: SeenMessageUseCase
 ) : BaseViewModel<ConversationDetailState>() {
 
+    lateinit var mCurrentConversation: Conversation
     var isTyping: Boolean = false
-    var currentConversation: Conversation? = null
     var shouldCreateConversation = false
-    var partner = MutableLiveData<User>()
-    var mPartnerID = ""
+    var mPartner = MutableLiveData<User?>()
     var mCurrentPage = 1
-    fun getConversationDetail(conversationId: String?, partnerId: String?) {
-        viewModelScope.launch {
-            getConversationDetailUseCase(conversationId, partnerId).let {
-                when (it) {
-                    is Result.Success -> {
-                        partner.postValue(it.data.participants?.firstOrNull { participant ->
-                            participant.id != getCurrentUser()?.id
-                        })
-                        currentConversation = it.data
-                        getListMessage(currentConversation?.id ?: "")
-                        subscribeConversation(currentConversation?.id ?: "")
-                    }
 
-                    is Result.Error -> {
-                        uiState.postValue(ConversationDetailState.Error(it.exception.message ?: "Error"))
-                        if ((it.exception as CustomException).code == 422) {
-                            shouldCreateConversation = true
-                            mPartnerID = partnerId ?: ""
-                        }
+    fun getConversationDetail(conversationId: String?, partner: User?) {
+        viewModelScope.launch {
+            val result = if (!conversationId.isNullOrEmpty()) {
+                getConversationDetailUseCase(conversationId = conversationId)
+            } else {
+                getConversationDetailUseCase(partnerId = partner?.id ?: "")
+            }
+            when (result) {
+                is Result.Success -> {
+                    mPartner.postValue(result.data.participants?.firstOrNull { participant ->
+                        participant.id != getCurrentUser()?.id
+                    })
+                    mCurrentConversation = result.data
+                    getListMessage(mCurrentPage)
+                    subscribeConversation()
+                }
+
+                is Result.Error -> {
+                    uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+                    if ((result.exception as CustomException).code == 422) {
+                        shouldCreateConversation = true
+                        mPartner.postValue(partner)
                     }
                 }
             }
         }
     }
 
-     fun getListMessage(conversationId: String) {
-        viewModelScope.launch {
-            uiState.postValue(ConversationDetailState.Loading)
-            getListMessageUseCase(conversationId, mCurrentPage).let {
-                when (it) {
-                    is Result.Success -> {
-                        if (mCurrentPage == 1) {
-                            uiState.postValue(ConversationDetailState.Success(it.data.data ?: listOf()))
-                            val unSeenMessage = it.data.data?.filter { message ->
-                                message.state == MessageState.SENT.value
-                                        && message.sender?.id != getCurrentUser()?.id
-                            }
-                            if (unSeenMessage?.isNotEmpty() == true) {
-                                seenMessage(conversationId, unSeenMessage.map { message -> message.id ?: "" })
-                            }
-                        } else {
-                            uiState.postValue(ConversationDetailState.LoadMoreSuccess(it.data.data ?: listOf()))
-                        }
-                    }
+     fun getListMessage(page: Int) {
+       viewModelScope.launch {
+           uiState.postValue(ConversationDetailState.Loading)
+           val result = getListMessageUseCase(mCurrentConversation.id ?: "", page)
+           when (result) {
+               is Result.Success -> {
+                   if (mCurrentPage == 1) {
+                       uiState.postValue(ConversationDetailState.Success(result.data.data ?: listOf()))
+                       val unSeenMessage = getUnseenMessage(result.data.data)
+                       if (unSeenMessage.isNotEmpty()) {
+                           seenMessage(unSeenMessage.map { message -> message.id ?: "" })
+                       }
+                   } else {
+                       uiState.postValue(ConversationDetailState.LoadMoreSuccess(result.data.data ?: listOf()))
+                   }
+               }
 
-                    is Result.Error -> {
-                        uiState.postValue(ConversationDetailState.Error(it.exception.message ?: "Error"))
-                    }
-                }
-            }
+               is Result.Error -> {
+                   uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+               }
+           }
+       }
+    }
+
+    private fun getUnseenMessage(listMessage: List<Message>?): List<Message> {
+        if (listMessage.isNullOrEmpty()) return listOf()
+        return listMessage.filter { message ->
+            message.state == MessageState.SENT.value && message.sender?.id != getCurrentUser()?.id
         }
     }
 
-    private suspend fun seenMessage(conversationId: String, messageIds: List<String>) {
-        when (val result = seenMessageUseCase(conversationId, messageIds)) {
+    private suspend fun seenMessage(messageIds: List<String>) {
+        val result = seenMessageUseCase(mCurrentConversation.id ?: "", messageIds)
+        when (result) {
             is Result.Success -> {
                 sendConversationEventUseCase(
-                    partner.value?.id ?: "",
-                    currentConversation?.id ?: "", Event(
+                    mPartner.value?.id ?: "",
+                    mCurrentConversation.id ?: "", Event(
                         getCurrentUser()?.id,
                         EventType.SEEN.value,
                         null,
@@ -128,29 +135,27 @@ class ConversationDetailViewModel @Inject constructor(
 
     }
 
-    private fun subscribeConversation(conversationId: String) {
-        viewModelScope.launch {
-            listenMessageEventUseCase(conversationId) {
-                when (it.type) {
-                    EventType.NEW_MESSAGE.value -> {
-                        if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
-                        uiState.postValue(ConversationDetailState.NewMessage(it.message!!))
-                        //
-                        val unSeenMessage = arrayListOf(it.message?.id ?: "")
-                        viewModelScope.launch {
-                            seenMessage(conversationId, unSeenMessage)
-                        }
+    private suspend fun subscribeConversation() {
+        listenMessageEventUseCase(mCurrentConversation.id ?: "") {
+            when (it.type) {
+                EventType.NEW_MESSAGE.value -> {
+                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
+                    uiState.postValue(ConversationDetailState.NewMessage(it.message!!))
+                    //
+                    val unSeenMessage = arrayListOf(it.message?.id ?: "")
+                    viewModelScope.launch {
+                        seenMessage(unSeenMessage)
                     }
+                }
 
-                    EventType.TYPING.value -> {
-                        if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
-                        uiState.postValue(ConversationDetailState.Typing(it.message!!))
-                    }
+                EventType.TYPING.value -> {
+                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
+                    uiState.postValue(ConversationDetailState.Typing(it.message!!))
+                }
 
-                    EventType.SEEN.value -> {
-                        if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
-                        uiState.postValue(ConversationDetailState.SeenMessage)
-                    }
+                EventType.SEEN.value -> {
+                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
+                    uiState.postValue(ConversationDetailState.SeenMessage)
                 }
             }
         }
@@ -160,19 +165,17 @@ class ConversationDetailViewModel @Inject constructor(
         return withContext(Dispatchers.IO) {
             val userIds = arrayListOf<String>().apply {
                 add(getCurrentUser()?.id ?: "")
-                add(mPartnerID)
+                add(mPartner.value?.id ?: "")
             }
-            createConversationUseCase(userIds).let {
-                when (it) {
-                    is Result.Success -> {
-                        it.data
-                    }
-
-                    is Result.Error -> {
-                        null
-                    }
+            val result = createConversationUseCase(userIds)
+            when (result) {
+                is Result.Success -> {
+                    result.data
                 }
 
+                is Result.Error -> {
+                    null
+                }
             }
         }
     }
@@ -180,19 +183,19 @@ class ConversationDetailViewModel @Inject constructor(
     fun sendMessage(message: Message) {
         viewModelScope.launch {
             if (shouldCreateConversation) {
-                currentConversation = createConversation()
+                mCurrentConversation = createConversation() ?: return@launch
                 shouldCreateConversation = false
             }
             message.state = MessageState.SENT.value
-            val result = createMessageUseCase(currentConversation?.id ?: "", message)
+            val result = createMessageUseCase(mCurrentConversation.id ?: "", message)
             when (result) {
                 is Result.Success -> {
                     val messageCreated = result.data
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
                     // Send Mqtt event
                     sendConversationEventUseCase(
-                        partner.value?.id ?: "",
-                        currentConversation?.id ?: "",
+                        mPartner.value?.id ?: "",
+                        mCurrentConversation.id ?: "",
                         Event(getCurrentUser()?.id, EventType.NEW_MESSAGE.value, result.data)
                     )
                 }
@@ -205,11 +208,11 @@ class ConversationDetailViewModel @Inject constructor(
     }
 
     fun sendTyping(isTyping: Boolean) {
-        if (currentConversation == null) return
+        if (!::mCurrentConversation.isInitialized) return
         viewModelScope.launch {
             sendConversationEventUseCase(
-                partner.value?.id ?: "",
-                currentConversation?.id ?: "", Event(
+                mPartner.value?.id ?: "",
+                mCurrentConversation.id ?: "", Event(
                     getCurrentUser()?.id,
                     EventType.TYPING.value,
                     Message().apply {

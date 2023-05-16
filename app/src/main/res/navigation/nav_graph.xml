@@ -15,7 +15,7 @@
             app:argType="string"
             app:nullable="true" />
         <argument
-            android:name="partnerId"
+            android:name="partner"
             app:argType="string"
             app:nullable="true" />
     </fragment>
