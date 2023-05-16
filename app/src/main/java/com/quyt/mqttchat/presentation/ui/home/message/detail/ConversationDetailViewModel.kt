@@ -15,6 +15,7 @@ import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.InsertMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.SendMessageEventUseCase
@@ -46,7 +47,8 @@ class ConversationDetailViewModel @Inject constructor(
     private val createMessageUseCase: CreateMessageUseCase,
     private val createConversationUseCase: CreateConversationUseCase,
     private val getConversationDetailUseCase: GetConversationDetailUseCase,
-    private val seenMessageUseCase: SeenMessageUseCase
+    private val seenMessageUseCase: SeenMessageUseCase,
+    private val insertMessageUseCase: InsertMessageUseCase
 ) : BaseViewModel<ConversationDetailState>() {
 
     lateinit var mCurrentConversation: Conversation

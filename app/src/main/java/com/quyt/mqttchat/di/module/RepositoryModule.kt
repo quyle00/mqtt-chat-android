@@ -1,5 +1,6 @@
 package com.quyt.mqttchat.di.module
 
+import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSource
 import com.quyt.mqttchat.data.datasource.remote.service.AccessService
 import com.quyt.mqttchat.data.datasource.remote.service.ContactService
 import com.quyt.mqttchat.data.datasource.remote.service.ConversationService
@@ -49,8 +50,10 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideMessageRepository(
-        service: MessageService
+        service: MessageService,
+        conversationService: ConversationService,
+        messageLocalDataSource: MessageLocalDataSource
     ): MessageRepository {
-        return MessageRepositoryImpl(service)
+        return MessageRepositoryImpl(service,conversationService,messageLocalDataSource)
     }
 }

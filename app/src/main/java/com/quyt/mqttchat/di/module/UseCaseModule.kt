@@ -15,6 +15,7 @@ import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.ListenConversationEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.InsertMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.SendMessageEventUseCase
@@ -80,6 +81,12 @@ class UseCaseModule {
     @Singleton
     fun provideCreateMessageUseCase(repository: MessageRepository): CreateMessageUseCase {
         return CreateMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideInsertMessageUseCase(repository: MessageRepository): InsertMessageUseCase {
+        return InsertMessageUseCase(repository)
     }
 
     @Provides

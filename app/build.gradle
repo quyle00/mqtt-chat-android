@@ -83,6 +83,7 @@ dependencies {
     implementation "androidx.room:room-ktx:2.5.1"
     // Paging 3 - Pagination
     implementation "androidx.paging:paging-runtime:3.1.1"
+    implementation "androidx.room:room-paging:2.5.1"
     // Realtime Protocol - MQTT
     implementation "com.hivemq:hivemq-mqtt-client:1.3.0"
     // Animation - Lottie

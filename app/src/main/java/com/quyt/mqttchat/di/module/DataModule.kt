@@ -1,6 +1,9 @@
 package com.quyt.mqttchat.di.module
 
 import android.content.Context
+import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSource
+import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSourceImpl
+import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.mapper.MessageMapper
 import com.quyt.mqttchat.utils.network.NetworkChecker
@@ -32,6 +35,12 @@ class DataModule {
     @Singleton
     fun provideEventMapper(): EventMapper {
         return EventMapper()
+    }
+
+    @Provides
+    @Singleton
+    fun provideMessageLocalDataSource(appDatabase: AppDatabase): MessageLocalDataSource {
+        return MessageLocalDataSourceImpl(appDatabase)
     }
 
 
