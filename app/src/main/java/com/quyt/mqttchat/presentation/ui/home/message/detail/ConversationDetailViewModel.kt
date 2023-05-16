@@ -28,6 +28,7 @@ import javax.inject.Inject
 sealed class ConversationDetailState {
     object Loading : ConversationDetailState()
     data class Success(val data: List<Message>) : ConversationDetailState()
+    data class LoadMoreSuccess(val data: List<Message>) : ConversationDetailState()
     data class Error(val error: String) : ConversationDetailState()
     data class NewMessage(val message: Message) : ConversationDetailState()
     data class Typing(val message: Message) : ConversationDetailState()
@@ -49,10 +50,11 @@ class ConversationDetailViewModel @Inject constructor(
 ) : BaseViewModel<ConversationDetailState>() {
 
     var isTyping: Boolean = false
-    private var currentConversation: Conversation? = null
+    var currentConversation: Conversation? = null
     var shouldCreateConversation = false
     var partner = MutableLiveData<User>()
     var mPartnerID = ""
+    var mCurrentPage = 1
     fun getConversationDetail(conversationId: String?, partnerId: String?) {
         viewModelScope.launch {
             getConversationDetailUseCase(conversationId, partnerId).let {
@@ -78,19 +80,23 @@ class ConversationDetailViewModel @Inject constructor(
         }
     }
 
-    private fun getListMessage(conversationId: String) {
+     fun getListMessage(conversationId: String) {
         viewModelScope.launch {
             uiState.postValue(ConversationDetailState.Loading)
-            getListMessageUseCase(conversationId).let {
+            getListMessageUseCase(conversationId, mCurrentPage).let {
                 when (it) {
                     is Result.Success -> {
-                        uiState.postValue(ConversationDetailState.Success(it.data))
-                        val unSeenMessage = it.data.filter { message ->
-                            message.state == MessageState.SENT.value
-                                    && message.sender?.id != getCurrentUser()?.id
-                        }
-                        if (unSeenMessage.isNotEmpty()) {
-                            seenMessage(conversationId, unSeenMessage.map { message -> message.id ?: "" })
+                        if (mCurrentPage == 1) {
+                            uiState.postValue(ConversationDetailState.Success(it.data.data ?: listOf()))
+                            val unSeenMessage = it.data.data?.filter { message ->
+                                message.state == MessageState.SENT.value
+                                        && message.sender?.id != getCurrentUser()?.id
+                            }
+                            if (unSeenMessage?.isNotEmpty() == true) {
+                                seenMessage(conversationId, unSeenMessage.map { message -> message.id ?: "" })
+                            }
+                        } else {
+                            uiState.postValue(ConversationDetailState.LoadMoreSuccess(it.data.data ?: listOf()))
                         }
                     }
 

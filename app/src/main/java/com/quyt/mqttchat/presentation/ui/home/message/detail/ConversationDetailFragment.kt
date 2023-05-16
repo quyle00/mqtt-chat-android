@@ -6,6 +6,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
@@ -23,6 +24,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
+    private var isLoading = false
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
     override fun setupView() {
@@ -64,6 +66,12 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 is ConversationDetailState.Success -> {
                     messageAdapter.setListMessage(state.data)
                     binding.rvMessage.scrollToPosition(0)
+                }
+
+                is ConversationDetailState.LoadMoreSuccess -> {
+                    isLoading = false
+                    messageAdapter.loading(false)
+                    messageAdapter.addListMessage(state.data)
                 }
 
                 is ConversationDetailState.Error -> {
@@ -118,5 +126,22 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setListMessage(ArrayList())
+        initScrollListener()
+    }
+
+    private fun initScrollListener() {
+        binding.rvMessage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
+                if (linearLayoutManager.findLastVisibleItemPosition() >= messageAdapter.itemCount - 1) {
+                    if (!isLoading) {
+                        isLoading = true
+                        messageAdapter.loading(true)
+                        viewModel.mCurrentPage++
+                        viewModel.getListMessage(viewModel.currentConversation?.id ?: "")
+                    }
+                }
+            }
+        })
     }
 }
