@@ -1,6 +1,7 @@
 package com.quyt.mqttchat.data.datasource.remote.service
 
 import com.quyt.mqttchat.data.datasource.remote.model.response.BaseResponse
+import com.quyt.mqttchat.data.datasource.remote.model.response.MessagePagingResponse
 import com.quyt.mqttchat.domain.model.Message
 import retrofit2.Response
 import retrofit2.http.Body
@@ -10,6 +11,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface MessageService {
 
@@ -17,6 +19,12 @@ interface MessageService {
     suspend fun getListMessage(
         @Path("conversationId") conversationId: String,
     ): Response<BaseResponse<List<Message>>>
+
+    @GET("conversation/645e0e02d86c952722f3d0b5/message")
+    suspend fun getListMessage2(
+        @Query("page") page: Int,
+        @Query("limit") limit: Int = 20,
+    ): Response<BaseResponse<MessagePagingResponse>>
 
     @POST("conversation/{conversationId}/message")
     suspend fun createMessage(
