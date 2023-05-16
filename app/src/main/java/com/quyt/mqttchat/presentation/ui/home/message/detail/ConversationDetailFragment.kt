@@ -4,21 +4,24 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.paging.map
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.data.datasource.local.entity.toMessage
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
-import com.quyt.mqttchat.domain.repository.AccessRepository
+import com.quyt.mqttchat.domain.model.toEntity
 import com.quyt.mqttchat.domain.repository.MessageRepository
-import com.quyt.mqttchat.presentation.adapter.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.MessageAdapter2
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,24 +44,28 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         initConversationList()
 //        observeState()
 //        handleTyping()
-//        binding.ivSend.setOnClickListener {
-//            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-//            val messageContent = binding.etMessage.text.toString().trim()
-//            if (messageContent.isNotEmpty()) {
-//                // Create message model
-//                val newMessage = Message().apply {
-//                    this.sender = viewModel.getCurrentUser()
-//                    this.content = messageContent
-//                    this.state = MessageState.SENDING.value
-//                    this.createdAt = sdf.format(Date())
-//                    this.sendTime = Date().time
-//                }
+        binding.ivSend.setOnClickListener {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            val messageContent = binding.etMessage.text.toString().trim()
+            if (messageContent.isNotEmpty()) {
+                // Create message model
+                val newMessage = Message().apply {
+                    this.sender = viewModel.getCurrentUser()
+                    this.content = messageContent
+                    this.state = MessageState.SENDING.value
+                    this.createdAt = sdf.format(Date())
+                    this.sendTime = Date().time
+                }
+                viewModel.viewModelScope.launch {
+                    messageRepository.insertMessage(newMessage.toEntity())
+                    messageAdapter.refresh()
+                }
 //                messageAdapter.addMessage(newMessage)
 //                binding.rvMessage.scrollToPosition(0)
 //                viewModel.sendMessage(newMessage)
-//                binding.etMessage.setText("")
-//            }
-//        }
+                binding.etMessage.setText("")
+            }
+        }
         binding.ivBack.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -129,7 +136,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
 //        messageAdapter.setListMessage(ArrayList())
         lifecycleScope.launch {
-            messageRepository.getListMessage2().collectLatest {
+            messageRepository.getListMessage2("645e0e02d86c952722f3d0b5").collectLatest {
                 messageAdapter.submitData(it)
             }
         }

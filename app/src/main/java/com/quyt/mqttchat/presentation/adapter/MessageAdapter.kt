@@ -87,9 +87,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     fun setTyping(typing: Boolean) {
         if (typing) {
             if (mListMessage.isEmpty() || !mListMessage[0].isTyping) {
-                mListMessage.add(0, Message().apply {
-                    isTyping = true
-                })
+//                mListMessage.add(0, Message())
                 notifyItemInserted(0)
             }
         } else {

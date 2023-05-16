@@ -1,9 +1,11 @@
 package com.quyt.mqttchat.di.module
 
 import android.content.Context
+import androidx.room.Room
 import com.google.gson.GsonBuilder
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
 import com.quyt.mqttchat.data.datasource.remote.interceptor.ConnectivityInterceptor
 import com.quyt.mqttchat.data.datasource.remote.interceptor.HeaderInterceptor
 import com.quyt.mqttchat.data.datasource.remote.interceptor.TokenInterceptor
@@ -42,6 +44,15 @@ class ApplicationModule {
 //            .addInterceptor(headerInterceptor)
 //            .build()
 //    }
+
+    @Provides
+    @Singleton
+    fun provideAppDatabase(@ApplicationContext ctx: Context): AppDatabase {
+        return Room.databaseBuilder(
+            ctx,
+            AppDatabase::class.java, "my_app_database"
+        ).build()
+    }
 
     @Provides
     @Singleton

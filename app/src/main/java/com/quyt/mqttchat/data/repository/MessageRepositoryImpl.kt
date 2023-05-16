@@ -1,18 +1,26 @@
 package com.quyt.mqttchat.data.repository
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.quyt.mqttchat.data.datasource.MessagePagingSource
+import androidx.paging.map
+import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
+import com.quyt.mqttchat.data.datasource.local.entity.MessageEntity
+import com.quyt.mqttchat.data.datasource.local.entity.toMessage
+import com.quyt.mqttchat.data.datasource.remote.MessageRemoteMediator
 import com.quyt.mqttchat.data.datasource.remote.extension.getError
 import com.quyt.mqttchat.data.datasource.remote.service.MessageService
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.Result
 import com.quyt.mqttchat.domain.repository.MessageRepository
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
-class MessageRepositoryImpl @Inject constructor(private val service: MessageService) : MessageRepository {
+class MessageRepositoryImpl(
+    private val service: MessageService,
+    private val appDatabase: AppDatabase
+) : MessageRepository {
     override suspend fun getListMessage(conversationId: String): Result<List<Message>> {
         return try {
             val res = service.getListMessage(conversationId)
@@ -26,15 +34,21 @@ class MessageRepositoryImpl @Inject constructor(private val service: MessageServ
         }
     }
 
-    override suspend fun getListMessage2(): Flow<PagingData<Message>> {
+    @OptIn(ExperimentalPagingApi::class)
+    override suspend fun getListMessage2(conversationId: String): Flow<PagingData<Message>> {
         return Pager(
             config = PagingConfig(
-                pageSize = 20,
+                pageSize = 30,
                 enablePlaceholders = false,
-                prefetchDistance = 1
             ),
-            pagingSourceFactory = { MessagePagingSource(service) }
-        ).flow
+            remoteMediator = MessageRemoteMediator(service, appDatabase,conversationId),
+        ) {
+            appDatabase.messageDao().pagingSource(conversationId)
+        }.flow.map {
+            it.map { messageEntity ->
+                messageEntity.toMessage()
+            }
+        }
     }
 
     override suspend fun createMessage(conversationId: String, message: Message): Result<Message> {
@@ -61,5 +75,9 @@ class MessageRepositoryImpl @Inject constructor(private val service: MessageServ
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    override suspend fun insertMessage(message: MessageEntity) {
+        appDatabase.messageDao().insertAll(listOf(message))
     }
 }
