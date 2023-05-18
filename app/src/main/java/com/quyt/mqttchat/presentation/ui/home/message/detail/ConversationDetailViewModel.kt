@@ -92,13 +92,13 @@ class ConversationDetailViewModel @Inject constructor(
            when (result) {
                is Result.Success -> {
                    if (mCurrentPage == 1) {
-                       uiState.postValue(ConversationDetailState.Success(result.data.data ?: listOf()))
-                       val unSeenMessage = getUnseenMessage(result.data.data)
+                       uiState.postValue(ConversationDetailState.Success(result.data))
+                       val unSeenMessage = getUnseenMessage(result.data)
                        if (unSeenMessage.isNotEmpty()) {
-                           seenMessage(unSeenMessage.map { message -> message.id ?: "" })
+                           seenMessage(unSeenMessage.map { message -> message.id })
                        }
                    } else {
-                       uiState.postValue(ConversationDetailState.LoadMoreSuccess(result.data.data ?: listOf()))
+                       uiState.postValue(ConversationDetailState.LoadMoreSuccess(result.data))
                    }
                }
 
@@ -116,8 +116,8 @@ class ConversationDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun seenMessage(messageIds: List<String>) {
-        val result = seenMessageUseCase(mCurrentConversation.id ?: "", messageIds)
+    private suspend fun seenMessage(unSeenMessageIds: List<String>) {
+        val result = seenMessageUseCase(mCurrentConversation.id ?: "", unSeenMessageIds)
         when (result) {
             is Result.Success -> {
                 sendConversationEventUseCase(

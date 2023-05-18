@@ -15,23 +15,34 @@ class MessageRepositoryImpl(
 ) : MessageRepository {
     override suspend fun getListMessage(conversationId: String, page: Int): Result<List<Message>> {
         return try {
-            val conversationRes = conversationService.getConversationDetail(conversationId)
-            if (conversationRes.isSuccessful) {
-                val remoteLastMessage = conversationRes.body()?.data?.lastMessage
-                if (remoteLastMessage != null) {
-                    val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
-                    if (localLatestMessage.id == remoteLastMessage.id) {
-                        val localMessage = messageLocalDatasource.getMessageByPage(conversationId, page)
+            if (page == 1) {
+                val conversationRes = conversationService.getConversationLastMessage(conversationId)
+                if (conversationRes.isSuccessful) {
+                    val remoteLastMessage = conversationRes.body()?.data
+                    if (remoteLastMessage != null) {
+                        val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
+                        if (localLatestMessage.id != remoteLastMessage.id) {
+                            messageLocalDatasource.clearMessage(conversationId)
+                        }
                     }
+                } else {
+                    Result.Error(conversationRes.getError())
                 }
-            } else {
-                Result.Error(conversationRes.getError())
             }
-            val res = messageService.getListMessage(conversationId, page)
-            if (res.isSuccessful) {
-                Result.Success(res.body()?.data?.data ?: listOf())
+
+            val localMessage = messageLocalDatasource.getMessageByPage(conversationId, page)
+            if (localMessage.isNotEmpty()) {
+                Result.Success(localMessage)
             } else {
-                Result.Error(res.getError())
+                val res = messageService.getListMessage(conversationId, page)
+                if (res.isSuccessful) {
+                    if (res.body()?.data?.data?.isNotEmpty() == true) {
+                        messageLocalDatasource.insertMessage(res.body()?.data?.data ?: listOf())
+                    }
+                    Result.Success(res.body()?.data?.data ?: listOf())
+                } else {
+                    Result.Error(res.getError())
+                }
             }
         } catch (e: Exception) {
             Result.Error(e)
