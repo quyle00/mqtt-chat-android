@@ -9,7 +9,7 @@ import com.quyt.mqttchat.data.datasource.local.entity.MessageEntity
 @Dao
 interface MessageDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(users: List<MessageEntity>)
+    suspend fun insertAll(message: List<MessageEntity>)
 
     @Query("SELECT * FROM message WHERE conversation LIKE :conversationId")
     fun getMessage(conversationId: String): List<MessageEntity>
@@ -18,7 +18,7 @@ interface MessageDao {
     fun getMessageByPage(conversationId: String, offset: Int, limit: Int = 20): List<MessageEntity>
 
     @Query("SELECT * FROM message WHERE conversation LIKE :conversationId ORDER BY createdAt DESC LIMIT 1")
-    fun getLatestMessage(conversationId: String): MessageEntity
+    fun getLatestMessage(conversationId: String): MessageEntity?
 
     @Query("DELETE FROM message WHERE conversation LIKE :conversationId")
     suspend fun clearAll(conversationId: String)

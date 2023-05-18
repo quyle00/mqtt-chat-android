@@ -10,9 +10,9 @@ import kotlinx.coroutines.withContext
 class GetListMessageUseCase(
     private val messageRepository: MessageRepository
 ) {
-    suspend operator fun invoke(conversationId: String, page: Int): Result<List<Message>> {
+    suspend operator fun invoke(conversationId: String, page: Int,lastMessageId :String?): Result<List<Message>> {
         return withContext(Dispatchers.IO) {
-            messageRepository.getListMessage(conversationId, page)
+            messageRepository.getListMessage(conversationId, page,lastMessageId)
         }
     }
 }

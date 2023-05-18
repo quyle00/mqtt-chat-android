@@ -10,7 +10,7 @@ interface MessageLocalDataSource {
 
     suspend fun getMessageByPage(conversationId: String, page: Int): List<Message>
 
-    suspend fun getLatestMessage(conversationId: String): Message
+    suspend fun getLatestMessage(conversationId: String): Message?
 
     suspend fun clearMessage(conversationId: String)
 }

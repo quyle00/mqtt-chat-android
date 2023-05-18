@@ -56,11 +56,11 @@ class ConversationViewHolder(private val binding: ItemConversationBinding, priva
         }
 
         binding.rlRoot.setOnClickListener {
-            listener.onConversationClick(conversation.id)
+            listener.onConversationClick(conversation)
         }
     }
 }
 
 interface OnConversationListener {
-    fun onConversationClick(conversationId: String?)
+    fun onConversationClick(conversation: Conversation?)
 }

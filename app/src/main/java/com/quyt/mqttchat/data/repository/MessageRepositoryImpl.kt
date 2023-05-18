@@ -13,20 +13,14 @@ class MessageRepositoryImpl(
     private val conversationService: ConversationService,
     private val messageLocalDatasource: MessageLocalDataSource
 ) : MessageRepository {
-    override suspend fun getListMessage(conversationId: String, page: Int): Result<List<Message>> {
+    override suspend fun getListMessage(conversationId: String, page: Int, lastMessageId: String?): Result<List<Message>> {
         return try {
             if (page == 1) {
-                val conversationRes = conversationService.getConversationLastMessage(conversationId)
-                if (conversationRes.isSuccessful) {
-                    val remoteLastMessage = conversationRes.body()?.data
-                    if (remoteLastMessage != null) {
-                        val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
-                        if (localLatestMessage.id != remoteLastMessage.id) {
-                            messageLocalDatasource.clearMessage(conversationId)
-                        }
+                if (lastMessageId != null) {
+                    val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
+                    if (localLatestMessage != null && localLatestMessage.id != lastMessageId) {
+                        messageLocalDatasource.clearMessage(conversationId)
                     }
-                } else {
-                    Result.Error(conversationRes.getError())
                 }
             }
 

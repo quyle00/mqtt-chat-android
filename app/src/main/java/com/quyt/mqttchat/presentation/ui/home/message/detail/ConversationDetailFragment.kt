@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
+import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
@@ -27,11 +28,12 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
     private var isLoading = false
+    private var noMoreData = false
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
     override fun setupView() {
         binding.viewModel = viewModel
-        viewModel.getConversationDetail(args.conversationId, Gson().fromJson(args.partner, User::class.java))
+        viewModel.getConversationDetail(Gson().fromJson(args.conversation,Conversation::class.java), Gson().fromJson(args.partner, User::class.java))
         initConversationList()
         observeState()
         handleAction()
@@ -47,12 +49,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 is ConversationDetailState.Success -> {
                     messageAdapter.setListMessage(state.data)
                     binding.rvMessage.scrollToPosition(0)
+                    noMoreData = state.data.size < 20
                 }
 
                 is ConversationDetailState.LoadMoreSuccess -> {
                     isLoading = false
                     messageAdapter.loading(false)
                     messageAdapter.addListMessage(state.data)
+                    noMoreData = state.data.size < 20
                 }
 
                 is ConversationDetailState.Error -> {
@@ -83,6 +87,12 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     val failedMessage = state.message
                     failedMessage.state = MessageState.FAILED.value
                     messageAdapter.updateMessage(failedMessage)
+                }
+
+                is ConversationDetailState.NoMoreData -> {
+                    noMoreData = true
+//                    isLoading = false
+//                    messageAdapter.loading(false)
                 }
             }
         }
@@ -136,7 +146,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
                 if (linearLayoutManager.findLastVisibleItemPosition() >= messageAdapter.itemCount - 1) {
-                    if (!isLoading) {
+                    if (!isLoading && !noMoreData) {
                         isLoading = true
                         messageAdapter.loading(true)
                         viewModel.mCurrentPage++

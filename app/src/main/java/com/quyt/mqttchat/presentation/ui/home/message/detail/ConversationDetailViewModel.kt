@@ -36,6 +36,7 @@ sealed class ConversationDetailState {
     object SeenMessage : ConversationDetailState()
     data class SendMessageSuccess(val message: Message) : ConversationDetailState()
     data class SendMessageError(val message: Message, var error: String) : ConversationDetailState()
+    data class NoMoreData(val message: String) : ConversationDetailState()
 }
 
 @HiltViewModel
@@ -57,10 +58,10 @@ class ConversationDetailViewModel @Inject constructor(
     var mPartner = MutableLiveData<User?>()
     var mCurrentPage = 1
 
-    fun getConversationDetail(conversationId: String?, partner: User?) {
+    fun getConversationDetail(conversation: Conversation?, partner: User?) {
         viewModelScope.launch {
-            val result = if (!conversationId.isNullOrEmpty()) {
-                getConversationDetailUseCase(conversationId = conversationId)
+            val result = if (conversation != null) {
+                Result.Success(conversation)
             } else {
                 getConversationDetailUseCase(partnerId = partner?.id ?: "")
             }
@@ -85,28 +86,36 @@ class ConversationDetailViewModel @Inject constructor(
         }
     }
 
-     fun getListMessage(page: Int) {
-       viewModelScope.launch {
-           uiState.postValue(ConversationDetailState.Loading)
-           val result = getListMessageUseCase(mCurrentConversation.id ?: "", page)
-           when (result) {
-               is Result.Success -> {
-                   if (mCurrentPage == 1) {
-                       uiState.postValue(ConversationDetailState.Success(result.data))
-                       val unSeenMessage = getUnseenMessage(result.data)
-                       if (unSeenMessage.isNotEmpty()) {
-                           seenMessage(unSeenMessage.map { message -> message.id })
-                       }
-                   } else {
-                       uiState.postValue(ConversationDetailState.LoadMoreSuccess(result.data))
-                   }
-               }
+    fun getListMessage(page: Int) {
+        viewModelScope.launch {
+            uiState.postValue(ConversationDetailState.Loading)
+            val result = getListMessageUseCase(mCurrentConversation.id ?: "", page,mCurrentConversation.lastMessage?.id)
+            when (result) {
+                is Result.Success -> {
+                    val listMessage = result.data
+                    if (listMessage.isEmpty()) {
+                        uiState.postValue(ConversationDetailState.NoMoreData("No more data"))
+                        if (mCurrentPage > 1) {
+                            mCurrentPage--
+                        }
+                        return@launch
+                    }
+                    if (mCurrentPage == 1) {
+                        uiState.postValue(ConversationDetailState.Success(listMessage))
+                        val unSeenMessage = getUnseenMessage(listMessage)
+                        if (unSeenMessage.isNotEmpty()) {
+                            seenMessage(unSeenMessage.map { message -> message.id })
+                        }
+                    } else {
+                        uiState.postValue(ConversationDetailState.LoadMoreSuccess(listMessage))
+                    }
+                }
 
-               is Result.Error -> {
-                   uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
-               }
-           }
-       }
+                is Result.Error -> {
+                    uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+                }
+            }
+        }
     }
 
     private fun getUnseenMessage(listMessage: List<Message>?): List<Message> {

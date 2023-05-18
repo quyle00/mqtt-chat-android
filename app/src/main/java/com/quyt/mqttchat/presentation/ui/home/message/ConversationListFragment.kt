@@ -5,8 +5,10 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversationListBinding
+import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.presentation.adapter.ConversationAdapter
 import com.quyt.mqttchat.presentation.adapter.OnConversationListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
@@ -30,9 +32,9 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
         viewModel.getListConversation()
     }
 
-    override fun onConversationClick(conversationId: String?) {
+    override fun onConversationClick(conversation: Conversation?) {
         findNavController().navigate(
-            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(conversationId, null)
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(Gson().toJson(conversation), null)
         )
     }
 

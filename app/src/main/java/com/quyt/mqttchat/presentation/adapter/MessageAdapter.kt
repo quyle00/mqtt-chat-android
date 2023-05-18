@@ -79,6 +79,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         }
     }
 
+
     fun setListMessage(listMessage: List<Message>) {
         val diffResult = DiffUtil.calculateDiff(MessageDiffUtilsCallback(mListMessage, listMessage))
         mListMessage.clear()

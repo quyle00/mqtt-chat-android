@@ -18,13 +18,15 @@ class MessageLocalDataSourceImpl(private val appDatabase: AppDatabase) : Message
 
     override suspend fun getMessageByPage(conversationId: String, page: Int): List<Message> {
         val offset = (page - 1) * 20
-        val localMessage = appDatabase.messageDao().getMessageByPage(conversationId,offset)
+        val localMessage = appDatabase.messageDao().getMessageByPage(conversationId,offset,20)
         return localMessage.map { it.toMessage() }
     }
 
-    override suspend fun getLatestMessage(conversationId: String): Message {
+    override suspend fun getLatestMessage(conversationId: String): Message? {
         val localMessage = appDatabase.messageDao().getLatestMessage(conversationId)
-        return localMessage.toMessage()
+        return localMessage.let {
+            it?.toMessage()
+        }
     }
 
     override suspend fun clearMessage(conversationId: String) {
