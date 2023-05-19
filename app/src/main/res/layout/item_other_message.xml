@@ -56,10 +56,9 @@
                     android:id="@+id/tv_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:layout_marginBottom="8dp"
                     android:maxWidth="230dp"
                     android:textColor="@color/white"
@@ -67,10 +66,22 @@
                     android:visibility="visible"
                     tools:text="This is a message" />
 
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_time_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toEndOf="@id/tv_message"
+                    android:layout_alignBottom="@id/tv_message"
+                    android:layout_marginEnd="8dp"
+                    android:textSize="12sp"
+                    android:visibility="visible"
+                    android:textColor="#B3FFFFFF"
+                    tools:text="00:00" />
+
                 <com.airbnb.lottie.LottieAnimationView
                     android:id="@+id/lav_typing"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp"
+                    android:layout_height="35dp"
                     app:lottie_autoPlay="true"
                     app:lottie_fileName="typing_animation.json"
                     app:lottie_loop="true" />

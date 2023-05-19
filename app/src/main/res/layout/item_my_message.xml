@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="android.view.View"/>
+
+        <import type="android.view.View" />
+
         <variable
             name="message"
             type="com.quyt.mqttchat.domain.model.Message" />
@@ -48,16 +51,43 @@
                     android:id="@+id/tv_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_centerInParent="true"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="4dp"
                     android:layout_marginBottom="8dp"
                     android:text="@{message.content}"
                     android:textAlignment="center"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    tools:text="1" />
+                    tools:text="This is a long messsage" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="bottom"
+                    android:layout_toEndOf="@id/tv_message"
+                    android:layout_alignBottom="@id/tv_message"
+                    android:layout_marginEnd="8dp"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_time_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:visibility="visible"
+                        android:textColor="#B3FFFFFF"
+                        tools:text="00:00" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_state"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginStart="4dp"
+                        android:src="@drawable/ic_check"
+                        app:tint="@color/white"
+                        />
+                </LinearLayout>
             </RelativeLayout>
 
             <ProgressBar
@@ -67,8 +97,8 @@
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="8dp"
                 android:layout_toStartOf="@id/rl_message"
-                tools:text="20:30"
-                android:visibility="@{message.state == state.SENDING.value ? View.VISIBLE : View.GONE}" />
+                android:visibility="@{message.state == state.SENDING.value ? View.VISIBLE : View.GONE}"
+                tools:text="20:30" />
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/iv_refresh"
@@ -80,28 +110,6 @@
                 android:src="@drawable/baseline_refresh_24"
                 android:tint="#FF0000"
                 android:visibility="@{message.state == state.FAILED.value ? View.VISIBLE : View.GONE}" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_sent"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:layout_toStartOf="@id/rl_message"
-                android:src="@drawable/ic_check_circle_outline_24"
-                android:tint="#4CAF50"
-                android:visibility="@{message.state == state.SENT.value ? View.VISIBLE : View.GONE}" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_seen"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_centerVertical="true"
-                android:layout_marginEnd="8dp"
-                android:layout_toStartOf="@id/rl_message"
-                android:src="@drawable/ic_eye_24"
-                android:tint="#4CAF50"
-                android:visibility="@{message.state == state.SEEN.value ? View.VISIBLE : View.GONE}" />
 
         </RelativeLayout>
     </LinearLayout>

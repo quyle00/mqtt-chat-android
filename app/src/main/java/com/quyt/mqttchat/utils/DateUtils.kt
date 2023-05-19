@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit
 
 object DateUtils {
 
-    fun formatTime(dateTimeString: String): String {
+    fun formatTime(dateTimeString: String,format: String): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         val dateTime = LocalDateTime.parse(dateTimeString, formatter)
 
-        val outputFormatter = DateTimeFormatter.ofPattern("HH:mm")
+        val outputFormatter = DateTimeFormatter.ofPattern(format)
         return dateTime.format(outputFormatter)
     }
 

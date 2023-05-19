@@ -60,25 +60,25 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = mListMessage[position]
-        // Because list reverse, so previous message is next message and next message is previous message
-        val previousMessage = if (position < mListMessage.size - 1) mListMessage[position + 1] else null
-        val nextMessage = if (position > 0) mListMessage[position - 1] else null
+        val previousMessage = if (position < mListMessage.size - 1) mListMessage[position + 1].takeIf { it?.sender?.id == message?.sender?.id } else null
+        val nextMessage = if (position > 0) mListMessage[position - 1].takeIf { it?.sender?.id == message?.sender?.id } else null
 
+        val messageGroupState = when {
+            nextMessage != null && previousMessage != null -> GroupMessageState.MIDDLE
+            nextMessage != null && previousMessage == null-> GroupMessageState.FIRST
+            nextMessage == null && previousMessage != null-> GroupMessageState.LAST
+            else -> GroupMessageState.SINGLE
+        }
         when (holder) {
             is MyMessageViewHolder -> {
-                val myPreviousMessageTime = previousMessage?.sender?.id?.takeIf { it == currentUserId }?.let { previousMessage.createdAt }
-                val myNextMessageTime = nextMessage?.sender?.id?.takeIf { it == currentUserId }?.let { nextMessage.createdAt }
-                holder.bind(message, myPreviousMessageTime, myNextMessageTime)
+                holder.bind(message,messageGroupState)
             }
 
             is OtherMessageViewHolder -> {
-                val otherPreviousMessageTime = previousMessage?.sender?.id?.takeIf { it != currentUserId }?.let { previousMessage.createdAt }
-                val otherNextMessageTime = nextMessage?.sender?.id?.takeIf { it != currentUserId }?.let { nextMessage.createdAt }
-                holder.bind(message, otherPreviousMessageTime, otherNextMessageTime)
+                holder.bind(message,messageGroupState)
             }
         }
     }
-
 
     fun setListMessage(listMessage: List<Message>) {
         val diffResult = DiffUtil.calculateDiff(MessageDiffUtilsCallback(mListMessage, listMessage))
@@ -95,11 +95,11 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 //        diffResult.dispatchUpdatesTo(this)
     }
 
-    fun loading(isLoading : Boolean){
-        if(isLoading){
+    fun loading(isLoading: Boolean) {
+        if (isLoading) {
             mListMessage.add(null)
             notifyItemInserted(mListMessage.size - 1)
-        }else{
+        } else {
             mListMessage.remove(null)
             notifyItemRemoved(mListMessage.size)
         }
@@ -152,26 +152,23 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 }
 
 class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message?, myPreviousMessageTime: String?, myNextMessageTime: String?) {
+    fun bind(message: Message?, groupMessageState: GroupMessageState) {
         binding.message = message
-        if (message?.isTyping==false) {
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "")
+        if (message?.isTyping == false) {
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "","dd-MM-yyyy HH:mm")
+            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?:"", "HH:mm")
         }
+        binding.ivState.setImageResource(if (message?.state == MessageState.SEEN.value) R.drawable.ic_double_check else R.drawable.ic_check)
         //
         val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
         params.topMargin = 40
-        when (handleGroupMessage(myPreviousMessageTime, message?.createdAt, myNextMessageTime)) {
+        when (groupMessageState) {
             GroupMessageState.SINGLE -> {
                 binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat)
             }
 
             GroupMessageState.FIRST -> {
                 binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_first)
-//                if (DateUtils.compareInMinutes(myPreviousMessageTime, message?.createdAt) > 1) {
-//                    binding.tvTime.visibility = View.VISIBLE
-//                } else {
-//                    binding.tvTime.visibility = View.GONE
-//                }
             }
 
             GroupMessageState.MIDDLE -> {
@@ -198,11 +195,16 @@ class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerV
 }
 
 class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message?, myPreviousMessageTime: String?, myNextMessageTime: String?) {
+    fun bind(message: Message?, groupMessageState: GroupMessageState) {
+        //
+        if (message?.isTyping == false) {
+            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "","dd-MM-yyyy HH:mm")
+            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?:"", "HH:mm")
+        }
         //
         val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
         params.topMargin = 40
-        when (handleGroupMessage(myPreviousMessageTime, message?.createdAt, myNextMessageTime)) {
+        when (groupMessageState) {
             GroupMessageState.SINGLE -> {
                 binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat)
             }
@@ -223,9 +225,6 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
         }
         binding.llRoot.layoutParams = params
         //
-        if (message?.isTyping == false) {
-            binding.tvTime.text = DateUtils.formatTime(message?.createdAt ?: "")
-        }
         binding.tvMessage.text = message?.content
         if (message?.isTyping == true) {
             binding.tvMessage.visibility = View.GONE
@@ -246,32 +245,6 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
 
 class LoadingViewHolder(binding: ItemLoadingBinding) : RecyclerView.ViewHolder(binding.root) {
 }
-
-fun handleGroupMessage(previousMessageTime: String?, currentMessageTime: String?, nextMessageTime: String?): GroupMessageState {
-    if (previousMessageTime == null && nextMessageTime == null) {
-        return GroupMessageState.SINGLE
-    }
-    if (nextMessageTime == null) {
-        return GroupMessageState.LAST
-    }
-    if (previousMessageTime == null) {
-        return GroupMessageState.FIRST
-    }
-    return if (DateUtils.compareInMinutes(currentMessageTime, nextMessageTime) > 1) {
-        if (DateUtils.compareInMinutes(previousMessageTime, currentMessageTime) > 1) {
-            GroupMessageState.SINGLE
-        } else {
-            GroupMessageState.LAST
-        }
-    } else {
-        if (DateUtils.compareInMinutes(previousMessageTime, currentMessageTime) > 1) {
-            GroupMessageState.FIRST
-        } else {
-            GroupMessageState.MIDDLE
-        }
-    }
-}
-
 enum class GroupMessageState {
     SINGLE, FIRST, MIDDLE, LAST
 }

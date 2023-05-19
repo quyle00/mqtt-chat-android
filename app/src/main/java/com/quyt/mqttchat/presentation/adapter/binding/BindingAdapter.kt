@@ -18,6 +18,6 @@ fun loadImage(view: AppCompatImageView, url: String?) {
 @BindingAdapter("setTime")
 fun setTimeStringToTextView(view: AppCompatTextView, time: String?) {
     if (!time.isNullOrEmpty()) {
-        view.text = DateUtils.formatTime(time)
+        view.text = DateUtils.formatTime(time, "HH:mm")
     }
 }
