@@ -33,7 +33,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     override val viewModel: ConversationDetailViewModel by viewModels()
     override fun setupView() {
         binding.viewModel = viewModel
-        viewModel.getConversationDetail(Gson().fromJson(args.conversation,Conversation::class.java), Gson().fromJson(args.partner, User::class.java))
+        viewModel.getConversationDetail(Gson().fromJson(args.conversation, Conversation::class.java), Gson().fromJson(args.partner, User::class.java))
         initConversationList()
         observeState()
         handleAction()
@@ -129,6 +129,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 viewModel.sendMessage(newMessage)
                 binding.etMessage.setText("")
             }
+        }
+        binding.ivAttach.setOnClickListener {
+            val bottomSheetAttach = BottomSheetAttach()
+            bottomSheetAttach.show(childFragmentManager, bottomSheetAttach.tag)
         }
     }
 
