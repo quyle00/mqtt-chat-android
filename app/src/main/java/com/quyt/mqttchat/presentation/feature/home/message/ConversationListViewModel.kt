@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.message
+package com.quyt.mqttchat.presentation.feature.home.message
 
 import androidx.lifecycle.viewModelScope
 import com.quyt.mqttchat.domain.model.Conversation
@@ -8,7 +8,6 @@ import com.quyt.mqttchat.domain.model.Result
 import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.ListenConversationEventUseCase
 import com.quyt.mqttchat.presentation.base.BaseViewModel
-import com.quyt.mqttchat.presentation.ui.home.message.detail.ConversationDetailState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.adapter
+package com.quyt.mqttchat.presentation.adapter.message
 
 import androidx.recyclerview.widget.DiffUtil
 import com.quyt.mqttchat.domain.model.Message

@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.auth.login
+package com.quyt.mqttchat.presentation.feature.auth.login
 
 import androidx.lifecycle.viewModelScope
 import com.quyt.mqttchat.domain.model.Result

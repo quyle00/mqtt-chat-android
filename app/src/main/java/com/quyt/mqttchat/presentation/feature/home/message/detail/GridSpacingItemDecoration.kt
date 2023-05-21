@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.message.detail
+package com.quyt.mqttchat.presentation.feature.home.message.detail
 
 import android.graphics.Rect
 import android.view.View

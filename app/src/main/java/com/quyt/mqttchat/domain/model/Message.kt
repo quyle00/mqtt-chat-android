@@ -23,7 +23,9 @@ data class Message(
     var sendTime: Long,
     var isMine: Boolean,
     var isTyping: Boolean,
-    var state: Int = MessageState.SENT.value
+    var state: Int = MessageState.SENT.value,
+    var type: Int= MessageContentType.TEXT.value,
+    var images: List<String>?,
 ){
     constructor() : this(
         id = "",
@@ -35,7 +37,9 @@ data class Message(
         sendTime = 0,
         isMine = false,
         isTyping = false,
-        state = MessageState.SENT.value
+        state = MessageState.SENT.value,
+        type = MessageContentType.TEXT.value,
+        images = listOf()
     )
 }
 
@@ -51,7 +55,9 @@ fun Message.toEntity() = MessageEntity(
     sendTime = sendTime,
     isMine = isMine,
     isTyping = isTyping,
-    state = state
+    state = state,
+    type = type,
+    images = Gson().toJson(images)
 )
 
 enum class MessageState(val value: Int) {
@@ -59,4 +65,9 @@ enum class MessageState(val value: Int) {
     SENT(1),
     SEEN(2),
     FAILED(3),
+}
+
+enum class MessageContentType(val value: Int) {
+    TEXT(0),
+    IMAGE(1),
 }

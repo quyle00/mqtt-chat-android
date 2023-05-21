@@ -1,18 +1,18 @@
-package com.quyt.mqttchat.presentation.adapter
+package com.quyt.mqttchat.presentation.adapter.message
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemLoadingBinding
+import com.quyt.mqttchat.databinding.ItemMyImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemMyMessageBinding
+import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
-import com.quyt.mqttchat.utils.DateUtils
 
 class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -34,6 +34,16 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
                 LoadingViewHolder(binding)
             }
 
+            MessageType.MY_IMAGE.value -> {
+                val binding = DataBindingUtil.inflate<ItemMyImageMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_my_image_message, parent, false)
+                MyImageMessageViewHolder(binding)
+            }
+
+            MessageType.OTHERS_IMAGE.value -> {
+                val binding = DataBindingUtil.inflate<ItemOtherImageMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_other_image_message, parent, false)
+                OtherImageMessageViewHolder(binding)
+            }
+
             else -> {
                 val binding = DataBindingUtil.inflate<ItemLoadingBinding>(LayoutInflater.from(parent.context), R.layout.item_loading, parent, false)
                 LoadingViewHolder(binding)
@@ -47,9 +57,18 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
             MessageType.LOADING.value
         } else {
             if (mListMessage[position]?.sender?.id == currentUserId) {
-                MessageType.MY_MESSAGE.value
+                if (!mListMessage[position]?.images.isNullOrEmpty()) {
+                    MessageType.MY_IMAGE.value
+                } else {
+                    MessageType.MY_MESSAGE.value
+                }
+
             } else {
-                MessageType.OTHERS_MESSAGE.value
+                if (!mListMessage[position]?.images.isNullOrEmpty()) {
+                    MessageType.OTHERS_IMAGE.value
+                } else {
+                    MessageType.OTHERS_MESSAGE.value
+                }
             }
         }
     }
@@ -65,17 +84,25 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
         val messageGroupState = when {
             nextMessage != null && previousMessage != null -> GroupMessageState.MIDDLE
-            nextMessage != null && previousMessage == null-> GroupMessageState.FIRST
-            nextMessage == null && previousMessage != null-> GroupMessageState.LAST
+            nextMessage != null && previousMessage == null -> GroupMessageState.FIRST
+            nextMessage == null && previousMessage != null -> GroupMessageState.LAST
             else -> GroupMessageState.SINGLE
         }
         when (holder) {
             is MyMessageViewHolder -> {
-                holder.bind(message,messageGroupState)
+                holder.bind(message, messageGroupState)
             }
 
             is OtherMessageViewHolder -> {
-                holder.bind(message,messageGroupState)
+                holder.bind(message, messageGroupState)
+            }
+
+            is MyImageMessageViewHolder -> {
+                holder.bind(message, messageGroupState)
+            }
+
+            is OtherImageMessageViewHolder -> {
+                holder.bind(message, messageGroupState)
             }
         }
     }
@@ -151,105 +178,14 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
 }
 
-class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message?, groupMessageState: GroupMessageState) {
-        binding.message = message
-        if (message?.isTyping == false) {
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "","dd-MM-yyyy HH:mm")
-            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?:"", "HH:mm")
-        }
-        binding.ivState.setImageResource(if (message?.state == MessageState.SEEN.value) R.drawable.ic_double_check else R.drawable.ic_check)
-        //
-        val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
-        params.topMargin = 40
-        when (groupMessageState) {
-            GroupMessageState.SINGLE -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat)
-            }
-
-            GroupMessageState.FIRST -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_first)
-            }
-
-            GroupMessageState.MIDDLE -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_middle)
-                params.topMargin = 4
-            }
-
-            GroupMessageState.LAST -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_my_chat_last)
-                params.topMargin = 4
-            }
-        }
-
-        binding.rlMessage.setOnClickListener {
-            if (binding.tvTime.visibility == View.VISIBLE) {
-                binding.tvTime.visibility = View.GONE
-            } else {
-                binding.tvTime.visibility = View.VISIBLE
-            }
-        }
-    }
-
-
-}
-
-class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(message: Message?, groupMessageState: GroupMessageState) {
-        //
-        if (message?.isTyping == false) {
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "","dd-MM-yyyy HH:mm")
-            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?:"", "HH:mm")
-        }
-        //
-        val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
-        params.topMargin = 40
-        when (groupMessageState) {
-            GroupMessageState.SINGLE -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat)
-            }
-
-            GroupMessageState.FIRST -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_first)
-            }
-
-            GroupMessageState.MIDDLE -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_middle)
-                params.topMargin = 4
-            }
-
-            GroupMessageState.LAST -> {
-                binding.rlMessage.setBackgroundResource(R.drawable.bg_other_chat_last)
-                params.topMargin = 4
-            }
-        }
-        binding.llRoot.layoutParams = params
-        //
-        binding.tvMessage.text = message?.content
-        if (message?.isTyping == true) {
-            binding.tvMessage.visibility = View.GONE
-            binding.lavTyping.visibility = View.VISIBLE
-        } else {
-            binding.tvMessage.visibility = View.VISIBLE
-            binding.lavTyping.visibility = View.GONE
-        }
-        binding.rlMessage.setOnClickListener {
-            if (binding.tvTime.visibility == View.VISIBLE) {
-                binding.tvTime.visibility = View.GONE
-            } else {
-                binding.tvTime.visibility = View.VISIBLE
-            }
-        }
-    }
-}
-
 class LoadingViewHolder(binding: ItemLoadingBinding) : RecyclerView.ViewHolder(binding.root) {
 }
+
 enum class GroupMessageState {
     SINGLE, FIRST, MIDDLE, LAST
 }
 
 enum class MessageType(val value: Int) {
-    MY_MESSAGE(0), OTHERS_MESSAGE(1), LOADING(2)
+    MY_MESSAGE(0), OTHERS_MESSAGE(1), LOADING(2), MY_IMAGE(3), OTHERS_IMAGE(4),
 }
 

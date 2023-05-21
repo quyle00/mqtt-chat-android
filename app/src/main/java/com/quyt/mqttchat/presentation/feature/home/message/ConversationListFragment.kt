@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.message
+package com.quyt.mqttchat.presentation.feature.home.message
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
@@ -12,7 +12,7 @@ import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.presentation.adapter.ConversationAdapter
 import com.quyt.mqttchat.presentation.adapter.OnConversationListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
-import com.quyt.mqttchat.presentation.ui.home.HomeFragmentDirections
+import com.quyt.mqttchat.presentation.feature.home.HomeFragmentDirections
 import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 

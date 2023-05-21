@@ -5,6 +5,7 @@ import androidx.room.PrimaryKey
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
 
@@ -21,7 +22,9 @@ data class MessageEntity(
     var sendTime: Long = 0,
     var isMine: Boolean?,
     var isTyping: Boolean,
-    var state: Int?
+    var state: Int?,
+    var type: Int= MessageContentType.TEXT.value,
+    var images: String?,
 )
 
 fun MessageEntity.toMessage() = Message(
@@ -34,5 +37,7 @@ fun MessageEntity.toMessage() = Message(
     sendTime = sendTime,
     isMine = isMine ?: false,
     isTyping = isTyping,
-    state = state ?: MessageState.SENT.value
+    state = state ?: MessageState.SENT.value,
+    type = type,
+    images = Gson().fromJson(images, Array<String>::class.java).toList()
 )

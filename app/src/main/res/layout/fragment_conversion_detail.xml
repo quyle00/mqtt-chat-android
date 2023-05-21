@@ -7,14 +7,14 @@
 
         <variable
             name="viewModel"
-            type="com.quyt.mqttchat.presentation.ui.home.message.detail.ConversationDetailViewModel" />
+            type="com.quyt.mqttchat.presentation.feature.home.message.detail.ConversationDetailViewModel" />
     </data>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/white"
-        tools:context=".presentation.ui.home.message.detail.ConversationDetailFragment">
+        tools:context=".presentation.feature.home.message.detail.ConversationDetailFragment">
 
         <LinearLayout
             android:id="@+id/ll_action_bar"

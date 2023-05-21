@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home
+package com.quyt.mqttchat.presentation.feature.home
 
 import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.base.BaseViewModel

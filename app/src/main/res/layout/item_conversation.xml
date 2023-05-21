@@ -57,7 +57,6 @@
                 android:layout_marginTop="4dp"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:text="@{conversation.lastMessage.content}"
                 android:textColor="@color/normal_text"
                 android:textSize="14sp"
                 tools:text="Sample last message Sample last message Sample last message" />
@@ -87,7 +86,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="4dp"
-                android:src="@drawable/ic_eye_24"
+                android:src="@drawable/ic_check"
                 android:visibility="gone" />
         </LinearLayout>
 

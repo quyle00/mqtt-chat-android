@@ -1,7 +1,6 @@
-package com.quyt.mqttchat.presentation.ui
+package com.quyt.mqttchat.presentation.feature
 
 import android.os.Bundle
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ActivityMainBinding

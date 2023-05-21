@@ -38,12 +38,18 @@ class ConversationAdapter(private val listener: OnConversationListener) : BaseRe
 
 class ConversationViewHolder(private val binding: ItemConversationBinding, private val listener: OnConversationListener) : RecyclerView.ViewHolder(binding.root) {
     fun bind(conversation: Conversation) {
+        if (conversation.lastMessage?.images?.isNotEmpty() == true) {
+            binding.tvContent.text = "Sent ${conversation.lastMessage?.images?.size} images"
+        } else {
+            binding.tvContent.text = conversation.lastMessage?.content
+        }
         binding.conversation = conversation
         if (conversation.lastMessage?.isMine == true) {
+            binding.tvContent.text = "You: ${conversation.lastMessage?.content}"
             binding.ivState.visibility = View.VISIBLE
             binding.ivState.setImageResource(when (conversation.lastMessage?.state) {
-                MessageState.SENT.value -> R.drawable.ic_check_circle_outline_24
-                MessageState.SEEN.value -> R.drawable.ic_eye_24
+                MessageState.SENT.value -> R.drawable.ic_check
+                MessageState.SEEN.value -> R.drawable.ic_double_check
                 else -> -1
             })
         }else{

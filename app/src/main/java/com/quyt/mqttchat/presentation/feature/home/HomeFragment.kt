@@ -1,13 +1,12 @@
-package com.quyt.mqttchat.presentation.ui.home
+package com.quyt.mqttchat.presentation.feature.home
 
 import androidx.fragment.app.viewModels
-import androidx.viewpager.widget.ViewPager
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentHomeBinding
 import com.quyt.mqttchat.presentation.adapter.HomeViewPagerAdapter
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
-import com.quyt.mqttchat.presentation.ui.home.contact.ContactFragment
-import com.quyt.mqttchat.presentation.ui.home.message.ConversationListFragment
+import com.quyt.mqttchat.presentation.feature.home.contact.ContactFragment
+import com.quyt.mqttchat.presentation.feature.home.message.ConversationListFragment
 
 class HomeFragment() : BaseBindingFragment<FragmentHomeBinding, HomeViewModel>() {
     override fun layoutId(): Int = R.layout.fragment_home

@@ -13,8 +13,7 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
     itemSameChecker = { oldItem, newItem -> oldItem == newItem },
     contentSameChecker = { oldItem, newItem -> oldItem == newItem }
 ) {
-
-    var imageCount = 0
+    private val mListImageSelected = ArrayList<String>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val binding = DataBindingUtil.inflate<ItemImagePickerBinding>(LayoutInflater.from(parent.context), R.layout.item_image_picker, parent, false)
         return ImagePickerViewHolder(binding, listener)
@@ -26,25 +25,37 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
         }
     }
 
-    inner class ImagePickerViewHolder(private val binding: ItemImagePickerBinding, private val listener: OnImagePickerListener) : RecyclerView.ViewHolder(binding.root) {
+    fun getSelectedImages() : ArrayList<String> {
+        return mListImageSelected
+    }
+
+    inner class ImagePickerViewHolder(val binding: ItemImagePickerBinding, private val listener: OnImagePickerListener) : RecyclerView.ViewHolder(binding.root) {
         fun bind(image: String) {
             Glide.with(binding.root).load(image).fitCenter().into(binding.ivImage)
+            if (mListImageSelected.contains(image)) {
+                binding.cvCount.visibility = android.view.View.VISIBLE
+                val positionInSelected = mListImageSelected.indexOf(image) + 1
+                binding.tvCount.text = positionInSelected.toString()
+            } else {
+                binding.cvCount.visibility = android.view.View.INVISIBLE
+            }
             binding.rlCount.setOnClickListener {
-                if (binding.cvCount.visibility == android.view.View.VISIBLE) {
-                    imageCount--
-                    binding.cvCount.visibility = android.view.View.INVISIBLE
-                    listener.onImageSelect(false, image)
+                if (mListImageSelected.contains(image)) {
+                    mListImageSelected.remove(image)
+                    notifyItemChanged(absoluteAdapterPosition)
                 } else {
-                    imageCount++
-                    binding.cvCount.visibility = android.view.View.VISIBLE
-                    listener.onImageSelect(true, image)
-                    binding.tvCount.text = imageCount.toString()
+                    mListImageSelected.add(image)
                 }
+                mListImageSelected.forEach { image ->
+                    val index = getItems().indexOf(image)
+                    notifyItemChanged(index)
+                }
+                listener.onImageSelect(mListImageSelected)
             }
         }
     }
 }
 
 interface OnImagePickerListener {
-    fun onImageSelect(isSelect: Boolean, imageUri: String)
+    fun onImageSelect(imageSelected : ArrayList<String>)
 }

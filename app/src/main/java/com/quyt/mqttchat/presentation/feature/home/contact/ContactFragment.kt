@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.contact
+package com.quyt.mqttchat.presentation.feature.home.contact
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
@@ -11,7 +11,7 @@ import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.ContactAdapter
 import com.quyt.mqttchat.presentation.adapter.OnContactListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
-import com.quyt.mqttchat.presentation.ui.home.HomeFragmentDirections
+import com.quyt.mqttchat.presentation.feature.home.HomeFragmentDirections
 import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 

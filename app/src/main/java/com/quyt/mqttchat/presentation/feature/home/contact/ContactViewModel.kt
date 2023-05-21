@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.contact
+package com.quyt.mqttchat.presentation.feature.home.contact
 
 import androidx.lifecycle.viewModelScope
 import com.quyt.mqttchat.domain.model.Result

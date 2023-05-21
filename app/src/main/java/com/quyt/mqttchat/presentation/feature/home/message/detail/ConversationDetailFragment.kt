@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.home.message.detail
+package com.quyt.mqttchat.presentation.feature.home.message.detail
 
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -14,8 +14,9 @@ import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
+import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.User
-import com.quyt.mqttchat.presentation.adapter.MessageAdapter
+import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -23,7 +24,7 @@ import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
-class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>() {
+class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),BottomSheetListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -131,7 +132,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             }
         }
         binding.ivAttach.setOnClickListener {
-            val bottomSheetAttach = BottomSheetAttach()
+            val bottomSheetAttach = BottomSheetAttach(this)
             bottomSheetAttach.show(childFragmentManager, bottomSheetAttach.tag)
         }
     }
@@ -159,5 +160,21 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
             }
         })
+    }
+
+    override fun onDataSelected(data: ArrayList<String>) {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            // Create message model
+            val newMessage = Message().apply {
+                this.sender = viewModel.getCurrentUser()
+                this.state = MessageState.SENDING.value
+                this.createdAt = sdf.format(Date())
+                this.sendTime = Date().time
+                this.images = data
+                this.type= MessageContentType.IMAGE.value
+            }
+            messageAdapter.addMessage(newMessage)
+            binding.rvMessage.scrollToPosition(0)
+            viewModel.sendMessage(newMessage)
     }
 }

@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.ui.auth.login
+package com.quyt.mqttchat.presentation.feature.auth.login
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
