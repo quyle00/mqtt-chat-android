@@ -42,14 +42,14 @@ sealed class ConversationDetailState {
 @HiltViewModel
 class ConversationDetailViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
-    private val sendConversationEventUseCase: SendMessageEventUseCase,
+    private val sendMessageEventUseCase: SendMessageEventUseCase,
     private val listenMessageEventUseCase: ListenMessageEventUseCase,
     private val getListMessageUseCase: GetListMessageUseCase,
     private val createMessageUseCase: CreateMessageUseCase,
     private val createConversationUseCase: CreateConversationUseCase,
     private val getConversationDetailUseCase: GetConversationDetailUseCase,
     private val seenMessageUseCase: SeenMessageUseCase,
-    private val insertMessageUseCase: InsertMessageUseCase
+    private val insertMessageUseCase: InsertMessageUseCase,
 ) : BaseViewModel<ConversationDetailState>() {
 
     lateinit var mCurrentConversation: Conversation
@@ -130,7 +130,8 @@ class ConversationDetailViewModel @Inject constructor(
         val result = seenMessageUseCase(mCurrentConversation.id ?: "", unSeenMessageIds)
         when (result) {
             is Result.Success -> {
-                sendConversationEventUseCase(
+                sendMessageEventUseCase(
+                    getCurrentUser()?.id ?: "",
                     mPartner.value?.id ?: "",
                     mCurrentConversation.id ?: "", Event(
                         getCurrentUser()?.id,
@@ -207,11 +208,13 @@ class ConversationDetailViewModel @Inject constructor(
                     val messageCreated = result.data
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
                     // Send Mqtt event
-                    sendConversationEventUseCase(
+                    sendMessageEventUseCase(
+                        getCurrentUser()?.id ?: "",
                         mPartner.value?.id ?: "",
                         mCurrentConversation.id ?: "",
                         Event(getCurrentUser()?.id, EventType.NEW_MESSAGE.value, result.data)
                     )
+                    insertMessageUseCase(arrayListOf(messageCreated))
                 }
 
                 is Result.Error -> {
@@ -224,7 +227,8 @@ class ConversationDetailViewModel @Inject constructor(
     fun sendTyping(isTyping: Boolean) {
         if (!::mCurrentConversation.isInitialized) return
         viewModelScope.launch {
-            sendConversationEventUseCase(
+            sendMessageEventUseCase(
+                getCurrentUser()?.id ?: "",
                 mPartner.value?.id ?: "",
                 mCurrentConversation.id ?: "", Event(
                     getCurrentUser()?.id,

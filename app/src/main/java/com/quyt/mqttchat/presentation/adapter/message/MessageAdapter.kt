@@ -83,8 +83,8 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = mListMessage[position]
-        val previousMessage = if (position < mListMessage.size - 1) mListMessage[position + 1].takeIf { it?.sender?.id == message?.sender?.id } else null
-        val nextMessage = if (position > 0) mListMessage[position - 1].takeIf { it?.sender?.id == message?.sender?.id } else null
+        val previousMessage = if (position > 0) mListMessage[position - 1].takeIf { it?.sender?.id == message?.sender?.id } else null
+        val nextMessage = if (position < mListMessage.size - 1) mListMessage[position + 1].takeIf { it?.sender?.id == message?.sender?.id } else null
 
         val messageGroupState = when {
             nextMessage != null && previousMessage != null -> GroupMessageState.MIDDLE
@@ -111,39 +111,37 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
         }
     }
 
-    fun setListMessage(listMessage: List<Message>) {
+    fun setFirstPageMessage(listMessage: List<Message>) {
         val diffResult = DiffUtil.calculateDiff(MessageDiffUtilsCallback(mListMessage, listMessage))
         mListMessage.clear()
-        mListMessage.addAll(listMessage)
+        mListMessage.addAll(listMessage.reversed())
         diffResult.dispatchUpdatesTo(this)
     }
 
-    fun addListMessage(listMessage: List<Message>) {
-        val diffResult = DiffUtil.calculateDiff(MessageDiffUtilsCallback(mListMessage, listMessage))
-        mListMessage.addAll(listMessage)
-        notifyItemRangeInserted(mListMessage.size - listMessage.size, listMessage.size)
-        notifyItemChanged(mListMessage.size - listMessage.size - 1)
-//        diffResult.dispatchUpdatesTo(this)
+    fun addOlderListMessage(listMessage: List<Message>) {
+        mListMessage.addAll(0, listMessage.reversed())
+        notifyItemRangeInserted(0, listMessage.size - 1)
+        notifyItemChanged(listMessage.size)
     }
 
-    fun loading(isLoading: Boolean) {
+    fun loadMoreLoading(isLoading: Boolean) {
         if (isLoading) {
-            mListMessage.add(null)
-            notifyItemInserted(mListMessage.size - 1)
+            mListMessage.add(0, null)
+            notifyItemInserted(0)
         } else {
             mListMessage.remove(null)
             notifyItemRemoved(mListMessage.size)
         }
     }
 
-    fun addMessage(message: Message) {
-        if (mListMessage.isNotEmpty() && mListMessage[0]?.isTyping == true) {
-            mListMessage[0] = message
-            notifyItemChanged(0)
+    fun addNewMessage(message: Message) {
+        if (mListMessage.isNotEmpty() && mListMessage.last()?.isTyping == true) {
+            mListMessage[mListMessage.size - 1] = message
+            notifyItemChanged(mListMessage.size - 1)
         } else {
-            mListMessage.add(0, message)
-//            notifyItemInserted(0)
-//            notifyItemChanged(1)
+            mListMessage.add(message)
+            notifyItemInserted(mListMessage.size - 1)
+            notifyItemChanged(mListMessage.size - 2)
         }
     }
 
@@ -156,16 +154,16 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
 
     fun setTyping(typing: Boolean) {
         if (typing) {
-            if (mListMessage.isEmpty() || mListMessage[0]?.isTyping == false) {
-                mListMessage.add(0, Message().apply {
+            if (mListMessage.isEmpty() || mListMessage.last()?.isTyping == false) {
+                mListMessage.add(Message().apply {
                     isTyping = true
                 })
-                notifyItemInserted(0)
+                notifyItemInserted(mListMessage.size - 1)
             }
         } else {
-            if (mListMessage.isNotEmpty() && mListMessage[0]?.isTyping == true) {
-                mListMessage.removeAt(0)
-                notifyItemRemoved(0)
+            if (mListMessage.isNotEmpty() && mListMessage.last()?.isTyping == true) {
+                mListMessage.removeLast()
+                notifyItemRemoved(mListMessage.size - 1)
             }
         }
     }

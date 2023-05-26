@@ -1,10 +1,8 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
-import android.util.Log
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -23,8 +21,6 @@ import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,18 +50,15 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.Success -> {
-                    messageAdapter.setListMessage(state.data)
-                    lifecycleScope.launch {
-                        delay(100)
-                        binding.rvMessage.scrollToPosition(0)
-                    }
+                    messageAdapter.setFirstPageMessage(state.data)
+                    scrollToBottom()
                     noMoreData = state.data.size < 20
                 }
 
                 is ConversationDetailState.LoadMoreSuccess -> {
                     isLoading = false
-                    messageAdapter.loading(false)
-                    messageAdapter.addListMessage(state.data)
+                    messageAdapter.loadMoreLoading(false)
+                    messageAdapter.addOlderListMessage(state.data)
                     noMoreData = state.data.size < 20
                 }
 
@@ -74,14 +67,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.NewMessage -> {
-                    messageAdapter.addMessage(state.message)
-                    binding.rvMessage.scrollToPosition(0)
+                    messageAdapter.addNewMessage(state.message)
+                    scrollToBottom()
                 }
 
                 is ConversationDetailState.Typing -> {
                     if (state.message.sender?.id != viewModel.getCurrentUser()?.id) {
                         messageAdapter.setTyping(state.message.isTyping)
-                        binding.rvMessage.scrollToPosition(0)
+                        scrollToBottom()
                     }
                 }
 
@@ -101,8 +94,6 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 is ConversationDetailState.NoMoreData -> {
                     noMoreData = true
-//                    isLoading = false
-//                    messageAdapter.loading(false)
                 }
             }
         }
@@ -134,11 +125,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     this.createdAt = sdf.format(Date())
                     this.sendTime = Date().time
                 }
-                messageAdapter.addMessage(newMessage)
-                lifecycleScope.launch {
-                    delay(100)
-                    binding.rvMessage.scrollToPosition(0)
-                }
+                messageAdapter.addNewMessage(newMessage)
+                binding.rvMessage.scrollToPosition(messageAdapter.itemCount - 1)
                 viewModel.sendMessage(newMessage)
                 binding.etMessage.setText("")
             }
@@ -152,15 +140,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private fun initConversationList() {
         messageAdapter = MessageAdapter(viewModel.getCurrentUser()?.id)
         binding.rvMessage.adapter = messageAdapter
-        binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
+        binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
-        messageAdapter.setListMessage(ArrayList())
+        messageAdapter.setFirstPageMessage(ArrayList())
         val messageSwipeController = MessageSwipeController(requireContext()) {
             messageAdapter.getMessage(it)?.let { message ->
-               viewModel.setReplyMessage(message)
+                viewModel.setReplyMessage(message)
             }
         }
-
         val itemTouchHelper = ItemTouchHelper(messageSwipeController)
         itemTouchHelper.attachToRecyclerView(binding.rvMessage)
         initScrollListener()
@@ -170,10 +157,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.rvMessage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
-                if (linearLayoutManager.findLastVisibleItemPosition() >= messageAdapter.itemCount - 1) {
+                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
                     if (!isLoading && !noMoreData) {
                         isLoading = true
-                        messageAdapter.loading(true)
+                        messageAdapter.loadMoreLoading(true)
                         viewModel.mCurrentPage++
                         viewModel.getListMessage(viewModel.mCurrentPage)
                     }
@@ -193,8 +180,12 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             this.images = data
             this.type = MessageContentType.IMAGE.value
         }
-        messageAdapter.addMessage(newMessage)
-        binding.rvMessage.scrollToPosition(0)
+        messageAdapter.addNewMessage(newMessage)
+        scrollToBottom()
         viewModel.sendMessage(newMessage)
+    }
+
+    private fun scrollToBottom() {
+        binding.rvMessage.scrollToPosition(messageAdapter.itemCount - 1)
     }
 }

@@ -40,12 +40,12 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
         }
     }
 
-    override suspend fun publish(topic: String, message: String, qos: Int) {
+    override suspend fun publish(topic: String, payload: String, qos: Int) {
         withContext(Dispatchers.IO) {
             val pubFuture = client.publishWith()
                 .topic(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(message.toByteArray())
+                .payload(payload.toByteArray())
                 .send()
 
             pubFuture.get()
