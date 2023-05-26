@@ -2,6 +2,7 @@ package com.quyt.mqttchat.presentation.feature.home.message.detail
 
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -20,6 +21,7 @@ import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
+import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -34,6 +36,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private var noMoreData = false
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
+    private val conversationListViewModel: ConversationListViewModel by activityViewModels()
+
     override fun setupView() {
         binding.viewModel = viewModel
         viewModel.getConversationDetail(Gson().fromJson(args.conversation, Conversation::class.java), Gson().fromJson(args.partner, User::class.java))
@@ -84,6 +88,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 is ConversationDetailState.SendMessageSuccess -> {
                     messageAdapter.updateMessage(state.message)
+                    conversationListViewModel.updateLastMessage(state.message)
                 }
 
                 is ConversationDetailState.SendMessageError -> {

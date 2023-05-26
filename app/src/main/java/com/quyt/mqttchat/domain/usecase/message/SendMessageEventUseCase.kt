@@ -13,13 +13,5 @@ class SendMessageEventUseCase(
             topic = "$partnerId/conversation/$conversationId",
             payload = mapper.toPayload(event), 0
         )
-        mqttClient.publish(
-            topic = "$userId/conversation/$conversationId",
-            payload = mapper.toPayload(event.apply {
-                this.message.apply {
-                    this?.isMine = true
-                }
-            }), 0
-        )
     }
 }

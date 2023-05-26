@@ -29,7 +29,7 @@ class ConversationListViewModel @Inject constructor(
             listenConversationEventUseCase {
                 when (it.type) {
                     EventType.NEW_MESSAGE.value -> {
-                        uiState.postValue(ConversationListState.NewMessage(it.message))
+                        updateLastMessage(it.message)
                     }
 
                     EventType.TYPING.value -> {
@@ -42,6 +42,10 @@ class ConversationListViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun updateLastMessage(message: Message?){
+        uiState.postValue(ConversationListState.NewMessage(message))
     }
 
     fun getListConversation() {

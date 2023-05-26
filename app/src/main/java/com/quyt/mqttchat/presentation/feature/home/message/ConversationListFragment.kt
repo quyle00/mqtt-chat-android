@@ -1,6 +1,7 @@
 package com.quyt.mqttchat.presentation.feature.home.message
 
 import android.widget.Toast
+import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +23,7 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
 
     override fun layoutId(): Int = R.layout.fragment_conversation_list
 
-    override val viewModel: ConversationListViewModel by viewModels()
+    override val viewModel: ConversationListViewModel by activityViewModels()
 
     private lateinit var mConversationAdapter: ConversationAdapter
 
