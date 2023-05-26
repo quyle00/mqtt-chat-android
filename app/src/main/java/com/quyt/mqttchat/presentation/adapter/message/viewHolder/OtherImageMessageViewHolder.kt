@@ -1,16 +1,14 @@
-package com.quyt.mqttchat.presentation.adapter.message
+package com.quyt.mqttchat.presentation.adapter.message.viewHolder
 
 import android.graphics.Outline
-import android.graphics.Rect
 import android.view.View
 import android.view.ViewOutlineProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.quyt.mqttchat.R
-import com.quyt.mqttchat.databinding.ItemMyImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
 import com.quyt.mqttchat.domain.model.Message
-import com.quyt.mqttchat.domain.model.MessageState
+import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
+import com.quyt.mqttchat.presentation.adapter.message.ImageAdapter
 import com.quyt.mqttchat.utils.DateUtils
 
 class OtherImageMessageViewHolder(private val binding: ItemOtherImageMessageBinding) : RecyclerView.ViewHolder(binding.root) {

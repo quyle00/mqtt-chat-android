@@ -57,6 +57,7 @@ class ConversationDetailViewModel @Inject constructor(
     var shouldCreateConversation = false
     var mPartner = MutableLiveData<User?>()
     var mCurrentPage = 1
+    var messageToReply = MutableLiveData<Message?>()
 
     fun getConversationDetail(conversation: Conversation?, partner: User?) {
         viewModelScope.launch {
@@ -89,7 +90,7 @@ class ConversationDetailViewModel @Inject constructor(
     fun getListMessage(page: Int) {
         viewModelScope.launch {
             uiState.postValue(ConversationDetailState.Loading)
-            val result = getListMessageUseCase(mCurrentConversation.id ?: "", page,mCurrentConversation.lastMessage?.id)
+            val result = getListMessageUseCase(mCurrentConversation.id ?: "", page, mCurrentConversation.lastMessage?.id)
             when (result) {
                 is Result.Success -> {
                     val listMessage = result.data
@@ -198,6 +199,8 @@ class ConversationDetailViewModel @Inject constructor(
                 shouldCreateConversation = false
             }
             message.state = MessageState.SENT.value
+            message.reply = messageToReply.value
+            messageToReply.postValue(null)
             val result = createMessageUseCase(mCurrentConversation.id ?: "", message)
             when (result) {
                 is Result.Success -> {
@@ -236,5 +239,13 @@ class ConversationDetailViewModel @Inject constructor(
 
     fun getCurrentUser() = sharedPreferences.getCurrentUser()
 
+    fun setReplyMessage(message: Message? = null) {
+        message?.reply = null
+        messageToReply.postValue(message)
+    }
+
+    fun onCloseReplyMessage() {
+        messageToReply.postValue(null)
+    }
 
 }

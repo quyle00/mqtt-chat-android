@@ -39,6 +39,11 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
     }
 
     private fun setupRecyclerView() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.getListConversation()
+            binding.swipeRefreshLayout.isRefreshing = false
+        }
+        //
         mConversationAdapter = ConversationAdapter(this)
         binding.rvConversation.adapter = mConversationAdapter
         binding.rvConversation.layoutManager = LinearLayoutManager(requireContext())

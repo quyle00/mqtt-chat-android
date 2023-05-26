@@ -23,29 +23,12 @@
         android:layout_height="wrap_content"
         android:background="@color/white">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cv_avatar"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="4dp"
-            app:cardBackgroundColor="@color/colorPrimary"
-            app:cardCornerRadius="12dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </androidx.cardview.widget.CardView>
-
         <RelativeLayout
             android:id="@id/rl_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="16dp"
             android:layout_marginBottom="4dp"
-            android:layout_toEndOf="@id/cv_avatar"
             android:minHeight="30dp"
             android:visibility="visible">
 

@@ -1,10 +1,13 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
+import android.util.Log
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -13,18 +16,21 @@ import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
-import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.MessageContentType
+import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
+import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
-class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),BottomSheetListener {
+class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(), BottomSheetListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -49,7 +55,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 is ConversationDetailState.Success -> {
                     messageAdapter.setListMessage(state.data)
-                    binding.rvMessage.scrollToPosition(0)
+                    lifecycleScope.launch {
+                        delay(100)
+                        binding.rvMessage.scrollToPosition(0)
+                    }
                     noMoreData = state.data.size < 20
                 }
 
@@ -126,7 +135,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     this.sendTime = Date().time
                 }
                 messageAdapter.addMessage(newMessage)
-                binding.rvMessage.scrollToPosition(0)
+                lifecycleScope.launch {
+                    delay(100)
+                    binding.rvMessage.scrollToPosition(0)
+                }
                 viewModel.sendMessage(newMessage)
                 binding.etMessage.setText("")
             }
@@ -143,6 +155,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, true)
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setListMessage(ArrayList())
+        val messageSwipeController = MessageSwipeController(requireContext()) {
+            messageAdapter.getMessage(it)?.let { message ->
+               viewModel.setReplyMessage(message)
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(messageSwipeController)
+        itemTouchHelper.attachToRecyclerView(binding.rvMessage)
         initScrollListener()
     }
 
@@ -164,17 +184,17 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     override fun onDataSelected(data: ArrayList<String>) {
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
-            // Create message model
-            val newMessage = Message().apply {
-                this.sender = viewModel.getCurrentUser()
-                this.state = MessageState.SENDING.value
-                this.createdAt = sdf.format(Date())
-                this.sendTime = Date().time
-                this.images = data
-                this.type= MessageContentType.IMAGE.value
-            }
-            messageAdapter.addMessage(newMessage)
-            binding.rvMessage.scrollToPosition(0)
-            viewModel.sendMessage(newMessage)
+        // Create message model
+        val newMessage = Message().apply {
+            this.sender = viewModel.getCurrentUser()
+            this.state = MessageState.SENDING.value
+            this.createdAt = sdf.format(Date())
+            this.sendTime = Date().time
+            this.images = data
+            this.type = MessageContentType.IMAGE.value
+        }
+        messageAdapter.addMessage(newMessage)
+        binding.rvMessage.scrollToPosition(0)
+        viewModel.sendMessage(newMessage)
     }
 }

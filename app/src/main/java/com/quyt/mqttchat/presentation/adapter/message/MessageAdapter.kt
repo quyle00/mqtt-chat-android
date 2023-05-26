@@ -13,6 +13,10 @@ import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyImageMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherImageMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageViewHolder
 
 class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -138,8 +142,8 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
             notifyItemChanged(0)
         } else {
             mListMessage.add(0, message)
-            notifyItemInserted(0)
-            notifyItemChanged(1)
+//            notifyItemInserted(0)
+//            notifyItemChanged(1)
         }
     }
 
@@ -174,6 +178,10 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
             }
             notifyItemRangeChanged(firstUnseenMessageIndex, mListMessage.size - firstUnseenMessageIndex)
         }
+    }
+
+    fun getMessage(position: Int): Message? {
+        return mListMessage[position]
     }
 
 }

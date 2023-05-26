@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.presentation.adapter.message
+package com.quyt.mqttchat.presentation.adapter.message.viewHolder
 
 import android.view.View
 import android.view.ViewGroup
@@ -6,17 +6,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.utils.DateUtils
 
 class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(binding.root) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         //
         if (message?.isTyping == false) {
-            binding.tvTime.text = DateUtils.formatTime(message.createdAt ?: "","dd-MM-yyyy HH:mm")
-            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?:"", "HH:mm")
+            binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?: "", "HH:mm")
         }
         //
-        val params = binding.llRoot.layoutParams as ViewGroup.MarginLayoutParams
+        val params = binding.rlMessage.layoutParams as ViewGroup.MarginLayoutParams
         params.topMargin = 40
         when (groupMessageState) {
             GroupMessageState.SINGLE -> {
@@ -37,7 +37,7 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
                 params.topMargin = 4
             }
         }
-        binding.llRoot.layoutParams = params
+        binding.rlMessage.layoutParams = params
         //
         binding.tvMessage.text = message?.content
         if (message?.isTyping == true) {
@@ -46,13 +46,6 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
         } else {
             binding.tvMessage.visibility = View.VISIBLE
             binding.lavTyping.visibility = View.GONE
-        }
-        binding.rlMessage.setOnClickListener {
-            if (binding.tvTime.visibility == View.VISIBLE) {
-                binding.tvTime.visibility = View.GONE
-            } else {
-                binding.tvTime.visibility = View.VISIBLE
-            }
         }
     }
 }
