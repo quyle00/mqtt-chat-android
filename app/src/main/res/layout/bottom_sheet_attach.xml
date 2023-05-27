@@ -14,7 +14,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_image"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginBottom="40dp"/>
 
         <LinearLayout
             android:id="@+id/ll_type"

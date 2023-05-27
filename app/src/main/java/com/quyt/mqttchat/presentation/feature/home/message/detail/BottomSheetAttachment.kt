@@ -1,11 +1,9 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
 import android.app.Dialog
-import android.content.Context
 import android.database.Cursor
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -22,15 +20,17 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.quyt.mqttchat.databinding.BottomSheetAttachBinding
 import com.quyt.mqttchat.databinding.BottomSheetAttachBindingImpl
 import com.quyt.mqttchat.presentation.adapter.ImagePickerAdapter
+import com.quyt.mqttchat.presentation.adapter.MediaModel
+import com.quyt.mqttchat.presentation.adapter.MediaType
 import com.quyt.mqttchat.presentation.adapter.OnImagePickerListener
 
 interface BottomSheetListener {
     fun onDataSelected(data: ArrayList<String>)
 }
 
-class BottomSheetAttach(private val listener : BottomSheetListener) : BottomSheetDialogFragment(), LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener {
+class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheetDialogFragment(), LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener {
     private lateinit var binding: BottomSheetAttachBinding
-    private val listOfAllImages = ArrayList<String>()
+    private val listMedia = ArrayList<MediaModel>()
     private lateinit var mLoaderManager: LoaderManager
     private lateinit var imagePickerAdapter: ImagePickerAdapter
 
@@ -58,14 +58,14 @@ class BottomSheetAttach(private val listener : BottomSheetListener) : BottomShee
         val bottomSheetBehavior = BottomSheetBehavior.from(binding.root.parent as View)
         bottomSheetBehavior.peekHeight = 1000
         binding.rlSend.setOnClickListener {
-            listener.onDataSelected(imagePickerAdapter.getSelectedImages())
+            listener.onDataSelected(imagePickerAdapter.getSelectedMediaUri())
             dismiss()
         }
     }
 
-    override fun onImageSelect(imageSelected: ArrayList<String>) {
-        binding.rlSend.visibility = if (imageSelected.size > 0) View.VISIBLE else View.GONE
-        binding.tvSelectedCount.text = imageSelected.size.toString()
+    override fun onMediaSelected(mediaSelected: ArrayList<String>) {
+        binding.rlSend.visibility = if (mediaSelected.size > 0) View.VISIBLE else View.GONE
+        binding.tvSelectedCount.text = mediaSelected.size.toString()
     }
 
     private fun stickSendButton(): View {
@@ -79,6 +79,7 @@ class BottomSheetAttach(private val listener : BottomSheetListener) : BottomShee
         sendImageButtonParent.removeView(sendImageButton)
         return sendImageButton
     }
+
     private fun stickyBottomActionView(): View {
         val actionView = binding.llType
         val actionViewParent = actionView.parent as ViewGroup
@@ -103,29 +104,36 @@ class BottomSheetAttach(private val listener : BottomSheetListener) : BottomShee
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        val uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        val projection = arrayOf(MediaStore.MediaColumns.DATA, MediaStore.Images.Media.BUCKET_DISPLAY_NAME)
-        val selection: String? = null     //Selection criteria
-        val selectionArgs = arrayOf<String>()  //Selection criteria
-        val sortOrder: String? = null
+        val uri = MediaStore.Files.getContentUri("external") // Lấy URI chung cho cả ảnh và video
+        val projection = arrayOf(
+            MediaStore.MediaColumns.DATA, MediaStore.Files.FileColumns.MEDIA_TYPE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+        )
+        val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?" // Tiêu chí tìm kiếm
+        val selectionArgs = arrayOf(
+            MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE.toString(), // Media type cho ảnh
+            MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO.toString() // Media type cho video
+        )
+        val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
 
         return CursorLoader(
-            requireActivity(),
-            uri,
-            projection,
-            selection,
-            selectionArgs,
-            sortOrder
+            requireActivity(), uri, projection, selection, selectionArgs, sortOrder
         )
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         data?.let {
             val columnIndexData = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+            val columnIndexMediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
             while (it.moveToNext()) {
-                listOfAllImages.add(it.getString(columnIndexData));
+                val mediaType = it.getInt(columnIndexMediaType)
+                val mediaData = it.getString(columnIndexData)
+                if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
+                    listMedia.add(MediaModel(mediaData, MediaType.IMAGE))
+                } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
+                    listMedia.add(MediaModel(mediaData, MediaType.VIDEO))
+                }
             }
-            imagePickerAdapter.setItems(listOfAllImages)
+            imagePickerAdapter.setItems(listMedia)
         }
     }
 
