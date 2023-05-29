@@ -1,5 +1,7 @@
 package com.quyt.mqttchat.presentation.adapter
 
+import android.media.MediaMetadataRetriever
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,7 @@ import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemImagePickerBinding
 import com.quyt.mqttchat.presentation.adapter.base.BaseRecyclerAdapter
+import com.quyt.mqttchat.utils.DateUtils
 
 enum class MediaType {
     IMAGE, VIDEO
@@ -38,33 +41,21 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
 
     inner class ImagePickerViewHolder(val binding: ItemImagePickerBinding, private val listener: OnImagePickerListener) : RecyclerView.ViewHolder(binding.root) {
         fun bind(media: MediaModel) {
-            if (media.type == MediaType.IMAGE) {
-                binding.ivImage.visibility = View.VISIBLE
-                binding.vvVideo.visibility = View.GONE
-                Glide.with(binding.root.context).load(media.uri).into(binding.ivImage)
-            } else {
-                binding.ivImage.visibility = View.GONE
-                binding.vvVideo.visibility = View.VISIBLE
-                binding.vvVideo.setVideoPath(media.uri)
-                binding.vvVideo.requestFocus()
-                binding.vvVideo.setOnClickListener {
-                    if (binding.vvVideo.isPlaying) {
-                        binding.vvVideo.pause()
-                    } else {
-                        binding.vvVideo.start()
-                    }
-                }
-//                binding.vvVideo.setOnPreparedListener {
-//                    it.isLooping = true
-//                    it.start()
-//                }
+            Glide.with(binding.root.context).load(media.uri).into(binding.ivImage)
+            if (media.type == MediaType.VIDEO) {
+                binding.llDuration.visibility = View.VISIBLE
+                val retriever = MediaMetadataRetriever()
+                retriever.setDataSource(binding.root.context, Uri.parse(media.uri))
+                val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                binding.tvDuration.text = DateUtils.formatMilliseconds(duration?.toLong())
+                retriever.release()
             }
             if (mListImageSelected.contains(media)) {
-                binding.cvCount.visibility = android.view.View.VISIBLE
+                binding.cvCount.visibility = View.VISIBLE
                 val positionInSelected = mListImageSelected.indexOf(media) + 1
                 binding.tvCount.text = positionInSelected.toString()
             } else {
-                binding.cvCount.visibility = android.view.View.INVISIBLE
+                binding.cvCount.visibility = View.INVISIBLE
             }
             binding.rlCount.setOnClickListener {
                 if (mListImageSelected.contains(media)) {
@@ -81,6 +72,8 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
             }
         }
     }
+
+
 }
 
 interface OnImagePickerListener {

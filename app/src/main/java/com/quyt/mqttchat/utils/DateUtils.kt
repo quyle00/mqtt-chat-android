@@ -29,4 +29,13 @@ object DateUtils {
 
         return minutesDifference.toInt()
     }
+
+    fun formatMilliseconds(milliseconds: Long?): String {
+        if (milliseconds == null) return "00:00"
+        val seconds = milliseconds / 1000
+        val minutes = seconds / 60
+        val remainingSeconds = seconds % 60
+
+        return "$minutes:${String.format("%02d", remainingSeconds)}"
+    }
 }

@@ -4,27 +4,18 @@
     <value>
       <entry key="app">
         <State>
-          <multipleDevicesSelectedInDropDown value="true" />
-          <runningDeviceTargetsSelectedWithDialog>
+          <runningDeviceTargetSelectedWithDropDown>
             <Target>
               <type value="RUNNING_DEVICE_TARGET" />
               <deviceKey>
                 <Key>
                   <type value="SERIAL_NUMBER" />
-                  <value value="192.168.5.101:5555" />
+                  <value value="R58NA33H6LL" />
                 </Key>
               </deviceKey>
             </Target>
-            <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
-              <deviceKey>
-                <Key>
-                  <type value="SERIAL_NUMBER" />
-                  <value value="192.168.5.102:5555" />
-                </Key>
-              </deviceKey>
-            </Target>
-          </runningDeviceTargetsSelectedWithDialog>
+          </runningDeviceTargetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2023-05-29T03:19:06.104023700Z" />
         </State>
       </entry>
     </value>
