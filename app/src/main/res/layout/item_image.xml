@@ -16,42 +16,32 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop" />
 
-        <RelativeLayout
-            android:id="@+id/rl_video"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <LinearLayout
+            android:id="@+id/ll_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:background="#80000000"
+            android:gravity="center_vertical"
+            android:visibility="visible">
 
-            <VideoView
-                android:id="@+id/vv_video"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@drawable/ic_play"
+                app:tint="@color/white" />
 
-            <LinearLayout
-                android:id="@+id/ll_duration"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tv_duration"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:background="#80000000"
-                android:gravity="center_vertical"
-                android:visibility="visible">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginStart="4dp"
-                    android:src="@drawable/ic_play"
-                    app:tint="@color/white" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="4dp"
-                    android:text="0:03"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    tools:text="0:03" />
-            </LinearLayout>
-        </RelativeLayout>
+                android:layout_marginEnd="4dp"
+                android:text="0:03"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                tools:text="0:03" />
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 </layout>
