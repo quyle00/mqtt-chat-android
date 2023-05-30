@@ -2,6 +2,18 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="ExampleInstrumentedTest">
+        <State />
+      </entry>
+      <entry key="GetListContactUseCaseTest">
+        <State />
+      </entry>
+      <entry key="LoginUseCaseTest">
+        <State />
+      </entry>
+      <entry key="LoginUseCaseTest.login success should return user">
+        <State />
+      </entry>
       <entry key="app">
         <State>
           <runningDeviceTargetSelectedWithDropDown>
