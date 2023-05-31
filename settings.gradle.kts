@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AndroidBaseKotlin"
-include ':app'
+include(":app")
