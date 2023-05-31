@@ -8,7 +8,7 @@ class EventMapper : PayloadMapper<Event> {
         return try {
             Gson().fromJson(payload, Event::class.java)
         } catch (e: Exception) {
-            Event(null, null, null)
+            Event()
         }
     }
 

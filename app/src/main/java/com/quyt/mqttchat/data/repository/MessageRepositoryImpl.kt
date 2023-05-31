@@ -89,4 +89,8 @@ class MessageRepositoryImpl(
             Result.Error(e)
         }
     }
+
+    override suspend fun updateLocalMessageState(messageIds: List<String>, newState: Int) {
+        messageLocalDatasource.updateMessageState(messageIds, newState)
+    }
 }

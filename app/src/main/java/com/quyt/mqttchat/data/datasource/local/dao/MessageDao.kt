@@ -22,4 +22,7 @@ interface MessageDao {
 
     @Query("DELETE FROM message WHERE conversation LIKE :conversationId")
     suspend fun clearAll(conversationId: String)
+
+    @Query("UPDATE message SET state = :newState WHERE id IN (:messageIds)")
+    suspend fun updateMessagesState(messageIds: List<String>, newState: Int)
 }

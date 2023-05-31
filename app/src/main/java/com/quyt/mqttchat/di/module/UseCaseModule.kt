@@ -18,7 +18,10 @@ import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.InsertMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendMarkReadEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendNewMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,8 +34,20 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideSendMessageEventUseCase(client: IMqttClient, mapper: EventMapper): SendMessageEventUseCase {
-        return SendMessageEventUseCase(client, mapper)
+    fun provideSendNewMessageEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendNewMessageEventUseCase {
+        return SendNewMessageEventUseCase(sharedPreferences,client, mapper)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSendMarkReadEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendMarkReadEventUseCase {
+        return SendMarkReadEventUseCase(sharedPreferences,client, mapper)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSendTypingEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendTypingEventUseCase {
+        return SendTypingEventUseCase(sharedPreferences,client, mapper)
     }
 
     @Provides
@@ -93,6 +108,12 @@ class UseCaseModule {
     @Singleton
     fun provideSeenMessageUseCase(repository: MessageRepository): SeenMessageUseCase {
         return SeenMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateLocalMessageStateUseCase(repository: MessageRepository): UpdateLocalMessageStateUseCase {
+        return UpdateLocalMessageStateUseCase(repository)
     }
 
     @Provides

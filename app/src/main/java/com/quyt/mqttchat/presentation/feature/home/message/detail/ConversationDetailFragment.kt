@@ -76,18 +76,19 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.Typing -> {
-                    if (state.message.sender?.id != viewModel.getCurrentUser()?.id) {
+                    if (state.message.sender?.id != viewModel.currentUser?.id) {
                         messageAdapter.setTyping(state.message.isTyping)
                         scrollToBottom()
                     }
                 }
 
-                is ConversationDetailState.SeenMessage -> {
+                is ConversationDetailState.MarkReadMessage -> {
                     messageAdapter.seenAllMessage()
                 }
 
                 is ConversationDetailState.SendMessageSuccess -> {
                     messageAdapter.updateMessage(state.message)
+                    state.message.isMine = state.message.sender?.id == viewModel.currentUser?.id
                     conversationListViewModel.updateLastMessage(state.message)
                 }
 
@@ -124,7 +125,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             if (messageContent.isNotEmpty()) {
                 // Create message model
                 val newMessage = Message().apply {
-                    this.sender = viewModel.getCurrentUser()
+                    this.sender = viewModel.currentUser
                     this.content = messageContent
                     this.state = MessageState.SENDING.value
                     this.createdAt = sdf.format(Date())
@@ -143,7 +144,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     private fun initConversationList() {
-        messageAdapter = MessageAdapter(viewModel.getCurrentUser()?.id)
+        messageAdapter = MessageAdapter(viewModel.currentUser?.id)
         binding.rvMessage.adapter = messageAdapter
         binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -178,7 +179,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         // Create message model
         val newMessage = Message().apply {
-            this.sender = viewModel.getCurrentUser()
+            this.sender = viewModel.currentUser
             this.state = MessageState.SENDING.value
             this.createdAt = sdf.format(Date())
             this.sendTime = Date().time
