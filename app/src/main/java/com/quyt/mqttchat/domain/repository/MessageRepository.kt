@@ -8,4 +8,5 @@ interface MessageRepository {
     suspend fun createMessage(conversationId: String, message: Message): Result<Message>
     suspend fun insertMessage(messageList: List<Message>)
     suspend fun updateSeenMessage(conversationId: String, messageIds: List<String>): Result<String>
+    suspend fun updateLocalMessageState(messageIds: List<String>, newState: Int)
 }

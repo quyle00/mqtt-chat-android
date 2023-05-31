@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.quyt.mqttchat.data.datasource.remote.extension.CustomException
 import com.quyt.mqttchat.domain.model.Conversation
-import com.quyt.mqttchat.domain.model.Event
 import com.quyt.mqttchat.domain.model.EventType
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
@@ -15,10 +14,12 @@ import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
-import com.quyt.mqttchat.domain.usecase.message.InsertMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendMarkReadEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendNewMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import com.quyt.mqttchat.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ sealed class ConversationDetailState {
     data class Error(val error: String) : ConversationDetailState()
     data class NewMessage(val message: Message) : ConversationDetailState()
     data class Typing(val message: Message) : ConversationDetailState()
-    object SeenMessage : ConversationDetailState()
+    data class MarkReadMessage(val messageIds: List<String>?) : ConversationDetailState()
     data class SendMessageSuccess(val message: Message) : ConversationDetailState()
     data class SendMessageError(val message: Message, var error: String) : ConversationDetailState()
     data class NoMoreData(val message: String) : ConversationDetailState()
@@ -42,22 +43,25 @@ sealed class ConversationDetailState {
 @HiltViewModel
 class ConversationDetailViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
-    private val sendMessageEventUseCase: SendMessageEventUseCase,
+    private val sendNewMessageEventUseCase: SendNewMessageEventUseCase,
+    private val sendMarkReadEventUseCase: SendMarkReadEventUseCase,
+    private val sendTypingEventUseCase: SendTypingEventUseCase,
     private val listenMessageEventUseCase: ListenMessageEventUseCase,
     private val getListMessageUseCase: GetListMessageUseCase,
     private val createMessageUseCase: CreateMessageUseCase,
     private val createConversationUseCase: CreateConversationUseCase,
     private val getConversationDetailUseCase: GetConversationDetailUseCase,
     private val seenMessageUseCase: SeenMessageUseCase,
-    private val insertMessageUseCase: InsertMessageUseCase,
+    private val updateLocalMessageStateUseCase: UpdateLocalMessageStateUseCase
 ) : BaseViewModel<ConversationDetailState>() {
 
-    lateinit var mCurrentConversation: Conversation
+    val currentUser: User? by lazy { sharedPreferences.getCurrentUser() }
+    private lateinit var mCurrentConversation: Conversation
     var isTyping: Boolean = false
-    var shouldCreateConversation = false
     var mPartner = MutableLiveData<User?>()
     var mCurrentPage = 1
     var messageToReply = MutableLiveData<Message?>()
+
 
     fun getConversationDetail(conversation: Conversation?, partner: User?) {
         viewModelScope.launch {
@@ -68,9 +72,7 @@ class ConversationDetailViewModel @Inject constructor(
             }
             when (result) {
                 is Result.Success -> {
-                    mPartner.postValue(result.data.participants?.firstOrNull { participant ->
-                        participant.id != getCurrentUser()?.id
-                    })
+                    mPartner.postValue(result.data.participants.getPartner())
                     mCurrentConversation = result.data
                     getListMessage(mCurrentPage)
                     subscribeConversation()
@@ -79,7 +81,6 @@ class ConversationDetailViewModel @Inject constructor(
                 is Result.Error -> {
                     uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
                     if ((result.exception as CustomException).code == 422) {
-                        shouldCreateConversation = true
                         mPartner.postValue(partner)
                     }
                 }
@@ -103,9 +104,9 @@ class ConversationDetailViewModel @Inject constructor(
                     }
                     if (mCurrentPage == 1) {
                         uiState.postValue(ConversationDetailState.Success(listMessage))
-                        val unSeenMessage = getUnseenMessage(listMessage)
+                        val unSeenMessage = getUnseenMessageIds(listMessage)
                         if (unSeenMessage.isNotEmpty()) {
-                            seenMessage(unSeenMessage.map { message -> message.id })
+                            markReadMessage(unSeenMessage)
                         }
                     } else {
                         uiState.postValue(ConversationDetailState.LoadMoreSuccess(listMessage))
@@ -119,25 +120,15 @@ class ConversationDetailViewModel @Inject constructor(
         }
     }
 
-    private fun getUnseenMessage(listMessage: List<Message>?): List<Message> {
-        if (listMessage.isNullOrEmpty()) return listOf()
-        return listMessage.filter { message ->
-            message.state == MessageState.SENT.value && message.sender?.id != getCurrentUser()?.id
-        }
-    }
 
-    private suspend fun seenMessage(unSeenMessageIds: List<String>) {
+    private suspend fun markReadMessage(unSeenMessageIds: List<String>) {
         val result = seenMessageUseCase(mCurrentConversation.id ?: "", unSeenMessageIds)
         when (result) {
             is Result.Success -> {
-                sendMessageEventUseCase(
-                    getCurrentUser()?.id ?: "",
+                sendMarkReadEventUseCase(
+                    mCurrentConversation.id ?: "",
                     mPartner.value?.id ?: "",
-                    mCurrentConversation.id ?: "", Event(
-                        getCurrentUser()?.id,
-                        EventType.SEEN.value,
-                        null,
-                    )
+                    unSeenMessageIds
                 )
             }
 
@@ -150,25 +141,28 @@ class ConversationDetailViewModel @Inject constructor(
 
     private suspend fun subscribeConversation() {
         listenMessageEventUseCase(mCurrentConversation.id ?: "") {
+            if (it.publisherId == currentUser?.id) return@listenMessageEventUseCase
             when (it.type) {
                 EventType.NEW_MESSAGE.value -> {
-                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
                     uiState.postValue(ConversationDetailState.NewMessage(it.message!!))
                     //
-                    val unSeenMessage = arrayListOf(it.message?.id ?: "")
+                    val unSeenMessage = arrayListOf((it.message?.id ?: ""))
                     viewModelScope.launch {
-                        seenMessage(unSeenMessage)
+                        markReadMessage(unSeenMessage)
                     }
                 }
 
                 EventType.TYPING.value -> {
-                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
                     uiState.postValue(ConversationDetailState.Typing(it.message!!))
                 }
 
-                EventType.SEEN.value -> {
-                    if (it.publisherId == getCurrentUser()?.id) return@listenMessageEventUseCase
-                    uiState.postValue(ConversationDetailState.SeenMessage)
+                EventType.MARK_READ.value -> {
+                    if (!it.messageIds.isNullOrEmpty()) {
+                        viewModelScope.launch {
+                            updateLocalMessageStateUseCase(it.messageIds!!, MessageState.SEEN.value)
+                        }
+                        uiState.postValue(ConversationDetailState.MarkReadMessage(it.messageIds))
+                    }
                 }
             }
         }
@@ -177,7 +171,7 @@ class ConversationDetailViewModel @Inject constructor(
     private suspend fun createConversation(): Conversation? {
         return withContext(Dispatchers.IO) {
             val userIds = arrayListOf<String>().apply {
-                add(getCurrentUser()?.id ?: "")
+                add(currentUser?.id ?: "")
                 add(mPartner.value?.id ?: "")
             }
             val result = createConversationUseCase(userIds)
@@ -195,11 +189,9 @@ class ConversationDetailViewModel @Inject constructor(
 
     fun sendMessage(message: Message) {
         viewModelScope.launch {
-            if (shouldCreateConversation) {
+            if (mCurrentConversation.id.isNullOrEmpty()) {
                 mCurrentConversation = createConversation() ?: return@launch
-                shouldCreateConversation = false
             }
-            message.state = MessageState.SENT.value
             message.reply = messageToReply.value
             messageToReply.postValue(null)
             val result = createMessageUseCase(mCurrentConversation.id ?: "", message)
@@ -208,13 +200,7 @@ class ConversationDetailViewModel @Inject constructor(
                     val messageCreated = result.data
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
                     // Send Mqtt event
-                    sendMessageEventUseCase(
-                        getCurrentUser()?.id ?: "",
-                        mPartner.value?.id ?: "",
-                        mCurrentConversation.id ?: "",
-                        Event(getCurrentUser()?.id, EventType.NEW_MESSAGE.value, result.data)
-                    )
-                    insertMessageUseCase(arrayListOf(messageCreated))
+                    sendNewMessageEventUseCase(mCurrentConversation.id ?: "", mPartner.value?.id ?: "", result.data)
                 }
 
                 is Result.Error -> {
@@ -227,21 +213,13 @@ class ConversationDetailViewModel @Inject constructor(
     fun sendTyping(isTyping: Boolean) {
         if (!::mCurrentConversation.isInitialized) return
         viewModelScope.launch {
-            sendMessageEventUseCase(
-                getCurrentUser()?.id ?: "",
+            sendTypingEventUseCase(
+                mCurrentConversation.id ?: "",
                 mPartner.value?.id ?: "",
-                mCurrentConversation.id ?: "", Event(
-                    getCurrentUser()?.id,
-                    EventType.TYPING.value,
-                    Message().apply {
-                        this.sender = getCurrentUser()
-                        this.isTyping = isTyping
-                    }
-                ))
+                isTyping
+            )
         }
     }
-
-    fun getCurrentUser() = sharedPreferences.getCurrentUser()
 
     fun setReplyMessage(message: Message? = null) {
         message?.reply = null
@@ -250,6 +228,17 @@ class ConversationDetailViewModel @Inject constructor(
 
     fun onCloseReplyMessage() {
         messageToReply.postValue(null)
+    }
+
+    private fun getUnseenMessageIds(listMessage: List<Message>?): List<String> {
+        if (listMessage.isNullOrEmpty()) return listOf()
+        return listMessage.filter { message ->
+            message.state == MessageState.SENT.value && message.sender?.id != currentUser?.id
+        }.map { message -> message.id }
+    }
+
+    private fun List<User>?.getPartner(): User? {
+        return this?.firstOrNull { user -> user.id != currentUser?.id }
     }
 
 }

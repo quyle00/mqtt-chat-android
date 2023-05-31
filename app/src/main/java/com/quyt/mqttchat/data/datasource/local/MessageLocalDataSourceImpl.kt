@@ -32,4 +32,8 @@ class MessageLocalDataSourceImpl(private val appDatabase: AppDatabase) : Message
     override suspend fun clearMessage(conversationId: String) {
         appDatabase.messageDao().clearAll(conversationId)
     }
+
+    override suspend fun updateMessageState(messageIds: List<String>, newState: Int) {
+        appDatabase.messageDao().updateMessagesState(messageIds,newState)
+    }
 }

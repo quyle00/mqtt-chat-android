@@ -13,4 +13,6 @@ interface MessageLocalDataSource {
     suspend fun getLatestMessage(conversationId: String): Message?
 
     suspend fun clearMessage(conversationId: String)
+
+    suspend fun updateMessageState(messageIds: List<String>, newState: Int)
 }

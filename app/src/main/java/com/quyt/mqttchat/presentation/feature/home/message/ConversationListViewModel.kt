@@ -24,27 +24,17 @@ class ConversationListViewModel @Inject constructor(
     private val getListConversationUseCase: GetListConversationUseCase,
     private val listenConversationEventUseCase: ListenConversationEventUseCase
 ) : BaseViewModel<ConversationListState>() {
-    fun subscribeNewMessage() {
+    private fun subscribeNewMessage() {
         viewModelScope.launch {
             listenConversationEventUseCase {
-                when (it.type) {
-                    EventType.NEW_MESSAGE.value -> {
-                        updateLastMessage(it.message)
-                    }
-
-                    EventType.TYPING.value -> {
-
-                    }
-
-                    EventType.SEEN.value -> {
-
-                    }
+                if (it.type == EventType.NEW_MESSAGE.value) {
+                    updateLastMessage(it.message)
                 }
             }
         }
     }
 
-    fun updateLastMessage(message: Message?){
+    fun updateLastMessage(message: Message?) {
         uiState.postValue(ConversationListState.NewMessage(message))
     }
 
