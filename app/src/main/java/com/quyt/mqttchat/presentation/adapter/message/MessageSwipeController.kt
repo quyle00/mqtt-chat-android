@@ -34,8 +34,8 @@ class MessageSwipeController(private val context: Context, private val showReply
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
         mView = viewHolder.itemView
-        imageDrawable = ContextCompat.getDrawable(context,R.drawable.ic_reply_24)!!
-        shareRound = ContextCompat.getDrawable(context,R.drawable.ic_round_shape)!!
+        imageDrawable = ContextCompat.getDrawable(context, R.drawable.ic_reply_24)!!
+        shareRound = ContextCompat.getDrawable(context, R.drawable.ic_round_shape)!!
         return makeMovementFlags(ACTION_STATE_IDLE, LEFT)
     }
 
@@ -66,7 +66,6 @@ class MessageSwipeController(private val context: Context, private val showReply
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
-
         if (actionState == ACTION_STATE_SWIPE) {
             setTouchListener(recyclerView, viewHolder)
         }
@@ -153,7 +152,10 @@ class MessageSwipeController(private val context: Context, private val showReply
         val x = mView.right + (mView.translationX / 2).toInt() + leftMargin
 
         val y = (mView.top + mView.measuredHeight / 2).toFloat()
-        shareRound.colorFilter = PorterDuffColorFilter(ContextCompat.getColor(context, R.color.colorPrimary), PorterDuff.Mode.MULTIPLY)
+        shareRound.colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(context, R.color.colorPrimary),
+            PorterDuff.Mode.MULTIPLY
+        )
 
         shareRound.setBounds(
             (x - pxToDp(18) * scale).toInt(),
@@ -177,5 +179,4 @@ class MessageSwipeController(private val context: Context, private val showReply
     private fun pxToDp(pixel: Int): Int {
         return DimenUtils.dp(pixel.toFloat(), context)
     }
-
 }

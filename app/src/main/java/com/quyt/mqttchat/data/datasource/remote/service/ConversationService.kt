@@ -9,13 +9,12 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ConversationService {
     @POST("conversation")
     @FormUrlEncoded
     suspend fun createConversation(
-        @Field("participants") participants: List<String>,
+        @Field("participants") participants: List<String>
     ): Response<BaseResponse<Conversation>>
 
     @GET("conversation")
@@ -23,16 +22,16 @@ interface ConversationService {
 
     @GET("conversation/{id}")
     suspend fun getConversationDetail(
-        @Path("id") id: String,
+        @Path("id") id: String
     ): Response<BaseResponse<Conversation>>
 
     @GET("conversation/{id}/last-message")
     suspend fun getConversationLastMessage(
-        @Path("id") id: String,
+        @Path("id") id: String
     ): Response<BaseResponse<Message>>
 
     @GET("conversation/by-partner/{partnerId}")
     suspend fun getConversationDetailByPartnerId(
-        @Path("partnerId") id: String,
+        @Path("partnerId") id: String
     ): Response<BaseResponse<Conversation>>
 }

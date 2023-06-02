@@ -9,7 +9,9 @@ import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.utils.DateUtils
 
-class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(
+    binding.root
+) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         //
         if (message?.reply != null) {
@@ -22,7 +24,13 @@ class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerV
         if (message?.isTyping == false) {
             binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?: "", "HH:mm")
         }
-        binding.ivState.setImageResource(if (message?.state == MessageState.SEEN.value) R.drawable.ic_double_check else R.drawable.ic_check)
+        binding.ivState.setImageResource(
+            if (message?.state == MessageState.SEEN.value) {
+                R.drawable.ic_double_check
+            } else {
+                R.drawable.ic_check
+            }
+        )
         //
         val params = binding.rlMessage.layoutParams as ViewGroup.MarginLayoutParams
         params.topMargin = 40
@@ -47,6 +55,4 @@ class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerV
         }
         binding.rlMessage.layoutParams = params
     }
-
-
 }

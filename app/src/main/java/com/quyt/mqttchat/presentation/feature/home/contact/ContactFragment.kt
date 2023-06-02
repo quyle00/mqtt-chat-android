@@ -16,7 +16,9 @@ import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewModel>(), OnContactListener {
+class ContactFragment :
+    BaseBindingFragment<FragmentContactBinding, ContactViewModel>(),
+    OnContactListener {
 
     private lateinit var mContactAdapter: ContactAdapter
     override fun layoutId(): Int = R.layout.fragment_contact
@@ -29,7 +31,10 @@ class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewM
 
     override fun onContactClick(user: User) {
         findNavController().navigate(
-            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(null, Gson().toJson(user))
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(
+                null,
+                Gson().toJson(user)
+            )
         )
     }
 
@@ -40,7 +45,7 @@ class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewM
     }
 
     private fun observeState() {
-        viewModel.uiState().observe(viewLifecycleOwner) {state ->
+        viewModel.uiState().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ContactState.Loading -> {
                     LoadingDialog.showLoading(requireContext())
@@ -56,6 +61,4 @@ class ContactFragment : BaseBindingFragment<FragmentContactBinding, ContactViewM
             }
         }
     }
-
-
 }

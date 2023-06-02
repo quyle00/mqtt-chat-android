@@ -11,7 +11,11 @@ import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.presentation.adapter.message.ImageAdapter
 import com.quyt.mqttchat.utils.DateUtils
 
-class OtherImageMessageViewHolder(private val binding: ItemOtherImageMessageBinding) : RecyclerView.ViewHolder(binding.root) {
+class OtherImageMessageViewHolder(
+    private val binding: ItemOtherImageMessageBinding
+) : RecyclerView.ViewHolder(
+    binding.root
+) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         binding.message = message
         //
@@ -28,7 +32,6 @@ class OtherImageMessageViewHolder(private val binding: ItemOtherImageMessageBind
                 val bottom = view?.height ?: 0
                 outline?.setRoundRect(left, top, right, bottom, 50f)
             }
-
         }
         binding.rvImages.apply {
             clipToOutline = true
@@ -36,5 +39,4 @@ class OtherImageMessageViewHolder(private val binding: ItemOtherImageMessageBind
         }
         binding.tvTime2.text = DateUtils.formatTime(message?.createdAt ?: "", "HH:mm")
     }
-
 }

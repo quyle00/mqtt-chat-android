@@ -2,15 +2,13 @@ package com.quyt.mqttchat.utils
 
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 object DateUtils {
 
-    fun formatTime(dateTimeString: String,format: String): String {
+    fun formatTime(dateTimeString: String, format: String): String {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
         val dateTime = LocalDateTime.parse(dateTimeString, formatter)
 

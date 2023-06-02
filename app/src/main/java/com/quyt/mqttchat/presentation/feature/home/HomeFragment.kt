@@ -25,12 +25,11 @@ class HomeFragment() : BaseBindingFragment<FragmentHomeBinding, HomeViewModel>()
         binding.vpHome.adapter = mHomeViewPagerAdapter
         binding.vpHome.offscreenPageLimit = 2
         binding.vpHome.isUserInputEnabled = false
-
     }
 
-    private fun setupBottomNavigation(){
+    private fun setupBottomNavigation() {
         binding.bnvHome.setOnNavigationItemSelectedListener {
-            when(it.itemId){
+            when (it.itemId) {
                 R.id.chat -> {
                     binding.vpHome.currentItem = 0
                     true
@@ -43,5 +42,4 @@ class HomeFragment() : BaseBindingFragment<FragmentHomeBinding, HomeViewModel>()
             }
         }
     }
-
 }

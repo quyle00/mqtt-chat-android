@@ -19,12 +19,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.UUID
+import javax.inject.Singleton
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.util.UUID
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -50,13 +50,17 @@ class ApplicationModule {
     fun provideAppDatabase(@ApplicationContext ctx: Context): AppDatabase {
         return Room.databaseBuilder(
             ctx,
-            AppDatabase::class.java, "my_app_database"
+            AppDatabase::class.java,
+            "my_app_database"
         ).build()
     }
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(headerInterceptor: HeaderInterceptor, tokenInterceptor: TokenInterceptor): OkHttpClient {
+    fun provideOkHttpClient(
+        headerInterceptor: HeaderInterceptor,
+        tokenInterceptor: TokenInterceptor
+    ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor()
         loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         return OkHttpClient.Builder()
@@ -94,7 +98,6 @@ class ApplicationModule {
             .client(okHttpClient)
             .build()
     }
-
 
     @Provides
     @Singleton

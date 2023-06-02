@@ -28,7 +28,9 @@ import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
-class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(), BottomSheetListener {
+class ConversationDetailFragment :
+    BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
+    BottomSheetListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -40,7 +42,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     override fun setupView() {
         binding.viewModel = viewModel
-        viewModel.getConversationDetail(Gson().fromJson(args.conversation, Conversation::class.java), Gson().fromJson(args.partner, User::class.java))
+        viewModel.getConversationDetail(
+            Gson().fromJson(args.conversation, Conversation::class.java),
+            Gson().fromJson(args.partner, User::class.java)
+        )
         initConversationList()
         observeState()
         handleAction()
@@ -50,7 +55,6 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         viewModel.uiState().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ConversationDetailState.Loading -> {
-
                 }
 
                 is ConversationDetailState.Success -> {
@@ -146,7 +150,11 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private fun initConversationList() {
         messageAdapter = MessageAdapter(viewModel.currentUser?.id)
         binding.rvMessage.adapter = messageAdapter
-        binding.rvMessage.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rvMessage.layoutManager = LinearLayoutManager(
+            requireContext(),
+            LinearLayoutManager.VERTICAL,
+            false
+        )
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setFirstPageMessage(ArrayList())
         val messageSwipeController = MessageSwipeController(requireContext()) {

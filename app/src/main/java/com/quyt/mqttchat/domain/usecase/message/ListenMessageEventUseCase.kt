@@ -3,7 +3,6 @@ package com.quyt.mqttchat.domain.usecase.message
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.model.Event
 import com.quyt.mqttchat.domain.repository.IMqttClient
-import com.quyt.mqttchat.domain.repository.SharedPreferences
 
 class ListenMessageEventUseCase(
     private val mqttClient: IMqttClient,

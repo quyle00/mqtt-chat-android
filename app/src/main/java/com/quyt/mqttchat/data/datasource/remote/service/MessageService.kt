@@ -36,7 +36,7 @@ interface MessageService {
     suspend fun createMessage2(
         @Path("conversationId") conversationId: String,
         @Part("message") message: RequestBody,
-        @Part images : List<MultipartBody.Part>
+        @Part images: List<MultipartBody.Part>
     ): Response<BaseResponse<Message>>
 
     @PUT("conversation/{conversationId}/message/seen")
@@ -45,5 +45,4 @@ interface MessageService {
         @Path("conversationId") conversationId: String,
         @Field("messageIds") messageIds: List<String>
     ): Response<BaseResponse<String>>
-
 }

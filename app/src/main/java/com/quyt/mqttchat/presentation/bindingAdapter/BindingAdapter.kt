@@ -9,7 +9,7 @@ import com.quyt.mqttchat.utils.DateUtils
 @BindingAdapter("imageUrl")
 fun loadImage(view: AppCompatImageView, url: String?) {
     if (url != null) {
-        Glide.with(view. context).load(url).into(view)
+        Glide.with(view.context).load(url).into(view)
     }
 }
 

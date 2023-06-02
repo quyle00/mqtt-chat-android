@@ -14,7 +14,12 @@ class ContactAdapter(private val listener: OnContactListener) : BaseRecyclerAdap
     contentSameChecker = { oldItem, newItem -> oldItem == newItem }
 ) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val binding = DataBindingUtil.inflate<ItemContactBinding>(LayoutInflater.from(parent.context), R.layout.item_contact, parent, false)
+        val binding = DataBindingUtil.inflate<ItemContactBinding>(
+            LayoutInflater.from(parent.context),
+            R.layout.item_contact,
+            parent,
+            false
+        )
         return ContactViewHolder(binding, listener)
     }
 
@@ -23,10 +28,14 @@ class ContactAdapter(private val listener: OnContactListener) : BaseRecyclerAdap
             holder.bind(getItem(position))
         }
     }
-
 }
 
-class ContactViewHolder(private val binding: ItemContactBinding, private val listener: OnContactListener) : RecyclerView.ViewHolder(binding.root) {
+class ContactViewHolder(
+    private val binding: ItemContactBinding,
+    private val listener: OnContactListener
+) : RecyclerView.ViewHolder(
+    binding.root
+) {
     fun bind(item: User) {
         binding.contact = item
         binding.llRoot.setOnClickListener {

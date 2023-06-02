@@ -15,7 +15,6 @@ abstract class BaseBindingFragment<VDB : ViewDataBinding, VM : ViewModel> : Frag
     protected lateinit var binding: VDB
     protected abstract val viewModel: VM
 
-
     @LayoutRes
     abstract fun layoutId(): Int
 
@@ -36,5 +35,4 @@ abstract class BaseBindingFragment<VDB : ViewDataBinding, VM : ViewModel> : Frag
         super.onViewCreated(view, savedInstanceState)
         setupView()
     }
-
 }

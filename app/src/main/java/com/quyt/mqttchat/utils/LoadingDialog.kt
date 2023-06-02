@@ -8,7 +8,7 @@ import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogLoadingBinding
 
 object LoadingDialog {
-    private var loadingDialog : AlertDialog? = null
+    private var loadingDialog: AlertDialog? = null
     fun showLoading(context: Context) {
         if (loadingDialog == null) {
             val builder = AlertDialog.Builder(context)

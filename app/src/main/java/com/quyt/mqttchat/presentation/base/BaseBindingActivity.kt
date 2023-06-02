@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 
-
 abstract class BaseBindingActivity<B : ViewDataBinding> : AppCompatActivity() {
 
     private lateinit var mViewDataBinding: B

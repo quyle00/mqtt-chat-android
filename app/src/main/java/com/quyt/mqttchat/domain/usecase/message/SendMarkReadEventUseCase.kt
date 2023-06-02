@@ -11,15 +11,20 @@ class SendMarkReadEventUseCase(
     private val mqttClient: IMqttClient,
     private val mapper: EventMapper
 ) {
-    suspend operator fun invoke(conversationId: String, partnerId: String, markReadMessageIds: List<String>) {
+    suspend operator fun invoke(
+        conversationId: String,
+        partnerId: String,
+        markReadMessageIds: List<String>
+    ) {
         val event = Event(
             sharedPreferences.getCurrentUser()?.id,
             EventType.MARK_READ.value,
             markReadMessageIds
         )
         mqttClient.publish(
-            topic = "$partnerId/conversation/${conversationId}",
-            payload = mapper.toPayload(event), 0
+            topic = "$partnerId/conversation/$conversationId",
+            payload = mapper.toPayload(event),
+            0
         )
     }
 }

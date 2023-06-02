@@ -10,9 +10,10 @@ object DimenUtils {
         }
         return if (value == 0f) {
             0
-        } else Math.ceil((density * value).toDouble()).toInt()
+        } else {
+            Math.ceil((density * value).toDouble()).toInt()
+        }
     }
-
 
     private fun checkDisplaySize(context: Context) {
         try {
@@ -20,6 +21,5 @@ object DimenUtils {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 }

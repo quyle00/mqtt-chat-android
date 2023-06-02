@@ -3,7 +3,10 @@ package com.quyt.mqttchat.presentation.adapter.message
 import androidx.recyclerview.widget.DiffUtil
 import com.quyt.mqttchat.domain.model.Message
 
-class MessageDiffUtilsCallback(private val oldPosts : List<Message?>, private val newPosts : List<Message?>) : DiffUtil.Callback(){
+class MessageDiffUtilsCallback(
+    private val oldPosts: List<Message?>,
+    private val newPosts: List<Message?>
+) : DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldPosts.size
     }

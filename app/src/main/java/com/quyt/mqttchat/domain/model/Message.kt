@@ -4,13 +4,13 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.quyt.mqttchat.data.datasource.local.entity.MessageEntity
 
-//data class Message(
+// data class Message(
 //    var id: Int,
 //    var conversationId : Int,
 //    var sender: User,
 //    var content : String,
 //    var sendTime : String,
-//)
+// )
 
 data class Message(
     @SerializedName("_id")
@@ -24,10 +24,10 @@ data class Message(
     var isMine: Boolean,
     var isTyping: Boolean,
     var state: Int = MessageState.SENT.value,
-    var type: Int= MessageContentType.TEXT.value,
+    var type: Int = MessageContentType.TEXT.value,
     var images: List<String>?,
-    var reply : Message?
-){
+    var reply: Message?
+) {
     constructor() : this(
         id = "",
         conversation = "",
@@ -44,8 +44,6 @@ data class Message(
         reply = null
     )
 }
-
-
 
 fun Message.toEntity() = MessageEntity(
     id = id,
@@ -67,10 +65,10 @@ enum class MessageState(val value: Int) {
     SENDING(0),
     SENT(1),
     SEEN(2),
-    FAILED(3),
+    FAILED(3)
 }
 
 enum class MessageContentType(val value: Int) {
     TEXT(0),
-    IMAGE(1),
+    IMAGE(1)
 }

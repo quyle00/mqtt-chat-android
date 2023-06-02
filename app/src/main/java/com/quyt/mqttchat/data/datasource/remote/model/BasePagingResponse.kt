@@ -4,5 +4,5 @@ open class BasePagingResponse {
     val page: Int? = null
     val total: Int? = null
     val limit: Int? = null
-    var error : String? = null
+    var error: String? = null
 }

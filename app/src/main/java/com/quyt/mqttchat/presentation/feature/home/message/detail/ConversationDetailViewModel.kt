@@ -22,10 +22,10 @@ import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import com.quyt.mqttchat.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 sealed class ConversationDetailState {
     object Loading : ConversationDetailState()
@@ -62,7 +62,6 @@ class ConversationDetailViewModel @Inject constructor(
     var mCurrentPage = 1
     var messageToReply = MutableLiveData<Message?>()
 
-
     fun getConversationDetail(conversation: Conversation?, partner: User?) {
         viewModelScope.launch {
             val result = if (conversation != null) {
@@ -79,7 +78,9 @@ class ConversationDetailViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+                    uiState.postValue(
+                        ConversationDetailState.Error(result.exception.message ?: "Error")
+                    )
                     if ((result.exception as CustomException).code == 422) {
                         mPartner.postValue(partner)
                     }
@@ -91,7 +92,11 @@ class ConversationDetailViewModel @Inject constructor(
     fun getListMessage(page: Int) {
         viewModelScope.launch {
             uiState.postValue(ConversationDetailState.Loading)
-            val result = getListMessageUseCase(mCurrentConversation.id ?: "", page, mCurrentConversation.lastMessage?.id)
+            val result = getListMessageUseCase(
+                mCurrentConversation.id ?: "",
+                page,
+                mCurrentConversation.lastMessage?.id
+            )
             when (result) {
                 is Result.Success -> {
                     val listMessage = result.data
@@ -114,12 +119,13 @@ class ConversationDetailViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+                    uiState.postValue(
+                        ConversationDetailState.Error(result.exception.message ?: "Error")
+                    )
                 }
             }
         }
     }
-
 
     private suspend fun markReadMessage(unSeenMessageIds: List<String>) {
         val result = seenMessageUseCase(mCurrentConversation.id ?: "", unSeenMessageIds)
@@ -133,10 +139,11 @@ class ConversationDetailViewModel @Inject constructor(
             }
 
             is Result.Error -> {
-                uiState.postValue(ConversationDetailState.Error(result.exception.message ?: "Error"))
+                uiState.postValue(
+                    ConversationDetailState.Error(result.exception.message ?: "Error")
+                )
             }
         }
-
     }
 
     private suspend fun subscribeConversation() {
@@ -200,11 +207,20 @@ class ConversationDetailViewModel @Inject constructor(
                     val messageCreated = result.data
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
                     // Send Mqtt event
-                    sendNewMessageEventUseCase(mCurrentConversation.id ?: "", mPartner.value?.id ?: "", result.data)
+                    sendNewMessageEventUseCase(
+                        mCurrentConversation.id ?: "",
+                        mPartner.value?.id ?: "",
+                        result.data
+                    )
                 }
 
                 is Result.Error -> {
-                    uiState.postValue(ConversationDetailState.SendMessageError(message, result.exception.message ?: "Error"))
+                    uiState.postValue(
+                        ConversationDetailState.SendMessageError(
+                            message,
+                            result.exception.message ?: "Error"
+                        )
+                    )
                 }
             }
         }
@@ -240,5 +256,4 @@ class ConversationDetailViewModel @Inject constructor(
     private fun List<User>?.getPartner(): User? {
         return this?.firstOrNull { user -> user.id != currentUser?.id }
     }
-
 }

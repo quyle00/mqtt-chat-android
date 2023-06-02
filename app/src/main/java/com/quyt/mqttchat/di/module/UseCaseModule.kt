@@ -34,25 +34,40 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideSendNewMessageEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendNewMessageEventUseCase {
-        return SendNewMessageEventUseCase(sharedPreferences,client, mapper)
+    fun provideSendNewMessageEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): SendNewMessageEventUseCase {
+        return SendNewMessageEventUseCase(sharedPreferences, client, mapper)
     }
 
     @Provides
     @Singleton
-    fun provideSendMarkReadEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendMarkReadEventUseCase {
-        return SendMarkReadEventUseCase(sharedPreferences,client, mapper)
+    fun provideSendMarkReadEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): SendMarkReadEventUseCase {
+        return SendMarkReadEventUseCase(sharedPreferences, client, mapper)
     }
 
     @Provides
     @Singleton
-    fun provideSendTypingEventUseCase(sharedPreferences: SharedPreferences,client: IMqttClient, mapper: EventMapper): SendTypingEventUseCase {
-        return SendTypingEventUseCase(sharedPreferences,client, mapper)
+    fun provideSendTypingEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): SendTypingEventUseCase {
+        return SendTypingEventUseCase(sharedPreferences, client, mapper)
     }
 
     @Provides
     @Singleton
-    fun provideListenMessageEventUseCase(client: IMqttClient, mapper: EventMapper): ListenMessageEventUseCase {
+    fun provideListenMessageEventUseCase(
+        client: IMqttClient,
+        mapper: EventMapper
+    ): ListenMessageEventUseCase {
         return ListenMessageEventUseCase(client, mapper)
     }
 
@@ -118,8 +133,11 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun provideListenConversationEventUseCase(sharedPreferences: SharedPreferences, client: IMqttClient, mapper: EventMapper): ListenConversationEventUseCase {
+    fun provideListenConversationEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): ListenConversationEventUseCase {
         return ListenConversationEventUseCase(sharedPreferences, client, mapper)
     }
-
 }

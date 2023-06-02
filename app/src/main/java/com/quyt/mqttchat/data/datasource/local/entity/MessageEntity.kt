@@ -23,9 +23,9 @@ data class MessageEntity(
     var isMine: Boolean?,
     var isTyping: Boolean,
     var state: Int?,
-    var type: Int= MessageContentType.TEXT.value,
+    var type: Int = MessageContentType.TEXT.value,
     var images: String?,
-    var reply : String?
+    var reply: String?
 )
 
 fun MessageEntity.toMessage() = Message(

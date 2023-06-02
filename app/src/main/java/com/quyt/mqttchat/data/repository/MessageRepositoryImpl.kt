@@ -1,6 +1,5 @@
 package com.quyt.mqttchat.data.repository
 
-import com.google.gson.Gson
 import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSource
 import com.quyt.mqttchat.data.datasource.remote.extension.getError
 import com.quyt.mqttchat.data.datasource.remote.service.ConversationService
@@ -12,13 +11,18 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import com.google.gson.Gson
 
 class MessageRepositoryImpl(
     private val messageService: MessageService,
     private val conversationService: ConversationService,
     private val messageLocalDatasource: MessageLocalDataSource
 ) : MessageRepository {
-    override suspend fun getListMessage(conversationId: String, page: Int, lastMessageId: String?): Result<List<Message>> {
+    override suspend fun getListMessage(
+        conversationId: String,
+        page: Int,
+        lastMessageId: String?
+    ): Result<List<Message>> {
         return try {
             if (page == 1) {
                 if (lastMessageId != null) {
@@ -58,8 +62,11 @@ class MessageRepositoryImpl(
                     val part = MultipartBody.Part.createFormData("images", file.name, requestFile)
                     files.add(part)
                 }
-                val messageRequestBody = RequestBody.create(MediaType.parse("text/json"), Gson().toJson(message))
-                messageService.createMessage2(conversationId, messageRequestBody,files)
+                val messageRequestBody = RequestBody.create(
+                    MediaType.parse("text/json"),
+                    Gson().toJson(message)
+                )
+                messageService.createMessage2(conversationId, messageRequestBody, files)
             } else {
                 messageService.createMessage(conversationId, message)
             }
@@ -77,7 +84,10 @@ class MessageRepositoryImpl(
         messageLocalDatasource.insertMessage(messageList)
     }
 
-    override suspend fun updateSeenMessage(conversationId: String, messageIds: List<String>): Result<String> {
+    override suspend fun updateSeenMessage(
+        conversationId: String,
+        messageIds: List<String>
+    ): Result<String> {
         return try {
             val res = messageService.updateSeenMessage(conversationId, messageIds)
             if (res.isSuccessful) {

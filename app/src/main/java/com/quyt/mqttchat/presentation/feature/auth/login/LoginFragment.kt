@@ -9,7 +9,6 @@ import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class LoginFragment : BaseBindingFragment<FragmentLoginBinding, LoginViewModel>() {
     override fun layoutId(): Int = R.layout.fragment_login

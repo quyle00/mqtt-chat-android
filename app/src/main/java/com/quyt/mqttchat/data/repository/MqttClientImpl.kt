@@ -3,9 +3,9 @@ package com.quyt.mqttchat.data.repository
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.quyt.mqttchat.domain.repository.IMqttClient
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
 
 class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) : IMqttClient {
     override suspend fun connect(): Boolean {

@@ -8,5 +8,4 @@ sealed class HomeState {
     data class Success(val data: User) : HomeState()
     data class Error(val error: String) : HomeState()
 }
-class HomeViewModel : BaseViewModel<HomeState>() {
-}
+class HomeViewModel : BaseViewModel<HomeState>()

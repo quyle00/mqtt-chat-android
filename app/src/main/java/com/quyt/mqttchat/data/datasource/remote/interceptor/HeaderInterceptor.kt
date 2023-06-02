@@ -5,8 +5,8 @@ import okhttp3.Response
 
 class HeaderInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request().newBuilder()
-            .addHeader("app-id", "642a7f19674c92985d0410ca").build()
+        // Add header here
+        val request = chain.request().newBuilder().build()
         return chain.proceed(request)
     }
 }

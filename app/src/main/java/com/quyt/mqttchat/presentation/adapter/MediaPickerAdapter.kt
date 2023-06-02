@@ -25,7 +25,12 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
 ) {
     private val mListImageSelected = ArrayList<MediaModel>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val binding = DataBindingUtil.inflate<ItemImagePickerBinding>(LayoutInflater.from(parent.context), R.layout.item_image_picker, parent, false)
+        val binding = DataBindingUtil.inflate<ItemImagePickerBinding>(
+            LayoutInflater.from(parent.context),
+            R.layout.item_image_picker,
+            parent,
+            false
+        )
         return ImagePickerViewHolder(binding, listener)
     }
 
@@ -39,14 +44,21 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
         return mListImageSelected.map { it.uri } as ArrayList<String>
     }
 
-    inner class ImagePickerViewHolder(val binding: ItemImagePickerBinding, private val listener: OnImagePickerListener) : RecyclerView.ViewHolder(binding.root) {
+    inner class ImagePickerViewHolder(
+        val binding: ItemImagePickerBinding,
+        private val listener: OnImagePickerListener
+    ) : RecyclerView.ViewHolder(
+        binding.root
+    ) {
         fun bind(media: MediaModel) {
             Glide.with(binding.root.context).load(media.uri).into(binding.ivImage)
             if (media.type == MediaType.VIDEO) {
                 binding.llDuration.visibility = View.VISIBLE
                 val retriever = MediaMetadataRetriever()
                 retriever.setDataSource(binding.root.context, Uri.parse(media.uri))
-                val duration = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+                val duration = retriever.extractMetadata(
+                    MediaMetadataRetriever.METADATA_KEY_DURATION
+                )
                 binding.tvDuration.text = DateUtils.formatMilliseconds(duration?.toLong())
                 retriever.release()
             }
@@ -72,8 +84,6 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
             }
         }
     }
-
-
 }
 
 interface OnImagePickerListener {

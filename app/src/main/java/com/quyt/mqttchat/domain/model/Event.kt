@@ -34,12 +34,10 @@ class Event(
         message = Message(),
         messageIds = messageIds
     )
-
 }
-
 
 enum class EventType(val value: Int) {
     NEW_MESSAGE(0),
     TYPING(1),
-    MARK_READ(2),
+    MARK_READ(2)
 }

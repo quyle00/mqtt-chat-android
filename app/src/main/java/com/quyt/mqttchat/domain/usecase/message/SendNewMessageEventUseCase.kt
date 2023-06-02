@@ -19,8 +19,9 @@ class SendNewMessageEventUseCase(
             message
         )
         mqttClient.publish(
-            topic = "$partnerId/conversation/${conversationId}",
-            payload = mapper.toPayload(event), 0
+            topic = "$partnerId/conversation/$conversationId",
+            payload = mapper.toPayload(event),
+            0
         )
     }
 }

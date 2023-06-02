@@ -42,6 +42,4 @@ class DataModule {
     fun provideMessageLocalDataSource(appDatabase: AppDatabase): MessageLocalDataSource {
         return MessageLocalDataSourceImpl(appDatabase)
     }
-
-
 }

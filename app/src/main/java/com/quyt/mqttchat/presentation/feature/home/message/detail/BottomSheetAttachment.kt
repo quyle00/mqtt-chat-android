@@ -34,7 +34,11 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     private lateinit var mLoaderManager: LoaderManager
     private lateinit var imagePickerAdapter: ImagePickerAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = BottomSheetAttachBindingImpl.inflate(inflater, container, false)
         initImageRecyclerView()
         initLoadManager()
@@ -46,7 +50,9 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
         bottomSheetDialog.setOnShowListener {
             val dialog = it as BottomSheetDialog
             dialog.findViewById<FrameLayout>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
-            val containerLayout: FrameLayout = dialog.findViewById<FrameLayout>(com.google.android.material.R.id.container) as FrameLayout
+            val containerLayout: FrameLayout = dialog.findViewById<FrameLayout>(
+                com.google.android.material.R.id.container
+            ) as FrameLayout
             containerLayout.addView(stickyBottomActionView(), containerLayout.childCount)
             containerLayout.addView(stickSendButton(), containerLayout.childCount)
         }
@@ -71,7 +77,10 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     private fun stickSendButton(): View {
         val sendImageButton = binding.rlSend
         val sendImageButtonParent = sendImageButton.parent as ViewGroup
-        sendImageButton.layoutParams = FrameLayout.LayoutParams(sendImageButton.layoutParams.width, sendImageButton.layoutParams.height).apply {
+        sendImageButton.layoutParams = FrameLayout.LayoutParams(
+            sendImageButton.layoutParams.width,
+            sendImageButton.layoutParams.height
+        ).apply {
             gravity = Gravity.BOTTOM or Gravity.END
             bottomMargin = 120
             marginEnd = 20
@@ -83,7 +92,10 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     private fun stickyBottomActionView(): View {
         val actionView = binding.llType
         val actionViewParent = actionView.parent as ViewGroup
-        actionView.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
+        actionView.layoutParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ).apply {
             gravity = Gravity.BOTTOM
         }
         actionViewParent.removeView(actionView)
@@ -106,7 +118,9 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
         val uri = MediaStore.Files.getContentUri("external") // Lấy URI chung cho cả ảnh và video
         val projection = arrayOf(
-            MediaStore.MediaColumns.DATA, MediaStore.Files.FileColumns.MEDIA_TYPE, MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+            MediaStore.MediaColumns.DATA,
+            MediaStore.Files.FileColumns.MEDIA_TYPE,
+            MediaStore.Images.Media.BUCKET_DISPLAY_NAME
         )
         val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?" // Tiêu chí tìm kiếm
         val selectionArgs = arrayOf(
@@ -116,14 +130,21 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
         val sortOrder = "${MediaStore.MediaColumns.DATE_MODIFIED} DESC"
 
         return CursorLoader(
-            requireActivity(), uri, projection, selection, selectionArgs, sortOrder
+            requireActivity(),
+            uri,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder
         )
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         data?.let {
             val columnIndexData = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
-            val columnIndexMediaType = it.getColumnIndexOrThrow(MediaStore.Files.FileColumns.MEDIA_TYPE)
+            val columnIndexMediaType = it.getColumnIndexOrThrow(
+                MediaStore.Files.FileColumns.MEDIA_TYPE
+            )
             while (it.moveToNext()) {
                 val mediaType = it.getInt(columnIndexMediaType)
                 val mediaData = it.getString(columnIndexData)
@@ -138,8 +159,5 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     }
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
-
     }
-
-
 }

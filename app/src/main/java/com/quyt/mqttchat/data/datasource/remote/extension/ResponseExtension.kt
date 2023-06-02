@@ -6,7 +6,7 @@ import retrofit2.Response
 
 fun <T> Response<T>.getError(): Throwable {
     val error = Gson().fromJson(errorBody()?.string(), BaseResponse::class.java)
-    return CustomException(error.code?:0,error.message)
+    return CustomException(error.code ?: 0, error.message)
 }
 
 class CustomException(val code: Int, message: String?) : Exception(message)

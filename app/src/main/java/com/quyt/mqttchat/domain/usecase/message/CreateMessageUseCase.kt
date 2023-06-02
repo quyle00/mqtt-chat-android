@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class CreateMessageUseCase(
-    private val messageRepository: MessageRepository,
+    private val messageRepository: MessageRepository
 ) {
     suspend operator fun invoke(conversationId: String, message: Message): Result<Message> {
         return withContext(Dispatchers.IO) {

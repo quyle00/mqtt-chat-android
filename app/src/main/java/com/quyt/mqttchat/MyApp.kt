@@ -4,10 +4,10 @@ import android.app.Application
 import android.util.Log
 import com.quyt.mqttchat.domain.repository.IMqttClient
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltAndroidApp
 class MyApp : Application() {
@@ -19,9 +19,9 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         GlobalScope.launch {
-           if (!mqttClient.connect()){
+            if (!mqttClient.connect()) {
                 Log.d("MQTT", "Failed to connect")
-           }
+            }
         }
     }
 }

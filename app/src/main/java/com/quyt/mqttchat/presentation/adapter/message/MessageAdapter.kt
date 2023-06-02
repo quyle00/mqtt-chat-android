@@ -24,36 +24,65 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
             MessageType.MY_MESSAGE.value -> {
-                val binding = DataBindingUtil.inflate<ItemMyMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_my_message, parent, false)
+                val binding = DataBindingUtil.inflate<ItemMyMessageBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_my_message,
+                    parent,
+                    false
+                )
                 MyMessageViewHolder(binding)
             }
 
             MessageType.OTHERS_MESSAGE.value -> {
-                val binding = DataBindingUtil.inflate<ItemOtherMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_other_message, parent, false)
+                val binding = DataBindingUtil.inflate<ItemOtherMessageBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_other_message,
+                    parent,
+                    false
+                )
                 OtherMessageViewHolder(binding)
             }
 
             MessageType.LOADING.value -> {
-                val binding = DataBindingUtil.inflate<ItemLoadingBinding>(LayoutInflater.from(parent.context), R.layout.item_loading, parent, false)
+                val binding = DataBindingUtil.inflate<ItemLoadingBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_loading,
+                    parent,
+                    false
+                )
                 LoadingViewHolder(binding)
             }
 
             MessageType.MY_IMAGE.value -> {
-                val binding = DataBindingUtil.inflate<ItemMyImageMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_my_image_message, parent, false)
+                val binding = DataBindingUtil.inflate<ItemMyImageMessageBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_my_image_message,
+                    parent,
+                    false
+                )
                 MyImageMessageViewHolder(binding)
             }
 
             MessageType.OTHERS_IMAGE.value -> {
-                val binding = DataBindingUtil.inflate<ItemOtherImageMessageBinding>(LayoutInflater.from(parent.context), R.layout.item_other_image_message, parent, false)
+                val binding = DataBindingUtil.inflate<ItemOtherImageMessageBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_other_image_message,
+                    parent,
+                    false
+                )
                 OtherImageMessageViewHolder(binding)
             }
 
             else -> {
-                val binding = DataBindingUtil.inflate<ItemLoadingBinding>(LayoutInflater.from(parent.context), R.layout.item_loading, parent, false)
+                val binding = DataBindingUtil.inflate<ItemLoadingBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_loading,
+                    parent,
+                    false
+                )
                 LoadingViewHolder(binding)
             }
         }
-
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -66,7 +95,6 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
                 } else {
                     MessageType.MY_MESSAGE.value
                 }
-
             } else {
                 if (!mListMessage[position]?.images.isNullOrEmpty()) {
                     MessageType.OTHERS_IMAGE.value
@@ -84,7 +112,11 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val message = mListMessage[position]
         val previousMessage = if (position > 0) mListMessage[position - 1].takeIf { it?.sender?.id == message?.sender?.id } else null
-        val nextMessage = if (position < mListMessage.size - 1) mListMessage[position + 1].takeIf { it?.sender?.id == message?.sender?.id } else null
+        val nextMessage = if (position < mListMessage.size - 1) {
+            mListMessage[position + 1].takeIf { it?.sender?.id == message?.sender?.id }
+        } else {
+            null
+        }
 
         val messageGroupState = when {
             nextMessage != null && previousMessage != null -> GroupMessageState.MIDDLE
@@ -155,9 +187,11 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     fun setTyping(typing: Boolean) {
         if (typing) {
             if (mListMessage.isEmpty() || mListMessage.last()?.isTyping == false) {
-                mListMessage.add(Message().apply {
-                    isTyping = true
-                })
+                mListMessage.add(
+                    Message().apply {
+                        isTyping = true
+                    }
+                )
                 notifyItemInserted(mListMessage.size - 1)
             }
         } else {
@@ -169,23 +203,26 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     }
 
     fun seenAllMessage() {
-        val firstUnseenMessageIndex = mListMessage.indexOfFirst { it?.state == MessageState.SENT.value }
+        val firstUnseenMessageIndex = mListMessage.indexOfFirst {
+            it?.state == MessageState.SENT.value
+        }
         if (firstUnseenMessageIndex != -1) {
             for (i in firstUnseenMessageIndex until mListMessage.size) {
                 mListMessage[i]?.state = MessageState.SEEN.value
             }
-            notifyItemRangeChanged(firstUnseenMessageIndex, mListMessage.size - firstUnseenMessageIndex)
+            notifyItemRangeChanged(
+                firstUnseenMessageIndex,
+                mListMessage.size - firstUnseenMessageIndex
+            )
         }
     }
 
     fun getMessage(position: Int): Message? {
         return mListMessage[position]
     }
-
 }
 
-class LoadingViewHolder(binding: ItemLoadingBinding) : RecyclerView.ViewHolder(binding.root) {
-}
+class LoadingViewHolder(binding: ItemLoadingBinding) : RecyclerView.ViewHolder(binding.root)
 
 enum class GroupMessageState {
     SINGLE, FIRST, MIDDLE, LAST
@@ -194,4 +231,3 @@ enum class GroupMessageState {
 enum class MessageType(val value: Int) {
     MY_MESSAGE(0), OTHERS_MESSAGE(1), LOADING(2), MY_IMAGE(3), OTHERS_IMAGE(4),
 }
-

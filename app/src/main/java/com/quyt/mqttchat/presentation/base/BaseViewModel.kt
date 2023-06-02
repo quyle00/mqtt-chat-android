@@ -8,5 +8,4 @@ abstract class BaseViewModel<T> : ViewModel() {
 
     fun uiState(): LiveData<T> = uiState
     protected val uiState: MutableLiveData<T> = MutableLiveData()
-
 }

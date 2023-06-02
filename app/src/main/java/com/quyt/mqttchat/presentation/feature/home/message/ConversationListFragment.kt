@@ -2,7 +2,6 @@ package com.quyt.mqttchat.presentation.feature.home.message
 
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -17,9 +16,10 @@ import com.quyt.mqttchat.presentation.feature.home.HomeFragmentDirections
 import com.quyt.mqttchat.utils.LoadingDialog
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
-class ConversationListFragment : BaseBindingFragment<FragmentConversationListBinding, ConversationListViewModel>(), OnConversationListener {
+class ConversationListFragment :
+    BaseBindingFragment<FragmentConversationListBinding, ConversationListViewModel>(),
+    OnConversationListener {
 
     override fun layoutId(): Int = R.layout.fragment_conversation_list
 
@@ -35,7 +35,10 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
 
     override fun onConversationClick(conversation: Conversation?) {
         findNavController().navigate(
-            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(Gson().toJson(conversation), null)
+            HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(
+                Gson().toJson(conversation),
+                null
+            )
         )
     }
 
@@ -75,5 +78,4 @@ class ConversationListFragment : BaseBindingFragment<FragmentConversationListBin
             }
         }
     }
-
 }
