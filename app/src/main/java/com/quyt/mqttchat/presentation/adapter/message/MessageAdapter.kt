@@ -2,6 +2,7 @@ package com.quyt.mqttchat.presentation.adapter.message
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +19,12 @@ import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyMessageViewHo
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherImageMessageViewHolder
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageViewHolder
 
-class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+interface OnMessageClickListener {
+    fun onMediaClick(imageView : ImageView, url: String?)
+}
+
+class MessageAdapter(private val currentUserId: String?,private val listener : OnMessageClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val mListMessage = mutableListOf<Message?>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -60,7 +66,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
                     parent,
                     false
                 )
-                MyImageMessageViewHolder(binding)
+                MyImageMessageViewHolder(binding,listener)
             }
 
             MessageType.OTHERS_IMAGE.value -> {
@@ -70,7 +76,7 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
                     parent,
                     false
                 )
-                OtherImageMessageViewHolder(binding)
+                OtherImageMessageViewHolder(binding,listener)
             }
 
             else -> {
@@ -151,19 +157,20 @@ class MessageAdapter(private val currentUserId: String?) : RecyclerView.Adapter<
     }
 
     fun addOlderListMessage(listMessage: List<Message>) {
+        mListMessage.removeIf { it == null }
         mListMessage.addAll(0, listMessage.reversed())
         notifyItemRangeInserted(0, listMessage.size - 1)
         notifyItemChanged(listMessage.size)
     }
 
-    fun loadMoreLoading(isLoading: Boolean) {
-        if (isLoading) {
-            mListMessage.add(0, null)
-            notifyItemInserted(0)
-        } else {
-            mListMessage.remove(null)
-            notifyItemRemoved(mListMessage.size)
-        }
+    fun loadMoreLoading() {
+        mListMessage.add(0, null)
+        notifyItemInserted(0)
+    }
+
+    fun removeLoading() {
+        mListMessage.removeIf { it == null }
+        notifyItemRemoved(0)
     }
 
     fun addNewMessage(message: Message) {

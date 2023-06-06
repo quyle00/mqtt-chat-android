@@ -1,7 +1,11 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
+import android.app.AlertDialog
+import android.view.LayoutInflater
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -10,8 +14,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
@@ -20,17 +26,18 @@ import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
+import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
+import com.quyt.mqttchat.presentation.gestures.dismiss.SwipeToDismissHandler
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 @AndroidEntryPoint
-class ConversationDetailFragment :
-    BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
-    BottomSheetListener {
+class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
+    BottomSheetListener, OnMessageClickListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -51,6 +58,45 @@ class ConversationDetailFragment :
         handleAction()
     }
 
+    override fun onMediaClick(imageView: ImageView, url: String?) {
+//        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
+//            Glide.with(view.context).load(image).into(view)
+//        }.withTransitionFrom(imageView).show()
+        viewMedia(url)
+    }
+
+    private fun viewMedia(url: String?) {
+        val builder = AlertDialog.Builder(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        val view = DataBindingUtil.inflate<DialogMediaViewerBinding>(
+            LayoutInflater.from(context),
+            R.layout.dialog_media_viewer,
+            null,
+            false
+        )
+        builder.setView(view.root)
+        builder.setCancelable(true)
+        Glide.with(view.root.context).load(url).into(view.ivImage)
+        val dialog = builder.create()
+        val swipeDismissBehavior = SwipeToDismissHandler(
+            swipeView = view.dismissContainer,
+            shouldAnimateDismiss = { true },
+            onDismiss = {
+//                view.dismissContainer.applyMargin(0, 0, 0, 0)
+                dialog.dismiss()
+            },
+            onSwipeViewMove = { translationY, translationLimit ->
+                val alpha = calculateTranslationAlpha(translationY, translationLimit)
+                view.backgroundView.alpha = alpha
+            })
+        view.rootContainer.setOnTouchListener(swipeDismissBehavior)
+        dialog.show()
+    }
+
+
+    private fun calculateTranslationAlpha(translationY: Float, translationLimit: Int): Float =
+        1.0f - 1.0f / translationLimit.toFloat() / 4f * Math.abs(translationY)
+
+
     private fun observeState() {
         viewModel.uiState().observe(viewLifecycleOwner) { state ->
             when (state) {
@@ -60,14 +106,11 @@ class ConversationDetailFragment :
                 is ConversationDetailState.Success -> {
                     messageAdapter.setFirstPageMessage(state.data)
                     scrollToBottom()
-                    noMoreData = state.data.size < 20
                 }
 
                 is ConversationDetailState.LoadMoreSuccess -> {
                     isLoading = false
-                    messageAdapter.loadMoreLoading(false)
                     messageAdapter.addOlderListMessage(state.data)
-                    noMoreData = state.data.size < 20
                 }
 
                 is ConversationDetailState.Error -> {
@@ -104,6 +147,8 @@ class ConversationDetailFragment :
 
                 is ConversationDetailState.NoMoreData -> {
                     noMoreData = true
+                    isLoading = false
+                    messageAdapter.removeLoading()
                 }
             }
         }
@@ -148,7 +193,7 @@ class ConversationDetailFragment :
     }
 
     private fun initConversationList() {
-        messageAdapter = MessageAdapter(viewModel.currentUser?.id)
+        messageAdapter = MessageAdapter(viewModel.currentUser?.id, this)
         binding.rvMessage.adapter = messageAdapter
         binding.rvMessage.layoutManager = LinearLayoutManager(
             requireContext(),
@@ -174,7 +219,7 @@ class ConversationDetailFragment :
                 if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
                     if (!isLoading && !noMoreData) {
                         isLoading = true
-                        messageAdapter.loadMoreLoading(true)
+                        messageAdapter.loadMoreLoading()
                         viewModel.mCurrentPage++
                         viewModel.getListMessage(viewModel.mCurrentPage)
                     }
@@ -202,4 +247,6 @@ class ConversationDetailFragment :
     private fun scrollToBottom() {
         binding.rvMessage.scrollToPosition(messageAdapter.itemCount - 1)
     }
+
+
 }

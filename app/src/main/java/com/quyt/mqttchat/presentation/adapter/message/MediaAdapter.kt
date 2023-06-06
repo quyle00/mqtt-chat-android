@@ -10,30 +10,33 @@ import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemImageBinding
 
-class ImageAdapter(private val listImageUrl: List<String>) : RecyclerView.Adapter<ImageAdapter.ImageViewHolder>() {
+class MediaAdapter(private val listImageUrl: List<String>,private val listener : OnMessageClickListener) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
         val binding = DataBindingUtil.inflate<ItemImageBinding>(
             LayoutInflater.from(parent.context),
             R.layout.item_image,
             parent,
             false
         )
-        return ImageViewHolder(binding)
+        return MediaViewHolder(binding)
     }
 
     override fun getItemCount(): Int {
         return listImageUrl.size
     }
 
-    override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
         holder.bind(listImageUrl[position])
     }
 
-    class ImageViewHolder(private val binding: ItemImageBinding) : RecyclerView.ViewHolder(
+    inner class MediaViewHolder(private val binding: ItemImageBinding) : RecyclerView.ViewHolder(
         binding.root
     ) {
         fun bind(item: String) {
+            binding.cvRoot.setOnClickListener {
+                listener.onMediaClick(binding.ivImage,item)
+            }
             Glide.with(binding.root.context)
                 .load(item)
                 .error(
@@ -45,7 +48,8 @@ class ImageAdapter(private val listImageUrl: List<String>) : RecyclerView.Adapte
                 .into(binding.ivImage)
             if (getFileExtensionFromUrl(item) == "mp4") {
                 binding.llDuration.visibility = View.VISIBLE
-            }
+            }else
+                binding.llDuration.visibility = View.GONE
         }
 
         private fun getFileExtensionFromUrl(url: String): String {

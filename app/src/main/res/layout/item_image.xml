@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cv_root"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_margin="1dp"

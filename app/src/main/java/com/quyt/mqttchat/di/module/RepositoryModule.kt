@@ -51,9 +51,8 @@ class RepositoryModule {
     @Singleton
     fun provideMessageRepository(
         service: MessageService,
-        conversationService: ConversationService,
         messageLocalDataSource: MessageLocalDataSource
     ): MessageRepository {
-        return MessageRepositoryImpl(service, conversationService, messageLocalDataSource)
+        return MessageRepositoryImpl(service, messageLocalDataSource)
     }
 }

@@ -1,8 +1,8 @@
 package com.quyt.mqttchat.data.repository
 
+import com.google.gson.Gson
 import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSource
 import com.quyt.mqttchat.data.datasource.remote.extension.getError
-import com.quyt.mqttchat.data.datasource.remote.service.ConversationService
 import com.quyt.mqttchat.data.datasource.remote.service.MessageService
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.Result
@@ -11,11 +11,9 @@ import okhttp3.MediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
-import com.google.gson.Gson
 
 class MessageRepositoryImpl(
     private val messageService: MessageService,
-    private val conversationService: ConversationService,
     private val messageLocalDatasource: MessageLocalDataSource
 ) : MessageRepository {
     override suspend fun getListMessage(
@@ -39,10 +37,13 @@ class MessageRepositoryImpl(
             } else {
                 val res = messageService.getListMessage(conversationId, page)
                 if (res.isSuccessful) {
-                    if (res.body()?.data?.data?.isNotEmpty() == true) {
-                        messageLocalDatasource.insertMessage(res.body()?.data?.data ?: listOf())
+                    val remoteMessages = res.body()?.data?.data ?: listOf()
+                    if (remoteMessages.isNotEmpty()) {
+                        messageLocalDatasource.insertMessage(remoteMessages)
+                        Result.Success(res.body()?.data?.data ?: listOf())
+                    }else{
+                        Result.Success(listOf())
                     }
-                    Result.Success(res.body()?.data?.data ?: listOf())
                 } else {
                     Result.Error(res.getError())
                 }

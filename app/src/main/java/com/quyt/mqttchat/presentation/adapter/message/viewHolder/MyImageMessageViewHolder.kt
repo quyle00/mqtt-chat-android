@@ -10,16 +10,27 @@ import com.quyt.mqttchat.databinding.ItemMyImageMessageBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
-import com.quyt.mqttchat.presentation.adapter.message.ImageAdapter
+import com.quyt.mqttchat.presentation.adapter.message.MediaAdapter
+import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.utils.DateUtils
 
-class MyImageMessageViewHolder(private val binding: ItemMyImageMessageBinding) : RecyclerView.ViewHolder(
+class MyImageMessageViewHolder(private val binding: ItemMyImageMessageBinding,private val listener : OnMessageClickListener) : RecyclerView.ViewHolder(
     binding.root
 ) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         binding.message = message
         //
-        val imageAdapter = ImageAdapter(message?.images ?: arrayListOf())
+        if (binding.rvImages.adapter == null) {
+          initRecyclerView(message?.images ?: arrayListOf())
+        }
+        binding.tvTime2.text = DateUtils.formatTime(message?.createdAt ?: "", "HH:mm")
+        binding.ivState.setImageResource(
+            if (message?.state == MessageState.SEEN.value) R.drawable.ic_double_check else R.drawable.ic_check
+        )
+    }
+
+    private fun initRecyclerView(imageUrls : List<String>){
+        val imageAdapter = MediaAdapter(imageUrls,listener)
         binding.rvImages.adapter = imageAdapter
         binding.rvImages.layoutManager = GridLayoutManager(binding.root.context, 3)
         binding.rvImages.layoutDirection = View.LAYOUT_DIRECTION_RTL
@@ -37,9 +48,5 @@ class MyImageMessageViewHolder(private val binding: ItemMyImageMessageBinding) :
             clipToOutline = true
             outlineProvider = outLineProvider
         }
-        binding.tvTime2.text = DateUtils.formatTime(message?.createdAt ?: "", "HH:mm")
-        binding.ivState.setImageResource(
-            if (message?.state == MessageState.SEEN.value) R.drawable.ic_double_check else R.drawable.ic_check
-        )
     }
 }
