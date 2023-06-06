@@ -1,11 +1,8 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
-import android.app.AlertDialog
-import android.view.LayoutInflater
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
-import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -17,7 +14,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
-import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
@@ -29,7 +25,7 @@ import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
-import com.quyt.mqttchat.presentation.gestures.dismiss.SwipeToDismissHandler
+import com.stfalcon.imageviewer.StfalconImageViewer
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -59,37 +55,38 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     override fun onMediaClick(imageView: ImageView, url: String?) {
+        val mediaViewerDialog = MediaViewerDialog.newInstance(url)
+        mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
 //        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
 //            Glide.with(view.context).load(image).into(view)
 //        }.withTransitionFrom(imageView).show()
-        viewMedia(url)
+//        viewMedia(url)
     }
 
     private fun viewMedia(url: String?) {
-        val builder = AlertDialog.Builder(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-        val view = DataBindingUtil.inflate<DialogMediaViewerBinding>(
-            LayoutInflater.from(context),
-            R.layout.dialog_media_viewer,
-            null,
-            false
-        )
-        builder.setView(view.root)
-        builder.setCancelable(true)
-        Glide.with(view.root.context).load(url).into(view.ivImage)
-        val dialog = builder.create()
-        val swipeDismissBehavior = SwipeToDismissHandler(
-            swipeView = view.dismissContainer,
-            shouldAnimateDismiss = { true },
-            onDismiss = {
-//                view.dismissContainer.applyMargin(0, 0, 0, 0)
-                dialog.dismiss()
-            },
-            onSwipeViewMove = { translationY, translationLimit ->
-                val alpha = calculateTranslationAlpha(translationY, translationLimit)
-                view.backgroundView.alpha = alpha
-            })
-        view.rootContainer.setOnTouchListener(swipeDismissBehavior)
-        dialog.show()
+//        val builder = AlertDialog.Builder(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+//        val view = DataBindingUtil.inflate<DialogMediaViewerBinding>(
+//            LayoutInflater.from(context),
+//            R.layout.dialog_media_viewer,
+//            null,
+//            false
+//        )
+//        builder.setView(view.root)
+//        builder.setCancelable(true)
+//        Glide.with(view.root.context).load(url).into(view.ivImage)
+//        val dialog = builder.create()
+//        val swipeDismissBehavior = SwipeToDismissHandler(
+//            swipeView = view.dismissContainer,
+//            shouldAnimateDismiss = { true },
+//            onDismiss = {
+//                dialog.dismiss()
+//            },
+//            onSwipeViewMove = { translationY, translationLimit ->
+//                val alpha = calculateTranslationAlpha(translationY, translationLimit)
+//                view.backgroundView.alpha = alpha
+//            })
+//        view.rootContainer.setOnTouchListener(swipeDismissBehavior)
+//        dialog.show()
     }
 
 
