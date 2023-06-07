@@ -1,150 +1,125 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
+import android.graphics.Rect
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.view.animation.AccelerateInterpolator
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
-import com.quyt.mqttchat.presentation.extensions.animateAlpha
-import com.quyt.mqttchat.presentation.extensions.applyMargin
-import com.quyt.mqttchat.presentation.extensions.makeVisible
-import com.quyt.mqttchat.presentation.gestures.direction.SwipeDirection
-import com.quyt.mqttchat.presentation.gestures.direction.SwipeDirectionDetector
-import com.quyt.mqttchat.presentation.gestures.dismiss.SwipeToDismissHandler
+import kotlin.math.abs
 
 
 class MediaViewerDialog : DialogFragment() {
-    private lateinit var binding: DialogMediaViewerBinding
-    private lateinit var transitionImageAnimator: TransitionImageAnimator
-    private lateinit var swipeDismissHandler: SwipeToDismissHandler
-    private lateinit var url: String
-    private lateinit var directionDetector: SwipeDirectionDetector
 
-    private var swipeDirection: SwipeDirection? = null
+    private lateinit var binding: DialogMediaViewerBinding
+    private lateinit var url: String
+    private var translationLimit = 300
+    private var isTracking = false
+    private var startY: Float = 0f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
     }
 
-//    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-//
-//        val dialog = super.onCreateDialog(savedInstanceState) as Dialog
-//
-//        return dialog
-//    }
-
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-//        dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
-        binding = DialogMediaViewerBinding.inflate(inflater, container, false)
-        directionDetector = SwipeDirectionDetector(requireContext()) { swipeDirection = it }
+        dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
+        binding = DataBindingUtil.inflate(inflater, R.layout.dialog_media_viewer, container, true)
         Glide.with(this).load(url).into(binding.transitionImageView)
-        //
-        transitionImageAnimator = createTransitionImageAnimator(null)
-        swipeDismissHandler = createSwipeToDismissHandler()
-        binding.rootContainer.setOnTouchListener(swipeDismissHandler)
-        binding.root.setOnTouchListener { _, event ->
-            dispatchTouchEvent(event)
-            handleTouchIfNotScaled(event)
-        }
+
+        handleSwipeToDismiss()
         return binding.root
     }
 
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun handleSwipeToDismiss() {
+        binding.rootContainer.setOnTouchListener { view, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    val hitRect = Rect().also { binding.dismissContainer.getHitRect(it) }
+                    if (hitRect.contains(event.x.toInt(), event.y.toInt())) {
+                        isTracking = true
+                    }
+                    startY = event.y
+                    return@setOnTouchListener true
+                }
 
-    private fun handleTouchIfNotScaled(event: MotionEvent): Boolean {
-        directionDetector.handleTouchEvent(event)
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (isTracking) {
+                        isTracking = false
+                        onTrackingEnd(view.height)
+                    }
+                    return@setOnTouchListener true
+                }
 
-        return when (swipeDirection) {
-            SwipeDirection.UP, SwipeDirection.DOWN -> {
-//                if (isSwipeToDismissAllowed && !wasScaled && imagesPager.isIdle) {
-                    swipeDismissHandler.onTouch(binding.rootContainer, event)
-//                } else true
+                MotionEvent.ACTION_MOVE -> {
+                    if (isTracking) {
+                        val translationY = event.y - startY
+                        binding.dismissContainer.translationY = translationY
+                        handleSwipeViewMove(translationY, translationLimit)
+                    }
+                    return@setOnTouchListener true
+                }
+
+                else -> {
+                    return@setOnTouchListener false
+                }
             }
-//            SwipeDirection.LEFT, SwipeDirection.RIGHT -> {
-//                imagesPager.dispatchTouchEvent(event)
-//            }
-            else -> true
         }
     }
 
-    private fun dispatchTouchEvent(event: MotionEvent) {
-        if (event.action == MotionEvent.ACTION_UP) {
-            handleEventActionUp(event)
+    private fun onTrackingEnd(parentHeight: Int) {
+        val animateTo = when {
+            binding.dismissContainer.translationY < -translationLimit -> -parentHeight.toFloat()
+            binding.dismissContainer.translationY > translationLimit -> parentHeight.toFloat()
+            else -> 0f
         }
-
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            handleEventActionDown(event)
-        }
+        animateTranslation(animateTo)
     }
 
-    private fun handleEventActionDown(event: MotionEvent) {
-//        swipeDirection = null
-//        wasScaled = false
-//        imagesPager.dispatchTouchEvent(event)
-
-        swipeDismissHandler.onTouch(binding.rootContainer, event)
-//        isOverlayWasClicked = dispatchOverlayTouch(event)
-    }
-
-    private fun handleEventActionUp(event: MotionEvent) {
-//        wasDoubleTapped = false
-        swipeDismissHandler.onTouch(binding.rootContainer, event)
-//        imagesPager.dispatchTouchEvent(event)
-//        isOverlayWasClicked = dispatchOverlayTouch(event)
-    }
-
-    private fun createSwipeToDismissHandler()
-            : SwipeToDismissHandler = SwipeToDismissHandler(
-        swipeView = binding.dismissContainer,
-        shouldAnimateDismiss = { true },
-        onDismiss = { animateClose() },
-        onSwipeViewMove = ::handleSwipeViewMove
-    )
-
-
-    private fun createTransitionImageAnimator(transitionImageView: ImageView?) =
-        TransitionImageAnimator(
-            externalImage = transitionImageView,
-            internalImage = binding.transitionImageView,
-            internalImageContainer = binding.transitionImageContainer
-        )
-
-    private fun animateClose() {
-        prepareViewsForTransition()
-        binding.dismissContainer.applyMargin(0, 0, 0, 0)
-
-        transitionImageAnimator.animateClose(
-            shouldDismissToBottom = true,
-            onTransitionStart = { duration ->
-                binding.backgroundView.animateAlpha(binding.backgroundView.alpha, 0f, duration)
-//                binding.overlayView?.animateAlpha(overlayView?.alpha, 0f, duration)
-            },
-            onTransitionEnd = { dialog?.dismiss() })
-    }
-
-    private fun prepareViewsForTransition() {
-        binding.transitionImageContainer.makeVisible()
-//        imagesPager.makeGone()
+    private fun animateTranslation(translationTo: Float) {
+        binding.dismissContainer.animate()
+            .translationY(translationTo)
+            .setDuration(200L)
+            .setInterpolator(AccelerateInterpolator())
+            .setUpdateListener {
+                handleSwipeViewMove(binding.dismissContainer.translationY, translationLimit)
+            }
+            .setListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    if (translationTo != 0f) {
+                        dialog?.dismiss()
+                    }
+                    //remove the update listener, otherwise it will be saved on the next animation execution:
+                    binding.dismissContainer.animate().setUpdateListener(null)
+                }
+            })
+            .start()
     }
 
     private fun handleSwipeViewMove(translationY: Float, translationLimit: Int) {
+        Log.d("DebugTAG", "TranslationY: $translationY")
+        Log.d("DebugTAG", "TranslationLimit: $translationLimit")
         val alpha = calculateTranslationAlpha(translationY, translationLimit)
+        Log.d("DebugTAG", alpha.toString())
         binding.backgroundView.alpha = alpha
-//        binding.overlayView?.alpha = alpha
     }
 
-    private fun calculateTranslationAlpha(translationY: Float, translationLimit: Int): Float =
-        1.0f - 1.0f / translationLimit.toFloat() / 4f * Math.abs(translationY)
-
-
+    private fun calculateTranslationAlpha(translationY: Float, translationLimit: Int): Float {
+        return 1.0f - 1.0f / translationLimit.toFloat() / 2f * abs(translationY)
+    }
 
     companion object {
         fun newInstance(url: String?): MediaViewerDialog {

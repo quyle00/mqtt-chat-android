@@ -10,7 +10,7 @@
             android:id="@+id/background_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/black"/>
+            android:background="@color/white"/>
 
         <FrameLayout
             android:id="@+id/dismiss_container"
