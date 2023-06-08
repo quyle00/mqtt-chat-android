@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import com.bumptech.glide.Glide
@@ -36,10 +37,36 @@ class MediaViewerDialog : DialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_media_viewer, container, true)
-        Glide.with(this).load(url).into(binding.transitionImageView)
-
+        loadMedia()
         handleSwipeToDismiss()
         return binding.root
+    }
+
+    private fun loadMedia(){
+        if (getFileExtensionFromUrl(url) == "mp4") {
+            binding.transitionImageView.visibility = View.GONE
+            binding.vvVideo.visibility = View.VISIBLE
+            binding.vvVideo.setVideoPath(url)
+            binding.vvVideo.start()
+        } else {
+            binding.transitionImageView.visibility = View.VISIBLE
+            binding.vvVideo.visibility = View.GONE
+            Glide.with(binding.root.context)
+                .load(url)
+                .error(
+                    ContextCompat.getDrawable(
+                        binding.root.context,
+                        R.drawable.ic_launcher_background
+                    )
+                )
+                .into(binding.transitionImageView)
+        }
+    }
+
+    private fun getFileExtensionFromUrl(url: String): String {
+        val fileUrl = url.substringAfterLast("/")
+        val fileExtension = fileUrl.substringAfterLast(".", "")
+        return fileExtension.ifEmpty { "" }
     }
 
 

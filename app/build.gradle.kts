@@ -104,6 +104,7 @@ dependencies {
     implementation("com.google.android.flexbox:flexbox:3.0.0")
     // Image Viewer - Stfalcon
     implementation("com.github.stfalcon-studio:StfalconImageViewer:v1.0.1")
+
 }
 
 // Hilt - Allow references to generated code
