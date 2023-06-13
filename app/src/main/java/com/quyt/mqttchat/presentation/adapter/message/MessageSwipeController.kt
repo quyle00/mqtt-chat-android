@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageViewHolder
 import com.quyt.mqttchat.utils.DimenUtils
 
 class MessageSwipeController(private val context: Context, private val showReplyUI: (Int) -> Unit) :
@@ -33,9 +35,13 @@ class MessageSwipeController(private val context: Context, private val showReply
     private val triggerValue = 50
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        mView = viewHolder.itemView
+        mView = when (viewHolder) {
+            is MyMessageViewHolder -> viewHolder.binding.rlMessage
+            is OtherMessageViewHolder -> viewHolder.binding.rlMessage
+            else -> viewHolder.itemView
+        }
         imageDrawable = ContextCompat.getDrawable(context, R.drawable.ic_reply_24)!!
-        shareRound = ContextCompat.getDrawable(context, R.drawable.ic_round_shape)!!
+        shareRound = ContextCompat.getDrawable(context, R.drawable.ic_circle)!!
         return makeMovementFlags(ACTION_STATE_IDLE, LEFT)
     }
 
@@ -76,7 +82,7 @@ class MessageSwipeController(private val context: Context, private val showReply
             startTracking = true
         }
         currentItemViewHolder = viewHolder
-        drawReplyButton(c)
+        drawReplyButton(c, viewHolder)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -91,7 +97,7 @@ class MessageSwipeController(private val context: Context, private val showReply
             false
         }
     }
-    private fun drawReplyButton(canvas: Canvas) {
+    private fun drawReplyButton(canvas: Canvas, viewHolder: RecyclerView.ViewHolder) {
         if (currentItemViewHolder == null) {
             return
         }
@@ -152,8 +158,19 @@ class MessageSwipeController(private val context: Context, private val showReply
         val x = mView.right + (mView.translationX / 2).toInt() + leftMargin
 
         val y = (mView.top + mView.measuredHeight / 2).toFloat()
-        shareRound.colorFilter = PorterDuffColorFilter(
-            ContextCompat.getColor(context, R.color.colorPrimary),
+        if (viewHolder is MyMessageViewHolder) {
+            shareRound.colorFilter = PorterDuffColorFilter(
+                ContextCompat.getColor(context, R.color.colorPrimary),
+                PorterDuff.Mode.MULTIPLY
+            )
+        }else{
+            shareRound.colorFilter = PorterDuffColorFilter(
+                ContextCompat.getColor(context, R.color.normal_text),
+                PorterDuff.Mode.MULTIPLY
+            )
+        }
+        imageDrawable.colorFilter = PorterDuffColorFilter(
+            ContextCompat.getColor(context, R.color.white),
             PorterDuff.Mode.MULTIPLY
         )
 

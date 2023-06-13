@@ -10,14 +10,14 @@ import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.utils.DateUtils
 
-class MyMessageViewHolder(private val binding: ItemMyMessageBinding, private val listener: OnMessageClickListener) : RecyclerView.ViewHolder(
+class MyMessageViewHolder(val binding: ItemMyMessageBinding, private val listener: OnMessageClickListener) : RecyclerView.ViewHolder(
     binding.root
 ) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         //
-        binding.rlMessage.setOnLongClickListener {
+        binding.rlMessage.setOnClickListener {
             listener.onMessageLongClick(message, absoluteAdapterPosition)
-            true
+//            true
         }
         //
         binding.tvEdited.visibility = if (message?.edited == true) {

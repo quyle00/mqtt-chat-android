@@ -9,7 +9,7 @@ import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.utils.DateUtils
 
-class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(
+class OtherMessageViewHolder(val binding: ItemOtherMessageBinding) : RecyclerView.ViewHolder(
     binding.root
 ) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {

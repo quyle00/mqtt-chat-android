@@ -249,7 +249,7 @@ class ConversationDetailViewModel @Inject constructor(
                 mCurrentConversation = createConversation() ?: return@launch
             }
             message.reply = messageToReply
-            onCloseReplyMessage()
+            onCloseEditorMessage()
             val result = createMessageUseCase(mCurrentConversation.id ?: "", message)
             when (result) {
                 is Result.Success -> {
@@ -280,7 +280,7 @@ class ConversationDetailViewModel @Inject constructor(
         messageToEdit?.content = messageInputValue.value ?: ""
         viewModelScope.launch {
             val result = updateMessageUseCase(messageToEdit!!, true)
-            onCloseReplyMessage()
+            onCloseEditorMessage()
             when (result) {
                 is Result.Success -> {
                     uiState.postValue(ConversationDetailState.EditMessageSuccess(result.data))
@@ -339,7 +339,7 @@ class ConversationDetailViewModel @Inject constructor(
         messageEditorContent.postValue(message?.content)
     }
 
-    fun onCloseReplyMessage() {
+    fun onCloseEditorMessage() {
         messageToReply = null
         messageEditorTitle.postValue(null)
         messageEditorContent.postValue(null)

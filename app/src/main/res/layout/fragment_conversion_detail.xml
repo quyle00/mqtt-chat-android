@@ -44,6 +44,7 @@
                 <androidx.appcompat.widget.AppCompatImageView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    setAvatar="@{viewModel.MPartner.avatar}"
                     android:src="@drawable/ic_launcher_background" />
             </androidx.cardview.widget.CardView>
 
@@ -151,12 +152,13 @@
                     tools:text="This is a message" />
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:id="@+id/iv_close_editor"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:layout_marginEnd="16dp"
-                    android:onClick="@{() -> viewModel.onCloseReplyMessage()}"
+                    android:padding="5dp"
                     android:src="@drawable/ic_close"
                     app:tint="@color/colorPrimary" />
 

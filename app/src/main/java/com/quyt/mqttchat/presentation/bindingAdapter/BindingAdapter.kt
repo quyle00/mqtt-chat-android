@@ -1,5 +1,6 @@
 package com.quyt.mqttchat.presentation.bindingAdapter
 
+import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.databinding.BindingAdapter
@@ -19,3 +20,11 @@ fun setTimeStringToTextView(view: AppCompatTextView, time: String?) {
         view.text = DateUtils.formatTime(time, "HH:mm")
     }
 }
+
+@BindingAdapter("setAvatar")
+fun setAvatar(view: ImageView, url: String?) {
+    if (url != null) {
+        Glide.with(view.context).load(url).into(view)
+    }
+}
+

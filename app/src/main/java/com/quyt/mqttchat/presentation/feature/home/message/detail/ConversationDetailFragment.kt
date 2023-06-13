@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -22,15 +23,16 @@ import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
+import com.quyt.mqttchat.extensions.showKeyboard
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
 import com.quyt.mqttchat.utils.DateUtils
-import com.quyt.mqttchat.utils.KeyboardUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -86,9 +88,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 BottomSheetMessageAction.Action.EDIT -> {
                     viewModel.setEditMessage(message)
-//                    KeyboardUtils.showKeyboard(requireContext())
-//                    binding.etMessage.requestFocus()
-//                    binding.etMessage.setSelection(binding.etMessage.text?.length?:0)
+                    lifecycleScope.launch {
+                        delay(100)
+                        binding.etMessage.showKeyboard()
+                    }
                 }
 
                 BottomSheetMessageAction.Action.DELETE -> {
@@ -209,6 +212,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             val bottomSheetAttach = BottomSheetAttach(this)
             bottomSheetAttach.show(childFragmentManager, bottomSheetAttach.tag)
         }
+        binding.ivCloseEditor.setOnClickListener {
+            binding.etMessage.requestFocus()
+            viewModel.onCloseEditorMessage()
+        }
     }
 
     private fun initConversationList() {
@@ -221,17 +228,33 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         )
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setFirstPageMessage(ArrayList())
+        swipeToReply()
+        loadMore()
+        handleLayoutChange()
+    }
+
+    private fun swipeToReply(){
         val messageSwipeController = MessageSwipeController(requireContext()) {
             messageAdapter.getMessage(it)?.let { message ->
                 viewModel.setReplyMessage(message)
+                binding.etMessage.showKeyboard()
             }
         }
         val itemTouchHelper = ItemTouchHelper(messageSwipeController)
         itemTouchHelper.attachToRecyclerView(binding.rvMessage)
-        initScrollListener()
     }
 
-    private fun initScrollListener() {
+    private fun handleLayoutChange() {
+        binding.rvMessage.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+            if (bottom < oldBottom) {
+                binding.rvMessage.smoothScrollToPosition(
+                    messageAdapter.itemCount - 1
+                )
+            }
+        }
+    }
+
+    private fun loadMore() {
         binding.rvMessage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
