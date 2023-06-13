@@ -27,12 +27,24 @@
             tools:text="This is a message" />
 
         <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tv_edited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="edited"
+            android:textColor="#B3FFFFFF"
+            android:layout_alignBottom="@id/tv_message"
+            android:layout_marginEnd="4dp"
+            android:layout_toEndOf="@id/tv_message"
+            android:textSize="12sp"
+            android:visibility="gone"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_time_2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tv_message"
             android:layout_marginEnd="8dp"
-            android:layout_toEndOf="@id/tv_message"
+            android:layout_toEndOf="@id/tv_edited"
             android:textColor="#B3FFFFFF"
             android:textSize="12sp"
             android:visibility="visible"

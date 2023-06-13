@@ -36,4 +36,12 @@ class MessageLocalDataSourceImpl(private val appDatabase: AppDatabase) : Message
     override suspend fun updateMessageState(messageIds: List<String>, newState: Int) {
         appDatabase.messageDao().updateMessagesState(messageIds, newState)
     }
+
+    override suspend fun updateMessage(message: Message) {
+        appDatabase.messageDao().updateMessage(message.toEntity())
+    }
+
+    override suspend fun deleteMessage(message: Message) {
+        appDatabase.messageDao().deleteMessage(message.toEntity())
+    }
 }

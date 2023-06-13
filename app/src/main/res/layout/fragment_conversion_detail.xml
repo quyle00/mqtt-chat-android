@@ -106,20 +106,32 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
-                android:visibility="@{viewModel.messageToReply != null ? View.VISIBLE : View.GONE}">
+                android:visibility="@{viewModel.messageEditorTitle != null ? View.VISIBLE : View.GONE}">
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/normal_text" />
 
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iv_message_editor_type"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="8dp"
+                    android:src="@{viewModel.isEditing ? @drawable/ic_edit : @drawable/ic_reply}"
+                    android:tint="@color/colorPrimary" />
+
                 <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/tv_message_owner"
+                    android:id="@+id/tv_editor_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
-                    android:text="@{viewModel.messageToReply.sender.fullname}"
+                    android:layout_toEndOf="@id/iv_message_editor_type"
+                    android:text="@{viewModel.messageEditorTitle}"
                     android:textColor="@color/title_text"
                     android:textSize="16sp"
                     tools:text="Sender" />
@@ -128,11 +140,12 @@
                     android:id="@+id/tv_message_content"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/tv_message_owner"
+                    android:layout_below="@id/tv_editor_title"
                     android:layout_marginStart="16dp"
+                    android:layout_toEndOf="@id/iv_message_editor_type"
                     android:maxLines="1"
                     android:singleLine="true"
-                    android:text="@{viewModel.messageToReply.content}"
+                    android:text="@{viewModel.messageEditorContent}"
                     android:textColor="@color/normal_text"
                     android:textSize="16sp"
                     tools:text="This is a message" />
@@ -175,6 +188,7 @@
                     android:layout_toEndOf="@id/iv_attach"
                     android:background="@drawable/bg_message_type"
                     android:hint="Message"
+                    android:text="@={viewModel.messageInputValue}"
                     android:minHeight="40dp"
                     android:paddingHorizontal="16dp"
                     android:textSize="16sp" />

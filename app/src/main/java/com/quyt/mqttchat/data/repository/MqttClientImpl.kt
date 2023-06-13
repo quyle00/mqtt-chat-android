@@ -1,5 +1,6 @@
 package com.quyt.mqttchat.data.repository
 
+import android.util.Log
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.quyt.mqttchat.domain.repository.IMqttClient
@@ -32,7 +33,19 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
                 .topicFilter(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
                 .callback { publish ->
-                    callback(String(publish.payloadAsBytes))
+                    val payload = String(publish.payloadAsBytes)
+                    if (payload.isNotEmpty()){
+                        callback(payload)
+                        // Clear retain message
+//                        if (publish.isRetain) {
+//                            client.publishWith()
+//                                .topic(publish.topic)
+//                                .qos(MqttQos.AT_LEAST_ONCE)
+//                                .retain(true)
+//                                .payload("".toByteArray())
+//                                .send()
+//                        }
+                    }
                 }
                 .send()
 
@@ -40,11 +53,22 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
         }
     }
 
-    override suspend fun publish(topic: String, payload: String, qos: Int) {
+    override suspend fun unsubscribe(topic: String) {
+        withContext(Dispatchers.IO) {
+            val unSubFuture = client.unsubscribeWith()
+                .topicFilter(topic)
+                .send()
+
+            unSubFuture.get()
+        }
+    }
+
+    override suspend fun publish(topic: String, payload: String, qos: Int,retain : Boolean) {
         withContext(Dispatchers.IO) {
             val pubFuture = client.publishWith()
                 .topic(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
+                .retain(retain)
                 .payload(payload.toByteArray())
                 .send()
 

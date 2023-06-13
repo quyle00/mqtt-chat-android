@@ -13,15 +13,21 @@ import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetListConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.ListenConversationEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.ClearRetainMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.DeleteMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.InsertMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendDeleteMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.SendEditMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SendMarkReadEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SendNewMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.UnsubscribeMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
+import com.quyt.mqttchat.domain.usecase.message.UpdateMessageUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -129,6 +135,54 @@ class UseCaseModule {
     @Singleton
     fun provideUpdateLocalMessageStateUseCase(repository: MessageRepository): UpdateLocalMessageStateUseCase {
         return UpdateLocalMessageStateUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideUpdateMessageUseCase(repository: MessageRepository): UpdateMessageUseCase {
+        return UpdateMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDeleteMessageUseCase(repository: MessageRepository): DeleteMessageUseCase {
+        return DeleteMessageUseCase(repository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSendEditMessageEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): SendEditMessageEventUseCase {
+        return SendEditMessageEventUseCase(sharedPreferences, client, mapper)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSendDeleteMessageEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient,
+        mapper: EventMapper
+    ): SendDeleteMessageEventUseCase {
+        return SendDeleteMessageEventUseCase(sharedPreferences, client, mapper)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUnsubscribeMessageEventUseCase(
+        client: IMqttClient,
+    ): UnsubscribeMessageEventUseCase {
+        return UnsubscribeMessageEventUseCase(client)
+    }
+
+    @Singleton
+    @Provides
+    fun provideClearRetainMessageEventUseCase(
+        client: IMqttClient,
+    ): ClearRetainMessageEventUseCase {
+        return ClearRetainMessageEventUseCase(client)
     }
 
     @Provides

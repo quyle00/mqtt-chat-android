@@ -18,6 +18,12 @@ class OtherMessageViewHolder(private val binding: ItemOtherMessageBinding) : Rec
             binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?: "", "HH:mm")
         }
         //
+        binding.tvEdited.visibility = if (message?.edited == true) {
+            ViewGroup.VISIBLE
+        } else {
+            ViewGroup.GONE
+        }
+        //
         val params = binding.rlMessage.layoutParams as ViewGroup.MarginLayoutParams
         params.topMargin = 40
         when (groupMessageState) {

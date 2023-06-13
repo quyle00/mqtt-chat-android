@@ -25,7 +25,8 @@ data class MessageEntity(
     var state: Int?,
     var type: Int = MessageContentType.TEXT.value,
     var images: String?,
-    var reply: String?
+    var reply: String?,
+    var edited : Boolean
 )
 
 fun MessageEntity.toMessage() = Message(
@@ -41,5 +42,6 @@ fun MessageEntity.toMessage() = Message(
     state = state ?: MessageState.SENT.value,
     type = type,
     images = Gson().fromJson(images, Array<String>::class.java).toList(),
-    reply = Gson().fromJson(reply, Message::class.java)
+    reply = Gson().fromJson(reply, Message::class.java),
+    edited = edited
 )

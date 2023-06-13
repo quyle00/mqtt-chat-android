@@ -7,12 +7,24 @@ import com.quyt.mqttchat.databinding.ItemMyMessageBinding
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
+import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.utils.DateUtils
 
-class MyMessageViewHolder(private val binding: ItemMyMessageBinding) : RecyclerView.ViewHolder(
+class MyMessageViewHolder(private val binding: ItemMyMessageBinding, private val listener: OnMessageClickListener) : RecyclerView.ViewHolder(
     binding.root
 ) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
+        //
+        binding.rlMessage.setOnLongClickListener {
+            listener.onMessageLongClick(message, absoluteAdapterPosition)
+            true
+        }
+        //
+        binding.tvEdited.visibility = if (message?.edited == true) {
+            ViewGroup.VISIBLE
+        } else {
+            ViewGroup.GONE
+        }
         //
         if (message?.reply != null) {
             binding.layoutReply.root.visibility = ViewGroup.VISIBLE

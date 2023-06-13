@@ -1,10 +1,13 @@
 package com.quyt.mqttchat.data.datasource.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.quyt.mqttchat.data.datasource.local.entity.MessageEntity
+import com.quyt.mqttchat.domain.model.Message
 
 @Dao
 interface MessageDao {
@@ -25,4 +28,10 @@ interface MessageDao {
 
     @Query("UPDATE message SET state = :newState WHERE id IN (:messageIds)")
     suspend fun updateMessagesState(messageIds: List<String>, newState: Int)
+
+    @Update
+    suspend fun updateMessage(message: MessageEntity)
+
+    @Delete
+    suspend fun deleteMessage(message: MessageEntity)
 }

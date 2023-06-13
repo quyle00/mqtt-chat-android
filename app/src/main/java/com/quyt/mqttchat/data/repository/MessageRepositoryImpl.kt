@@ -23,12 +23,12 @@ class MessageRepositoryImpl(
     ): Result<List<Message>> {
         return try {
             if (page == 1) {
-                if (lastMessageId != null) {
+//                if (lastMessageId != null) {
                     val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
                     if (localLatestMessage != null && localLatestMessage.id != lastMessageId) {
                         messageLocalDatasource.clearMessage(conversationId)
                     }
-                }
+//                }
             }
 
             val localMessage = messageLocalDatasource.getMessageByPage(conversationId, page)
@@ -41,7 +41,7 @@ class MessageRepositoryImpl(
                     if (remoteMessages.isNotEmpty()) {
                         messageLocalDatasource.insertMessage(remoteMessages)
                         Result.Success(res.body()?.data?.data ?: listOf())
-                    }else{
+                    } else {
                         Result.Success(listOf())
                     }
                 } else {
@@ -103,5 +103,43 @@ class MessageRepositoryImpl(
 
     override suspend fun updateLocalMessageState(messageIds: List<String>, newState: Int) {
         messageLocalDatasource.updateMessageState(messageIds, newState)
+    }
+
+    override suspend fun updateMessage(message: Message, shouldUpdateRemote: Boolean): Result<Message> {
+        return try {
+            if (shouldUpdateRemote) {
+                val res = messageService.updateMessage(message.conversation ?: "", message)
+                if (res.isSuccessful) {
+                    messageLocalDatasource.updateMessage(res.body()?.data!!)
+                    Result.Success(res.body()?.data!!)
+                } else {
+                    Result.Error(res.getError())
+                }
+            } else {
+                messageLocalDatasource.updateMessage(message)
+                Result.Success(message)
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    override suspend fun deleteMessage(message: Message, shouldDeleteRemote: Boolean): Result<String> {
+        return try {
+            if (shouldDeleteRemote) {
+                val res = messageService.deleteMessage(message.conversation ?: "", message.id ?: "")
+                if (res.isSuccessful) {
+                    messageLocalDatasource.deleteMessage(message)
+                    Result.Success("Success")
+                } else {
+                    Result.Error(res.getError())
+                }
+            } else {
+                messageLocalDatasource.deleteMessage(message)
+                Result.Success("Success")
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
     }
 }

@@ -15,4 +15,8 @@ interface MessageLocalDataSource {
     suspend fun clearMessage(conversationId: String)
 
     suspend fun updateMessageState(messageIds: List<String>, newState: Int)
+
+    suspend fun updateMessage(message: Message)
+
+    suspend fun deleteMessage(message: Message)
 }

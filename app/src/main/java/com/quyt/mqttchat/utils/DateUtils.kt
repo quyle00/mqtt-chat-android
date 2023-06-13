@@ -3,6 +3,7 @@ package com.quyt.mqttchat.utils
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 
@@ -35,5 +36,14 @@ object DateUtils {
         val remainingSeconds = seconds % 60
 
         return "$minutes:${String.format("%02d", remainingSeconds)}"
+    }
+
+    fun currentDateTimeStr(): String {
+        val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+        return sdf.format(Date())
+    }
+
+    fun currentTimestamp(): Long {
+        return System.currentTimeMillis()
     }
 }

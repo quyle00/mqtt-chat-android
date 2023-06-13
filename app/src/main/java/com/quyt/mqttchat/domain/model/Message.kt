@@ -26,7 +26,8 @@ data class Message(
     var state: Int = MessageState.SENT.value,
     var type: Int = MessageContentType.TEXT.value,
     var images: List<String>?,
-    var reply: Message?
+    var reply: Message?,
+    var edited : Boolean
 ) {
     constructor() : this(
         id = "",
@@ -41,7 +42,8 @@ data class Message(
         state = MessageState.SENT.value,
         type = MessageContentType.TEXT.value,
         images = listOf(),
-        reply = null
+        reply = null,
+        edited = false
     )
 }
 
@@ -58,7 +60,8 @@ fun Message.toEntity() = MessageEntity(
     state = state,
     type = type,
     images = Gson().toJson(images),
-    reply = Gson().toJson(reply)
+    reply = Gson().toJson(reply),
+    edited = edited
 )
 
 enum class MessageState(val value: Int) {

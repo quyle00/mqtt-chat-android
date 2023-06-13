@@ -1,5 +1,8 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -11,7 +14,6 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
@@ -25,11 +27,15 @@ import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
-import com.stfalcon.imageviewer.StfalconImageViewer
+import com.quyt.mqttchat.utils.DateUtils
+import com.quyt.mqttchat.utils.KeyboardUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 @AndroidEntryPoint
 class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
@@ -57,42 +63,42 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     override fun onMediaClick(imageView: ImageView, url: String?) {
         val mediaViewerDialog = MediaViewerDialog.newInstance(url)
         mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
-//        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
-//            Glide.with(view.context).load(image).into(view)
-//        }.withTransitionFrom(imageView).show()
-//        viewMedia(url)
     }
 
-    private fun viewMedia(url: String?) {
-//        val builder = AlertDialog.Builder(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
-//        val view = DataBindingUtil.inflate<DialogMediaViewerBinding>(
-//            LayoutInflater.from(context),
-//            R.layout.dialog_media_viewer,
-//            null,
-//            false
-//        )
-//        builder.setView(view.root)
-//        builder.setCancelable(true)
-//        Glide.with(view.root.context).load(url).into(view.ivImage)
-//        val dialog = builder.create()
-//        val swipeDismissBehavior = SwipeToDismissHandler(
-//            swipeView = view.dismissContainer,
-//            shouldAnimateDismiss = { true },
-//            onDismiss = {
-//                dialog.dismiss()
-//            },
-//            onSwipeViewMove = { translationY, translationLimit ->
-//                val alpha = calculateTranslationAlpha(translationY, translationLimit)
-//                view.backgroundView.alpha = alpha
-//            })
-//        view.rootContainer.setOnTouchListener(swipeDismissBehavior)
-//        dialog.show()
+    override fun onMessageLongClick(message: Message?, position: Int) {
+        showMessageActionBottomSheet(message, position)
     }
 
+    private fun showMessageActionBottomSheet(message: Message?, position: Int) {
+        val messageActionBottomSheet = BottomSheetMessageAction()
+        messageActionBottomSheet.show(childFragmentManager, "messageActionBottomSheet")
+        messageActionBottomSheet.action().observe(viewLifecycleOwner) { action ->
+            when (action) {
+                BottomSheetMessageAction.Action.REPLY -> {
+                    viewModel.setReplyMessage(message)
+                }
 
-    private fun calculateTranslationAlpha(translationY: Float, translationLimit: Int): Float =
-        1.0f - 1.0f / translationLimit.toFloat() / 4f * Math.abs(translationY)
+                BottomSheetMessageAction.Action.COPY -> {
+                    val clipboardManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val clipData = ClipData.newPlainText("label", message?.content)
+                    clipboardManager.setPrimaryClip(clipData)
+                }
 
+                BottomSheetMessageAction.Action.EDIT -> {
+                    viewModel.setEditMessage(message)
+//                    KeyboardUtils.showKeyboard(requireContext())
+//                    binding.etMessage.requestFocus()
+//                    binding.etMessage.setSelection(binding.etMessage.text?.length?:0)
+                }
+
+                BottomSheetMessageAction.Action.DELETE -> {
+                    viewModel.deleteMessage(message!!)
+                }
+
+                else -> {}
+            }
+        }
+    }
 
     private fun observeState() {
         viewModel.uiState().observe(viewLifecycleOwner) { state ->
@@ -131,7 +137,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.SendMessageSuccess -> {
-                    messageAdapter.updateMessage(state.message)
+                    messageAdapter.updateMessageState(state.message)
                     state.message.isMine = state.message.sender?.id == viewModel.currentUser?.id
                     conversationListViewModel.updateLastMessage(state.message)
                 }
@@ -139,13 +145,25 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 is ConversationDetailState.SendMessageError -> {
                     val failedMessage = state.message
                     failedMessage.state = MessageState.FAILED.value
-                    messageAdapter.updateMessage(failedMessage)
+                    messageAdapter.updateMessageState(failedMessage)
                 }
 
                 is ConversationDetailState.NoMoreData -> {
                     noMoreData = true
                     isLoading = false
                     messageAdapter.removeLoading()
+                }
+
+                is ConversationDetailState.EditMessageSuccess -> {
+                    state.message.edited = true
+                    messageAdapter.updateMessage(state.message)
+                }
+
+                is ConversationDetailState.DeleteMessageSuccess -> {
+                    messageAdapter.deleteMessage(state.message.id)
+                }
+
+                else -> {
                 }
             }
         }
@@ -156,6 +174,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             findNavController().popBackStack()
         }
         binding.etMessage.addTextChangedListener {
+            if (viewModel.isEditing.value == true) return@addTextChangedListener
             if (it.toString().isNotEmpty() && !viewModel.isTyping) {
                 viewModel.isTyping = true
                 viewModel.sendTyping(true)
@@ -166,21 +185,24 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             }
         }
         binding.ivSend.setOnClickListener {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
             val messageContent = binding.etMessage.text.toString().trim()
             if (messageContent.isNotEmpty()) {
-                // Create message model
-                val newMessage = Message().apply {
-                    this.sender = viewModel.currentUser
-                    this.content = messageContent
-                    this.state = MessageState.SENDING.value
-                    this.createdAt = sdf.format(Date())
-                    this.sendTime = Date().time
+                if (viewModel.isEditing.value == true) {
+                    viewModel.editMessage()
+                } else {
+                    // Create message model
+                    val newMessage = Message().apply {
+                        this.sender = viewModel.currentUser
+                        this.content = messageContent
+                        this.state = MessageState.SENDING.value
+                        this.createdAt = DateUtils.currentDateTimeStr()
+                        this.sendTime = DateUtils.currentTimestamp()
+                    }
+                    messageAdapter.addNewMessage(newMessage)
+                    binding.rvMessage.scrollToPosition(messageAdapter.itemCount - 1)
+                    viewModel.sendMessage(newMessage)
+                    binding.etMessage.setText("")
                 }
-                messageAdapter.addNewMessage(newMessage)
-                binding.rvMessage.scrollToPosition(messageAdapter.itemCount - 1)
-                viewModel.sendMessage(newMessage)
-                binding.etMessage.setText("")
             }
         }
         binding.ivAttach.setOnClickListener {
@@ -239,6 +261,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         messageAdapter.addNewMessage(newMessage)
         scrollToBottom()
         viewModel.sendMessage(newMessage)
+    }
+
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        GlobalScope.launch {
+            viewModel.unsubscribeConversation()
+        }
     }
 
     private fun scrollToBottom() {

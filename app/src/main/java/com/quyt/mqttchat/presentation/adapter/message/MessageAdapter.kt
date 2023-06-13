@@ -22,6 +22,7 @@ import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageVie
 
 interface OnMessageClickListener {
     fun onMediaClick(imageView : ImageView, url: String?)
+    fun onMessageLongClick(message: Message?, position: Int)
 }
 
 class MessageAdapter(private val currentUserId: String?,private val listener : OnMessageClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -36,7 +37,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
                     parent,
                     false
                 )
-                MyMessageViewHolder(binding)
+                MyMessageViewHolder(binding,listener)
             }
 
             MessageType.OTHERS_MESSAGE.value -> {
@@ -185,9 +186,27 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
     }
 
     fun updateMessage(message: Message) {
+        mListMessage.find { it?.id == message.id }?.let {
+            it.edited = message.edited
+            it.content = message.content
+            notifyItemChanged(mListMessage.indexOf(it))
+        }
+    }
+
+    fun updateMessageState(message: Message) {
         mListMessage.find { it?.sendTime == message.sendTime }?.let {
+            it.id = message.id
+            it.conversation = message.conversation
             it.state = message.state
             notifyItemChanged(mListMessage.indexOf(it))
+        }
+    }
+
+    fun deleteMessage(messageId: String){
+        mListMessage.find { it?.id == messageId }?.let {
+            val index = mListMessage.indexOf(it)
+            mListMessage.remove(it)
+            notifyItemRemoved(index)
         }
     }
 
@@ -204,7 +223,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
         } else {
             if (mListMessage.isNotEmpty() && mListMessage.last()?.isTyping == true) {
                 mListMessage.removeLast()
-                notifyItemRemoved(mListMessage.size - 1)
+                notifyItemRemoved(mListMessage.size)
             }
         }
     }
