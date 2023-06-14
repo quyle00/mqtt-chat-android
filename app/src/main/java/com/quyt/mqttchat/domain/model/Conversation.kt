@@ -17,3 +17,4 @@ class Conversation {
     var participants: List<User>? = null
     var lastMessage: Message? = null
 }
+

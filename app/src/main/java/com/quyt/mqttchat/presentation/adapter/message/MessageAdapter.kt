@@ -228,7 +228,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
         }
     }
 
-    fun seenAllMessage() {
+    fun markReadAllUnSeenMessage() {
         val firstUnseenMessageIndex = mListMessage.indexOfFirst {
             it?.state == MessageState.SENT.value
         }

@@ -6,6 +6,7 @@ import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSourceImpl
 import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.mapper.MessageMapper
+import com.quyt.mqttchat.domain.mapper.UserMapper
 import com.quyt.mqttchat.utils.network.NetworkChecker
 import com.quyt.mqttchat.utils.network.NetworkCheckerImpl
 import dagger.Module
@@ -35,6 +36,12 @@ class DataModule {
     @Singleton
     fun provideEventMapper(): EventMapper {
         return EventMapper()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserMapper(): UserMapper {
+        return UserMapper()
     }
 
     @Provides

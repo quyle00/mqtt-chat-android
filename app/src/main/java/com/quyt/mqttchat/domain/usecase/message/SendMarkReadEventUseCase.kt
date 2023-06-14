@@ -19,6 +19,8 @@ class SendMarkReadEventUseCase(
         val event = Event(
             sharedPreferences.getCurrentUser()?.id,
             EventType.MARK_READ.value,
+            conversationId,
+            null,
             markReadMessageIds
         )
         mqttClient.publish(

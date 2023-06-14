@@ -3,6 +3,7 @@ package com.quyt.mqttchat.presentation.feature.home.message.detail
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -53,11 +54,13 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     override fun setupView() {
         binding.viewModel = viewModel
+        Log.d("DeBugTime", "initConversationList ${DateUtils.currentTimestamp()}")
+        initConversationList()
+        Log.d("DeBugTime", "getConversationDetail ${DateUtils.currentTimestamp()}")
         viewModel.getConversationDetail(
             Gson().fromJson(args.conversation, Conversation::class.java),
             Gson().fromJson(args.partner, User::class.java)
         )
-        initConversationList()
         observeState()
         handleAction()
     }
@@ -110,6 +113,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.Success -> {
+                    Log.d("DeBugTime", "setFirstPageMessage ${DateUtils.currentTimestamp()}")
                     messageAdapter.setFirstPageMessage(state.data)
                     scrollToBottom()
                 }
@@ -135,8 +139,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     }
                 }
 
-                is ConversationDetailState.MarkReadMessage -> {
-                    messageAdapter.seenAllMessage()
+                is ConversationDetailState.PartnerMarkReadMessage -> {
+                    messageAdapter.markReadAllUnSeenMessage()
                 }
 
                 is ConversationDetailState.SendMessageSuccess -> {
@@ -166,7 +170,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                     messageAdapter.deleteMessage(state.message.id)
                 }
 
-                else -> {
+                is ConversationDetailState.SendMarkReadMessageSuccess -> {
+                    conversationListViewModel.updateMarkReadMyLastMessage(state.conversationId)
                 }
             }
         }

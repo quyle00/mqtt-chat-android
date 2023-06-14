@@ -16,4 +16,6 @@ class User {
     var username: String? = null
     var avatar: String? = null
     var token: String? = null
+    var lastSeen = 0L
+    var isOnline = false
 }

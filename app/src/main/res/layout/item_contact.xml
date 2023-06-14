@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="android.view.View" />
         <variable
             name="contact"
             type="com.quyt.mqttchat.domain.model.User" />
@@ -17,18 +18,34 @@
         android:layout_marginTop="12dp"
         android:gravity="center_vertical">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            app:cardCornerRadius="48dp">
+       <RelativeLayout
+           android:layout_width="48dp"
+           android:layout_height="48dp">
+           <androidx.cardview.widget.CardView
+               android:layout_width="48dp"
+               android:layout_height="48dp"
+               app:cardCornerRadius="48dp"
+               app:cardElevation="0dp">
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/iv_avatar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:src="@drawable/ic_launcher_background"
-                imageUrl="@{contact.avatar}"/>
-        </androidx.cardview.widget.CardView>
+               <androidx.appcompat.widget.AppCompatImageView
+                   android:id="@+id/iv_avatar"
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   tools:src="@drawable/ic_launcher_background"
+                   imageUrl="@{contact.avatar}"/>
+           </androidx.cardview.widget.CardView>
+
+           <androidx.cardview.widget.CardView
+               android:id="@+id/cv_status"
+               android:layout_width="12dp"
+               android:layout_height="12dp"
+               android:layout_alignParentBottom="true"
+               android:layout_alignParentEnd="true"
+               app:cardBackgroundColor="#4CAF50"
+               app:cardCornerRadius="8dp"
+               android:visibility="@{contact.isOnline ? View.VISIBLE : View.GONE}"
+               app:cardElevation="0dp" />
+       </RelativeLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -46,9 +63,17 @@
                 android:textSize="16sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/tv_last_seen"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:text="Active now"
+                android:visibility="@{contact.isOnline ? View.VISIBLE : View.GONE}"
+                android:textColor="@color/normal_text"
+                android:textSize="14sp" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="@{contact.isOnline ? View.GONE : View.VISIBLE}"
+                setTimeAgo="@{contact.lastSeen}"
                 android:text="last seen 1 hour ago"
                 android:textColor="@color/normal_text"
                 android:textSize="14sp" />

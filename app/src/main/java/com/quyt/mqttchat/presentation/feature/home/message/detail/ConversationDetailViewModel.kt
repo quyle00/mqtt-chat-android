@@ -26,6 +26,7 @@ import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UnsubscribeMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateMessageUseCase
+import com.quyt.mqttchat.domain.usecase.user.ListenUserStatusEventUseCase
 import com.quyt.mqttchat.presentation.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,8 @@ sealed class ConversationDetailState {
     data class Error(val error: String) : ConversationDetailState()
     data class NewMessage(val message: Message) : ConversationDetailState()
     data class Typing(val message: Message) : ConversationDetailState()
-    data class MarkReadMessage(val messageIds: List<String>?) : ConversationDetailState()
+    data class PartnerMarkReadMessage(val messageIds: List<String>?) : ConversationDetailState()
+    data class SendMarkReadMessageSuccess(val conversationId: String) : ConversationDetailState()
     data class SendMessageSuccess(val message: Message) : ConversationDetailState()
     data class SendMessageError(val message: Message, var error: String) : ConversationDetailState()
     data class NoMoreData(val message: String) : ConversationDetailState()
@@ -66,7 +68,8 @@ class ConversationDetailViewModel @Inject constructor(
     private val sendEditMessageEventUseCase: SendEditMessageEventUseCase,
     private val sendDeleteMessageEventUseCase: SendDeleteMessageEventUseCase,
     private val unsubscribeMessageEventUseCase: UnsubscribeMessageEventUseCase,
-    private val clearRetainMessageEventUseCase: ClearRetainMessageEventUseCase
+    private val clearRetainMessageEventUseCase: ClearRetainMessageEventUseCase,
+    private val listenUserStatusEventUseCase: ListenUserStatusEventUseCase
 ) : BaseViewModel<ConversationDetailState>() {
 
     val currentUser: User? by lazy { sharedPreferences.getCurrentUser() }
@@ -135,6 +138,7 @@ class ConversationDetailViewModel @Inject constructor(
                         uiState.postValue(ConversationDetailState.LoadMoreSuccess(listMessage))
                     }
                     subscribeConversation()
+                    subscribeUserStatus()
                 }
 
                 is Result.Error -> {
@@ -155,6 +159,10 @@ class ConversationDetailViewModel @Inject constructor(
                     mPartner.value?.id ?: "",
                     unSeenMessageIds
                 )
+                updateLocalMessageStateUseCase(unSeenMessageIds, MessageState.SEEN.value)
+                uiState.postValue(
+                    ConversationDetailState.SendMarkReadMessageSuccess(mCurrentConversation.id ?: "")
+                )
             }
 
             is Result.Error -> {
@@ -162,6 +170,15 @@ class ConversationDetailViewModel @Inject constructor(
                     ConversationDetailState.Error(result.exception.message ?: "Error")
                 )
             }
+        }
+    }
+
+    private suspend fun subscribeUserStatus() {
+        listenUserStatusEventUseCase(mPartner.value?.id ?: "") {
+            val user = mPartner.value
+            user?.isOnline = it.isOnline
+            user?.lastSeen = it.lastSeen
+            mPartner.postValue(user)
         }
     }
 
@@ -187,7 +204,7 @@ class ConversationDetailViewModel @Inject constructor(
                         viewModelScope.launch {
                             updateLocalMessageStateUseCase(it.messageIds!!, MessageState.SEEN.value)
                         }
-                        uiState.postValue(ConversationDetailState.MarkReadMessage(it.messageIds))
+                        uiState.postValue(ConversationDetailState.PartnerMarkReadMessage(it.messageIds))
                     }
                 }
 

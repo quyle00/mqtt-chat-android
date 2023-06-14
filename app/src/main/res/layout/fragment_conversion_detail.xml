@@ -42,9 +42,9 @@
                 app:cardCornerRadius="32dp">
 
                 <androidx.appcompat.widget.AppCompatImageView
+                    setAvatar="@{viewModel.MPartner.avatar}"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    setAvatar="@{viewModel.MPartner.avatar}"
                     android:src="@drawable/ic_launcher_background" />
             </androidx.cardview.widget.CardView>
 
@@ -71,6 +71,8 @@
                     <androidx.cardview.widget.CardView
                         android:layout_width="8dp"
                         android:layout_height="8dp"
+                        android:layout_marginEnd="4dp"
+                        android:visibility="@{viewModel.MPartner.isOnline ? View.VISIBLE : View.GONE}"
                         app:cardBackgroundColor="#4CAF50"
                         app:cardCornerRadius="8dp"
                         app:cardElevation="0dp" />
@@ -78,10 +80,18 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         android:text="Active"
                         android:textColor="@color/normal_text"
-                        android:textSize="12sp" />
+                        android:textSize="12sp"
+                        android:visibility="@{viewModel.MPartner.isOnline ? View.VISIBLE : View.GONE}" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        setTimeAgo="@{viewModel.MPartner.lastSeen}"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/normal_text"
+                        android:textSize="12sp"
+                        android:visibility="@{viewModel.MPartner.isOnline ? View.GONE : View.VISIBLE}" />
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
@@ -190,9 +200,9 @@
                     android:layout_toEndOf="@id/iv_attach"
                     android:background="@drawable/bg_message_type"
                     android:hint="Message"
-                    android:text="@={viewModel.messageInputValue}"
                     android:minHeight="40dp"
                     android:paddingHorizontal="16dp"
+                    android:text="@={viewModel.messageInputValue}"
                     android:textSize="16sp" />
 
                 <androidx.appcompat.widget.AppCompatImageView

@@ -12,7 +12,7 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
     override suspend fun connect(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                client.connect().get()
+                client.connectWith().cleanSession(false).send().get()
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -36,15 +36,6 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
                     val payload = String(publish.payloadAsBytes)
                     if (payload.isNotEmpty()){
                         callback(payload)
-                        // Clear retain message
-//                        if (publish.isRetain) {
-//                            client.publishWith()
-//                                .topic(publish.topic)
-//                                .qos(MqttQos.AT_LEAST_ONCE)
-//                                .retain(true)
-//                                .payload("".toByteArray())
-//                                .send()
-//                        }
                     }
                 }
                 .send()

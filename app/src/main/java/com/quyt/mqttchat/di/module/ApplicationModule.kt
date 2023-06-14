@@ -3,8 +3,11 @@ package com.quyt.mqttchat.di.module
 import android.content.Context
 import androidx.room.Room
 import com.google.gson.GsonBuilder
+import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3WillPublishBuilder
 import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
 import com.quyt.mqttchat.data.datasource.remote.interceptor.ConnectivityInterceptor
 import com.quyt.mqttchat.data.datasource.remote.interceptor.HeaderInterceptor
@@ -93,7 +96,7 @@ class ApplicationModule {
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         val gson = GsonBuilder().serializeNulls().create()
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.10:3000/")
+            .baseUrl("http://172.17.12.122:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -101,10 +104,10 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideMqttClient(): Mqtt3AsyncClient {
+    fun provideMqttClient(sharedPreferences: SharedPreferences): Mqtt3AsyncClient {
         return Mqtt3Client.builder()
-            .identifier(UUID.randomUUID().toString())
-            .serverHost("192.168.1.10")
+            .identifier(sharedPreferences.getCurrentUser()?.id?: UUID.randomUUID().toString())
+            .serverHost("172.17.12.122")
             .buildAsync()
     }
 

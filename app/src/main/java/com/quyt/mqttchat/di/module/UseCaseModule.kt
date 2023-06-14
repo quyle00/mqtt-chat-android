@@ -1,6 +1,7 @@
 package com.quyt.mqttchat.di.module
 
 import com.quyt.mqttchat.domain.mapper.EventMapper
+import com.quyt.mqttchat.domain.mapper.UserMapper
 import com.quyt.mqttchat.domain.repository.AccessRepository
 import com.quyt.mqttchat.domain.repository.ConversationRepository
 import com.quyt.mqttchat.domain.repository.IMqttClient
@@ -28,6 +29,8 @@ import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UnsubscribeMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateMessageUseCase
+import com.quyt.mqttchat.domain.usecase.user.ListenUserStatusEventUseCase
+import com.quyt.mqttchat.domain.usecase.user.SendUserStatusEventUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -193,5 +196,23 @@ class UseCaseModule {
         mapper: EventMapper
     ): ListenConversationEventUseCase {
         return ListenConversationEventUseCase(sharedPreferences, client, mapper)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSendUserStatusEventUseCase(
+        sharedPreferences: SharedPreferences,
+        client: IMqttClient
+    ): SendUserStatusEventUseCase {
+        return SendUserStatusEventUseCase(sharedPreferences, client)
+    }
+
+    @Provides
+    @Singleton
+    fun provideListenUserStatusEventUseCase(
+        client: IMqttClient,
+        mapper: UserMapper
+    ): ListenUserStatusEventUseCase {
+        return ListenUserStatusEventUseCase(client, mapper)
     }
 }

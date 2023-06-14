@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentContactBinding
@@ -42,6 +43,7 @@ class ContactFragment :
         mContactAdapter = ContactAdapter(this)
         binding.rvContact.adapter = mContactAdapter
         binding.rvContact.layoutManager = LinearLayoutManager(requireContext())
+        (binding.rvContact.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     }
 
     private fun observeState() {
@@ -50,13 +52,20 @@ class ContactFragment :
                 is ContactState.Loading -> {
                     LoadingDialog.showLoading(requireContext())
                 }
+
                 is ContactState.Success -> {
                     LoadingDialog.hideLoading()
                     mContactAdapter.setItems(state.data)
+                    viewModel.subscribeUserStatus()
                 }
+
                 is ContactState.Error -> {
                     LoadingDialog.hideLoading()
                     Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
+                }
+
+                is ContactState.UserStatusChange -> {
+                    mContactAdapter.updateOnlineStatus(state.userId, state.isOnline, state.lastSeen)
                 }
             }
         }

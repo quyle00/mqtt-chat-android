@@ -35,11 +35,12 @@ class MessageSwipeController(private val context: Context, private val showReply
     private val triggerValue = 50
 
     override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder): Int {
-        mView = when (viewHolder) {
-            is MyMessageViewHolder -> viewHolder.binding.rlMessage
-            is OtherMessageViewHolder -> viewHolder.binding.rlMessage
-            else -> viewHolder.itemView
-        }
+//        mView = when (viewHolder) {
+//            is MyMessageViewHolder -> viewHolder.binding.rlMessage
+//            is OtherMessageViewHolder -> viewHolder.binding.rlMessage
+//            else -> viewHolder.itemView
+//        }
+        mView = viewHolder.itemView
         imageDrawable = ContextCompat.getDrawable(context, R.drawable.ic_reply_24)!!
         shareRound = ContextCompat.getDrawable(context, R.drawable.ic_circle)!!
         return makeMovementFlags(ACTION_STATE_IDLE, LEFT)

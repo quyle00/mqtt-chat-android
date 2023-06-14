@@ -3,12 +3,14 @@ package com.quyt.mqttchat.domain.model
 class Event(
     var publisherId: String?,
     var type: Int?,
+    var conversationId: String? = null,
     var message: Message?,
     var messageIds: List<String>?
 ) {
     constructor() : this(
         publisherId = "",
         type = 0,
+        conversationId = null,
         message = Message(),
         messageIds = listOf()
     )

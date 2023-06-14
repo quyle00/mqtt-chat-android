@@ -18,10 +18,10 @@ class MyApp : Application() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
-        GlobalScope.launch {
-            if (!mqttClient.connect()) {
-                Log.d("MQTT", "Failed to connect")
-            }
-        }
+//        GlobalScope.launch {
+//            if (!mqttClient.connect()) {
+//                Log.d("MQTT", "Failed to connect")
+//            }
+//        }
     }
 }

@@ -48,7 +48,7 @@ class ConversationListFragment :
             binding.swipeRefreshLayout.isRefreshing = false
         }
         //
-        mConversationAdapter = ConversationAdapter(this)
+        mConversationAdapter = ConversationAdapter(viewModel.currentUser?.id?:"",this)
         binding.rvConversation.adapter = mConversationAdapter
         binding.rvConversation.layoutManager = LinearLayoutManager(requireContext())
         (binding.rvConversation.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -64,6 +64,7 @@ class ConversationListFragment :
                 is ConversationListState.Success -> {
                     LoadingDialog.hideLoading()
                     mConversationAdapter.setItems(state.data)
+                    viewModel.subscribeUserStatus()
                 }
 
                 is ConversationListState.Error -> {
@@ -74,6 +75,12 @@ class ConversationListFragment :
                 is ConversationListState.NewMessage -> {
                     val conversationId = state.message?.conversation
                     mConversationAdapter.updateLastMessage(conversationId, state.message)
+                }
+                is ConversationListState.UserStatusChange -> {
+                    mConversationAdapter.updateUserStatus(state.userId, state.isOnline)
+                }
+                is ConversationListState.MarkReadLastMessage -> {
+                    mConversationAdapter.markReadLastMessage(state.conversationId)
                 }
             }
         }

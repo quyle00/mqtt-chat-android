@@ -28,6 +28,18 @@ class ContactAdapter(private val listener: OnContactListener) : BaseRecyclerAdap
             holder.bind(getItem(position))
         }
     }
+
+    fun updateOnlineStatus(userId: String?, isOnline: Boolean,lastSeen : Long) {
+        val foundIndex = getItems().indexOfFirst {
+            it.id == userId
+        }
+        if (foundIndex != -1) {
+            val user = getItem(foundIndex)
+            user.isOnline = isOnline
+            user.lastSeen = lastSeen
+            updateAt(foundIndex, user)
+        }
+    }
 }
 
 class ContactViewHolder(
