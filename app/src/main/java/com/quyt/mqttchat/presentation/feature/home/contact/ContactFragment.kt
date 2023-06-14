@@ -40,6 +40,9 @@ class ContactFragment :
     }
 
     private fun setupRecyclerView() {
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.getListContact()
+        }
         mContactAdapter = ContactAdapter(this)
         binding.rvContact.adapter = mContactAdapter
         binding.rvContact.layoutManager = LinearLayoutManager(requireContext())
@@ -50,17 +53,17 @@ class ContactFragment :
         viewModel.uiState().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ContactState.Loading -> {
-                    LoadingDialog.showLoading(requireContext())
+                    binding.swipeRefreshLayout.isRefreshing = true
                 }
 
                 is ContactState.Success -> {
-                    LoadingDialog.hideLoading()
+                    binding.swipeRefreshLayout.isRefreshing = false
                     mContactAdapter.setItems(state.data)
                     viewModel.subscribeUserStatus()
                 }
 
                 is ContactState.Error -> {
-                    LoadingDialog.hideLoading()
+                    binding.swipeRefreshLayout.isRefreshing = false
                     Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
                 }
 

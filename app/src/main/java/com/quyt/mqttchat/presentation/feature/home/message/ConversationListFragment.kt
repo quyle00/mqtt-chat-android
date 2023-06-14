@@ -45,7 +45,6 @@ class ConversationListFragment :
     private fun setupRecyclerView() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             viewModel.getListConversation()
-            binding.swipeRefreshLayout.isRefreshing = false
         }
         //
         mConversationAdapter = ConversationAdapter(viewModel.currentUser?.id?:"",this)
@@ -58,17 +57,17 @@ class ConversationListFragment :
         viewModel.uiState().observe(viewLifecycleOwner) { state ->
             when (state) {
                 is ConversationListState.Loading -> {
-                    LoadingDialog.showLoading(requireContext())
+                    binding.swipeRefreshLayout.isRefreshing = true
                 }
 
                 is ConversationListState.Success -> {
-                    LoadingDialog.hideLoading()
+                    binding.swipeRefreshLayout.isRefreshing = false
                     mConversationAdapter.setItems(state.data)
                     viewModel.subscribeUserStatus()
                 }
 
                 is ConversationListState.Error -> {
-                    LoadingDialog.hideLoading()
+                    binding.swipeRefreshLayout.isRefreshing = false
                     Toast.makeText(requireContext(), state.error, Toast.LENGTH_SHORT).show()
                 }
 
