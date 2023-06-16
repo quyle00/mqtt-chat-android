@@ -1,14 +1,20 @@
 package com.quyt.mqttchat.presentation.feature
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.util.Log
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ActivityMainBinding
@@ -32,6 +38,25 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>() {
     lateinit var mqttClient: IMqttClient
     @Inject
     lateinit var sendUserStatusEventUseCase: SendUserStatusEventUseCase
+
+    private var hasNotificationPermissionGranted = false
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            hasNotificationPermissionGranted = isGranted
+            if (!isGranted) {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+                        showNotificationPermissionRationale()
+                    } else {
+                        showSettingDialog()
+                    }
+                }
+            } else {
+                Toast.makeText(applicationContext, "notification permission granted", Toast.LENGTH_SHORT)
+                    .show()
+            }
+        }
+
     override fun getLayoutId(): Int = R.layout.activity_main
 
     override fun onViewReady(savedInstance: Bundle?)  {
@@ -55,7 +80,23 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>() {
                 )
             )
         }
+        if (Build.VERSION.SDK_INT >= 33) {
+            hasNotificationPermissionGranted = checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == 0
+            if (!hasNotificationPermissionGranted) {
+                requestNotificationPermission()
+            }
+        } else {
+            hasNotificationPermissionGranted = true
+        }
 
+    }
+
+    private fun requestNotificationPermission(){
+        if (Build.VERSION.SDK_INT >= 33) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            hasNotificationPermissionGranted = true
+        }
     }
 
     override fun onResume() {
@@ -73,6 +114,33 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>() {
         lifecycleScope.launch {
             sendUserStatusEventUseCase(false)
         }
+    }
+
+    private fun showSettingDialog() {
+        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+            .setTitle("Notification Permission")
+            .setMessage("Notification permission is required, Please allow notification permission from setting")
+            .setPositiveButton("Ok") { _, _ ->
+                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun showNotificationPermissionRationale() {
+
+        MaterialAlertDialogBuilder(this, com.google.android.material.R.style.MaterialAlertDialog_Material3)
+            .setTitle("Alert")
+            .setMessage("Notification permission is required, to show notification")
+            .setPositiveButton("Ok") { _, _ ->
+                if (Build.VERSION.SDK_INT >= 33) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
 }
