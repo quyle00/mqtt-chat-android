@@ -1,28 +1,30 @@
-package com.quyt.mqttchat.domain.usecase.message
+package com.quyt.mqttchat.domain.usecase.message.realTime
 
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.model.Event
 import com.quyt.mqttchat.domain.model.EventType
-import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.repository.IMqttClient
 import com.quyt.mqttchat.domain.repository.SharedPreferences
 
-class SendTypingEventUseCase(
+class SendMarkReadEventUseCase(
     private val sharedPreferences: SharedPreferences,
     private val mqttClient: IMqttClient,
     private val mapper: EventMapper
 ) {
-    suspend operator fun invoke(conversationId: String, partnerId: String, typing: Boolean) {
+    suspend operator fun invoke(
+        conversationId: String,
+        partnerId: String,
+        markReadMessageIds: List<String>
+    ) {
         val event = Event(
             sharedPreferences.getCurrentUser()?.id,
-            EventType.TYPING.value,
-            Message().apply {
-                this.sender = sharedPreferences.getCurrentUser()
-                this.isTyping = typing
-            }
+            EventType.MARK_READ.value,
+            conversationId,
+            null,
+            markReadMessageIds
         )
         mqttClient.publish(
-            topic = "$partnerId/conversation/$conversationId",
+            topic = "conversation/$conversationId/$partnerId",
             payload = mapper.toPayload(event),
             0
         )

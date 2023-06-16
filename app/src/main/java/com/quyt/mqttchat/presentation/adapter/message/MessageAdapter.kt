@@ -178,6 +178,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
         if (mListMessage.isNotEmpty() && mListMessage.last()?.isTyping == true) {
             mListMessage[mListMessage.size - 1] = message
             notifyItemChanged(mListMessage.size - 1)
+            notifyItemChanged(mListMessage.size - 2)
         } else {
             mListMessage.add(message)
             notifyItemInserted(mListMessage.size - 1)
@@ -207,6 +208,8 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
             val index = mListMessage.indexOf(it)
             mListMessage.remove(it)
             notifyItemRemoved(index)
+            notifyItemChanged(index)
+            notifyItemChanged(index-1)
         }
     }
 

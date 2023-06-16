@@ -19,4 +19,12 @@ class SharedPreferencesImpl @Inject constructor(context: Context) : SharedPrefer
         val userJson = sharedPreferences.getString("current_user", "") ?: ""
         return Gson().fromJson(userJson, User::class.java)
     }
+
+    override fun saveDeviceToken(token: String) {
+        sharedPreferences.edit().putString("device_token", token).apply()
+    }
+
+    override fun getDeviceToken(): String? {
+        return sharedPreferences.getString("device_token", "")
+    }
 }

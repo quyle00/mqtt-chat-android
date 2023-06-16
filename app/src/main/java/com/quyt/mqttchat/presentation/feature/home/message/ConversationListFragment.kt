@@ -36,7 +36,7 @@ class ConversationListFragment :
     override fun onConversationClick(conversation: Conversation?) {
         findNavController().navigate(
             HomeFragmentDirections.actionHomeFragmentToConversationDetailFragment(
-                Gson().toJson(conversation),
+                conversation?.id,
                 null
             )
         )

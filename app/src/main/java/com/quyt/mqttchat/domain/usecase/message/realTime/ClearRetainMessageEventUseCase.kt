@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.domain.usecase.message
+package com.quyt.mqttchat.domain.usecase.message.realTime
 
 import com.quyt.mqttchat.domain.repository.IMqttClient
 
@@ -7,7 +7,7 @@ class ClearRetainMessageEventUseCase(
 ) {
     suspend operator fun invoke(conversationId: String, userId: String) {
         mqttClient.publish(
-            topic = "$userId/conversation/$conversationId",
+            topic = "conversation/$conversationId/$userId",
             payload = "",
             0,
             true

@@ -3,8 +3,8 @@
     <solid
         android:color="@color/normal_text"/>
     <corners
-        android:topLeftRadius="30dp"
-        android:bottomLeftRadius="5dp"
-        android:topRightRadius="30dp"
-        android:bottomRightRadius="30dp"/>
+        android:topLeftRadius="@dimen/message_corner_radius"
+        android:bottomLeftRadius="@dimen/message_corner_radius_small"
+        android:topRightRadius="@dimen/message_corner_radius"
+        android:bottomRightRadius="@dimen/message_corner_radius"/>
 </shape>

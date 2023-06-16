@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.domain.usecase.message
+package com.quyt.mqttchat.domain.usecase.message.realTime
 
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.model.Event
@@ -7,7 +7,7 @@ import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.repository.IMqttClient
 import com.quyt.mqttchat.domain.repository.SharedPreferences
 
-class SendEditMessageEventUseCase(
+class SendNewMessageEventUseCase(
     private val sharedPreferences: SharedPreferences,
     private val mqttClient: IMqttClient,
     private val mapper: EventMapper
@@ -15,14 +15,13 @@ class SendEditMessageEventUseCase(
     suspend operator fun invoke(conversationId: String, partnerId: String, message: Message) {
         val event = Event(
             sharedPreferences.getCurrentUser()?.id,
-            EventType.EDIT.value,
+            EventType.NEW_MESSAGE.value,
             message
         )
         mqttClient.publish(
-            topic = "$partnerId/conversation/$conversationId",
+            topic = "conversation/$conversationId/$partnerId",
             payload = mapper.toPayload(event),
-            0,
-            true
+            0
         )
     }
 }

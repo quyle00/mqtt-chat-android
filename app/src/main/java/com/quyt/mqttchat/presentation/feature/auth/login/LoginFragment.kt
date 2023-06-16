@@ -2,6 +2,7 @@ package com.quyt.mqttchat.presentation.feature.auth.login
 
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentLoginBinding
@@ -20,6 +21,9 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding, LoginViewModel>(
         binding.btnLogin.setOnClickListener {
             viewModel.login(binding.etUsername.text.toString(), binding.etPassword.text.toString())
         }
+        binding.tvRegister.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+        }
     }
 
     private fun observeState() {
@@ -32,7 +36,10 @@ class LoginFragment : BaseBindingFragment<FragmentLoginBinding, LoginViewModel>(
                 is LoginState.Success -> {
                     LoadingDialog.hideLoading()
                     Toast.makeText(requireContext(), "Login success", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+                    val navOptions = NavOptions.Builder()
+                        .setPopUpTo(R.id.homeFragment, true)
+                        .build()
+                    findNavController().navigate(R.id.action_loginFragment_to_homeFragment,null,navOptions)
                 }
 
                 is LoginState.Error -> {

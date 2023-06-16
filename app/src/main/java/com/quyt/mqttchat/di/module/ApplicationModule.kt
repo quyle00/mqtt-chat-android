@@ -94,7 +94,6 @@ class ApplicationModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        val gson = GsonBuilder().serializeNulls().create()
         return Retrofit.Builder()
             .baseUrl("http://172.17.12.122:3000/")
             .addConverterFactory(GsonConverterFactory.create())

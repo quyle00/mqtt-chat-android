@@ -58,7 +58,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         initConversationList()
         Log.d("DeBugTime", "getConversationDetail ${DateUtils.currentTimestamp()}")
         viewModel.getConversationDetail(
-            Gson().fromJson(args.conversation, Conversation::class.java),
+            args.conversationId,
             Gson().fromJson(args.partner, User::class.java)
         )
         observeState()
@@ -193,6 +193,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             }
         }
         binding.ivSend.setOnClickListener {
+            viewModel.isTyping = false
             val messageContent = binding.etMessage.text.toString().trim()
             if (messageContent.isNotEmpty()) {
                 if (viewModel.isEditing.value == true) {

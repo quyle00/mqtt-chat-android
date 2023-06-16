@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.domain.usecase.message
+package com.quyt.mqttchat.domain.usecase.message.realTime
 
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.model.Event
@@ -19,7 +19,7 @@ class SendDeleteMessageEventUseCase(
             message
         )
         mqttClient.publish(
-            topic = "$partnerId/conversation/$conversationId",
+            topic = "conversation/$conversationId/$partnerId",
             payload = mapper.toPayload(event),
             0,
             retain = true

@@ -11,7 +11,7 @@ class ListenConversationEventUseCase(
     private val mapper: EventMapper
 ) {
     suspend operator fun invoke(callback: (Event) -> Unit) {
-        mqttClient.subscribe("${sharedPreferences.getCurrentUser()?.id}/conversation/#", 0) {
+        mqttClient.subscribe("conversation/+/${sharedPreferences.getCurrentUser()?.id}", 0) {
             callback(mapper.toModel(it))
         }
     }

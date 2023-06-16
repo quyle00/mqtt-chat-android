@@ -12,18 +12,18 @@ import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.domain.repository.SharedPreferences
 import com.quyt.mqttchat.domain.usecase.conversation.CreateConversationUseCase
 import com.quyt.mqttchat.domain.usecase.conversation.GetConversationDetailUseCase
-import com.quyt.mqttchat.domain.usecase.message.ClearRetainMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.ClearRetainMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.CreateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.DeleteMessageUseCase
 import com.quyt.mqttchat.domain.usecase.message.GetListMessageUseCase
-import com.quyt.mqttchat.domain.usecase.message.ListenMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.ListenMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.SeenMessageUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendDeleteMessageEventUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendEditMessageEventUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendMarkReadEventUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendNewMessageEventUseCase
-import com.quyt.mqttchat.domain.usecase.message.SendTypingEventUseCase
-import com.quyt.mqttchat.domain.usecase.message.UnsubscribeMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.SendDeleteMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.SendEditMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.SendMarkReadEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.SendNewMessageEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.SendTypingEventUseCase
+import com.quyt.mqttchat.domain.usecase.message.realTime.UnsubscribeMessageEventUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateLocalMessageStateUseCase
 import com.quyt.mqttchat.domain.usecase.message.UpdateMessageUseCase
 import com.quyt.mqttchat.domain.usecase.user.ListenUserStatusEventUseCase
@@ -84,10 +84,10 @@ class ConversationDetailViewModel @Inject constructor(
     var messageInputValue = MutableLiveData<String?>()
     var isEditing = MutableLiveData<Boolean>()
 
-    fun getConversationDetail(conversation: Conversation?, partner: User?) {
+    fun getConversationDetail(conversationId: String?, partner: User?) {
         viewModelScope.launch {
-            val result = if (conversation != null) {
-                Result.Success(conversation)
+            val result = if (conversationId != null) {
+                getConversationDetailUseCase(conversationId = conversationId)
             } else {
                 getConversationDetailUseCase(partnerId = partner?.id ?: "")
             }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "655706404",
+    "project_id": "mqttchat-105c7",
+    "storage_bucket": "mqttchat-105c7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:655706404:android:77853cfdf49ad92a888bb1",
+        "android_client_info": {
+          "package_name": "com.quyt.mqttchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "655706404-f5stt4jlduu21dh77ef62m6roe50o3sr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHgugyC9HGpOokJH9L1xFWBFU4gRg3t3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "655706404-f5stt4jlduu21dh77ef62m6roe50o3sr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

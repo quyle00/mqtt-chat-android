@@ -14,6 +14,12 @@ class OtherMessageViewHolder(val binding: ItemOtherMessageBinding) : RecyclerVie
 ) {
     fun bind(message: Message?, groupMessageState: GroupMessageState) {
         //
+        if (message?.reply != null) {
+            binding.layoutReply.root.visibility = ViewGroup.VISIBLE
+            binding.layoutReply.tvMessageOwner.text = message.reply?.sender?.fullname
+            binding.layoutReply.tvMessageContent.text = message.reply?.content
+        }
+        //
         if (message?.isTyping == false) {
             binding.tvTime2.text = DateUtils.formatTime(message.createdAt ?: "", "HH:mm")
         }

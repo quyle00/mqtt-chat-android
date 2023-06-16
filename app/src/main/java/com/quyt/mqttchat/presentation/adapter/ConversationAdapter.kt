@@ -68,6 +68,7 @@ class ConversationAdapter(private val currentUserId : String,
 
     fun markReadLastMessage(conversationId: String?) {
         getItems().indexOfFirst { it.id == conversationId }.let {
+            if (it == -1) return@let
             val conversation = getItem(it)
             conversation.lastMessage?.state = MessageState.SEEN.value
             updateAt(it, conversation)

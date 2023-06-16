@@ -12,6 +12,7 @@ import com.quyt.mqttchat.data.repository.UserRepositoryImpl
 import com.quyt.mqttchat.domain.repository.AccessRepository
 import com.quyt.mqttchat.domain.repository.ConversationRepository
 import com.quyt.mqttchat.domain.repository.MessageRepository
+import com.quyt.mqttchat.domain.repository.SharedPreferences
 import com.quyt.mqttchat.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
@@ -26,9 +27,10 @@ class RepositoryModule {
     @Provides
     @Singleton
     fun provideAccessRepository(
-        service: AccessService
+        service: AccessService,
+        sharedPreferences: SharedPreferences
     ): AccessRepository {
-        return AccessRepositoryImpl(service)
+        return AccessRepositoryImpl(service, sharedPreferences)
     }
 
     @Provides

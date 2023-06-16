@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.domain.usecase.message
+package com.quyt.mqttchat.domain.usecase.message.realTime
 
 import com.quyt.mqttchat.domain.mapper.EventMapper
 import com.quyt.mqttchat.domain.model.Event
@@ -9,7 +9,7 @@ class ListenMessageEventUseCase(
     private val mapper: EventMapper
 ) {
     suspend operator fun invoke(conversationId: String, callback: (Event) -> Unit) {
-        mqttClient.subscribe("+/conversation/$conversationId", 0) {
+        mqttClient.subscribe("conversation/$conversationId/+", 0) {
             callback(mapper.toModel(it))
         }
     }

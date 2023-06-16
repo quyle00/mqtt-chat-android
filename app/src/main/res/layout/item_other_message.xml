@@ -12,14 +12,25 @@
         android:minHeight="30dp"
         android:visibility="visible">
 
+        <include
+            android:id="@+id/layout_reply"
+            layout="@layout/layout_reply_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:visibility="gone"
+            tools:visibility="visible"/>
+
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="8dp"
+            android:layout_below="@id/layout_reply"
             android:maxWidth="230dp"
             android:textColor="@color/white"
             android:textSize="16sp"
@@ -43,7 +54,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/tv_message"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_toEndOf="@id/tv_edited"
             android:textColor="#B3FFFFFF"
             android:textSize="12sp"

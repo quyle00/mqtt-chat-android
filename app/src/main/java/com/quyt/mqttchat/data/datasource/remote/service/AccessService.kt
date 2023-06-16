@@ -12,6 +12,7 @@ interface AccessService {
     @FormUrlEncoded
     suspend fun login(
         @Field("username") username: String,
-        @Field("password") password: String
+        @Field("password") password: String,
+        @Field("deviceToken") deviceToken: String
     ): Response<BaseResponse<User>>
 }
