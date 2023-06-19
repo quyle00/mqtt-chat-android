@@ -95,7 +95,7 @@ class ApplicationModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://192.168.1.168:3000/")
+            .baseUrl("http://172.17.12.122:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -106,7 +106,7 @@ class ApplicationModule {
     fun provideMqttClient(sharedPreferences: SharedPreferences): Mqtt3AsyncClient {
         return Mqtt3Client.builder()
             .identifier(sharedPreferences.getCurrentUser()?.id?: UUID.randomUUID().toString())
-            .serverHost("192.168.1.168")
+            .serverHost("172.17.12.122")
             .automaticReconnectWithDefaultConfig()
             .buildAsync()
     }

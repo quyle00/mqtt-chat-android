@@ -96,12 +96,18 @@
             </LinearLayout>
         </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_message"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_above="@id/ll_message_action"
-            android:layout_below="@id/ll_action_bar" />
+            android:layout_below="@id/ll_action_bar">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"/>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/ll_message_action"

@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
-import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
@@ -53,10 +52,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private val conversationListViewModel: ConversationListViewModel by activityViewModels()
 
     override fun setupView() {
+//        Log.d("DeBugTime", "Start")
         binding.viewModel = viewModel
-        Log.d("DeBugTime", "initConversationList Start ${DateUtils.currentTimestamp()}")
         initConversationList()
-        Log.d("DeBugTime", "getConversationDetail End${DateUtils.currentTimestamp()}")
+//        Log.d("DeBugTime", "getConversationDetail End${DateUtils.currentTimestamp()}")
         viewModel.getConversationDetail(
             args.conversationId,
             Gson().fromJson(args.partner, User::class.java)
@@ -113,7 +112,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 }
 
                 is ConversationDetailState.Success -> {
-                    Log.d("DeBugTime", "setFirstPageMessage ${DateUtils.currentTimestamp()}")
+//                    Log.d("DeBugTime", "Done get data")
                     messageAdapter.setFirstPageMessage(state.data)
                     scrollToBottom()
                 }
@@ -227,11 +226,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private fun initConversationList() {
         messageAdapter = MessageAdapter(viewModel.currentUser?.id, this)
         binding.rvMessage.adapter = messageAdapter
-        binding.rvMessage.layoutManager = LinearLayoutManager(
-            requireContext(),
-            LinearLayoutManager.VERTICAL,
-            false
-        )
+        val linearLayoutManager = LinearLayoutManager(requireContext())
+        binding.rvMessage.layoutManager = linearLayoutManager
         (binding.rvMessage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         messageAdapter.setFirstPageMessage(ArrayList())
         swipeToReply()
@@ -252,7 +248,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     private fun handleLayoutChange() {
         binding.rvMessage.addOnLayoutChangeListener { view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            if (bottom < oldBottom) {
+            if (bottom < oldBottom && messageAdapter.itemCount > 0) {
                 binding.rvMessage.smoothScrollToPosition(
                     messageAdapter.itemCount - 1
                 )
