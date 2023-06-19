@@ -1,18 +1,17 @@
 package com.quyt.mqttchat.data.repository
 
-import android.util.Log
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.quyt.mqttchat.domain.repository.IMqttClient
-import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) : IMqttClient {
     override suspend fun connect(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                client.connectWith().cleanSession(false).send().get()
+                client.connectWith().cleanSession(false).send()
                 true
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -23,47 +22,42 @@ class MqttClientImpl @Inject constructor(private val client: Mqtt3AsyncClient) :
 
     override suspend fun disconnect() {
         withContext(Dispatchers.IO) {
-            client.disconnect().get()
+            client.disconnect()
         }
     }
 
     override suspend fun subscribe(topic: String, qos: Int, callback: (String) -> Unit) {
         withContext(Dispatchers.IO) {
-            val subFuture = client.subscribeWith()
+            client.subscribeWith()
                 .topicFilter(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
                 .callback { publish ->
                     val payload = String(publish.payloadAsBytes)
-                    if (payload.isNotEmpty()){
+                    if (payload.isNotEmpty()) {
                         callback(payload)
                     }
                 }
                 .send()
-
-            subFuture.get()
         }
     }
 
     override suspend fun unsubscribe(topic: String) {
         withContext(Dispatchers.IO) {
-            val unSubFuture = client.unsubscribeWith()
+            client.unsubscribeWith()
                 .topicFilter(topic)
                 .send()
-
-            unSubFuture.get()
         }
     }
 
-    override suspend fun publish(topic: String, payload: String, qos: Int,retain : Boolean) {
+    override suspend fun publish(topic: String, payload: String, qos: Int, retain: Boolean) {
         withContext(Dispatchers.IO) {
-            val pubFuture = client.publishWith()
+            client.publishWith()
                 .topic(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
                 .retain(retain)
                 .payload(payload.toByteArray())
                 .send()
 
-            pubFuture.get()
         }
     }
 }

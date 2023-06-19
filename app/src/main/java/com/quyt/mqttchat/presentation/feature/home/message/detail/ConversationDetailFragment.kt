@@ -54,9 +54,9 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     override fun setupView() {
         binding.viewModel = viewModel
-        Log.d("DeBugTime", "initConversationList ${DateUtils.currentTimestamp()}")
+        Log.d("DeBugTime", "initConversationList Start ${DateUtils.currentTimestamp()}")
         initConversationList()
-        Log.d("DeBugTime", "getConversationDetail ${DateUtils.currentTimestamp()}")
+        Log.d("DeBugTime", "getConversationDetail End${DateUtils.currentTimestamp()}")
         viewModel.getConversationDetail(
             args.conversationId,
             Gson().fromJson(args.partner, User::class.java)
