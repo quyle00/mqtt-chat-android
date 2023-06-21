@@ -23,6 +23,7 @@ import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
+import com.quyt.mqttchat.emoji.EmojiPopup
 import com.quyt.mqttchat.extensions.showKeyboard
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
@@ -177,6 +178,10 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     private fun handleAction() {
+        val emojiPopup = EmojiPopup(binding.root, binding.etMessage)
+        binding.ivEmoji.setOnClickListener {
+            emojiPopup.toggle()
+        }
         binding.ivBack.setOnClickListener {
             findNavController().popBackStack()
         }
