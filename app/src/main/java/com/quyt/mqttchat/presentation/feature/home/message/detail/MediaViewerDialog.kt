@@ -11,12 +11,26 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
+import com.quyt.mqttchat.presentation.extensions.addListener
+import com.quyt.mqttchat.presentation.extensions.applyMargin
+import com.quyt.mqttchat.presentation.extensions.globalVisibleRect
+import com.quyt.mqttchat.presentation.extensions.isRectVisible
+import com.quyt.mqttchat.presentation.extensions.localVisibleRect
+import com.quyt.mqttchat.presentation.extensions.makeViewMatchParent
+import com.quyt.mqttchat.presentation.extensions.postApply
+import com.quyt.mqttchat.presentation.extensions.postDelayed
+import com.quyt.mqttchat.presentation.extensions.requestNewSize
 import kotlin.math.abs
 
 
@@ -24,6 +38,7 @@ class MediaViewerDialog : DialogFragment() {
 
     private lateinit var binding: DialogMediaViewerBinding
     private lateinit var url: String
+    private var transitionView: ImageView? = null
     private var translationLimit = 300
     private var isTracking = false
     private var startY: Float = 0f
@@ -37,12 +52,54 @@ class MediaViewerDialog : DialogFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_media_viewer, container, true)
+        binding.transitionImageView.drawable?.let {
+            binding.transitionImageView.setImageBitmap(it.toBitmap())
+        }
+        dialog?.setOnShowListener {
+            transitionView?.let {
+                if (transitionView.isRectVisible) {
+                    with(transitionView.localVisibleRect) {
+                        binding.transitionImageView.requestNewSize(it.width, it.height)
+                        binding.transitionImageView.applyMargin(top = -top, start = -left)
+                    }
+                    with(transitionView.globalVisibleRect) {
+                        binding.transitionImageContainer.requestNewSize(width(), height())
+                        binding.transitionImageContainer.applyMargin(left, top, right, bottom)
+                    }
+                }
+
+                // resetRootTranslation()
+                val internalRoot = binding.transitionImageContainer.parent as ViewGroup
+                internalRoot.animate()
+                    .translationY(0f)
+                    .setDuration(300)
+                    .start()
+                //
+                internalRoot.postApply {
+                    //ain't nothing but a kludge to prevent blinking when transition is starting
+                    transitionView?.postDelayed(50) { visibility = View.INVISIBLE }
+
+                    TransitionManager.beginDelayedTransition(
+                        internalRoot,
+                        AutoTransition()
+                            .setDuration(300)
+                            .setInterpolator(DecelerateInterpolator())
+                            .addListener(onTransitionEnd = { })
+                    )
+
+                    binding.transitionImageContainer.makeViewMatchParent()
+                    binding.transitionImageView.makeViewMatchParent()
+
+                    binding.transitionImageContainer.requestLayout()
+                }
+            }
+        }
         loadMedia()
         handleSwipeToDismiss()
         return binding.root
     }
 
-    private fun loadMedia(){
+    private fun loadMedia() {
         if (getFileExtensionFromUrl(url) == "mp4") {
             binding.transitionImageView.visibility = View.GONE
             binding.vvVideo.visibility = View.VISIBLE
@@ -149,9 +206,10 @@ class MediaViewerDialog : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(url: String?): MediaViewerDialog {
+        fun newInstance(url: String?, transitionView: ImageView): MediaViewerDialog {
             val fragment = MediaViewerDialog()
             fragment.url = url ?: ""
+            fragment.transitionView = transitionView
             return fragment
         }
     }
