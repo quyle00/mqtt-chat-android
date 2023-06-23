@@ -53,10 +53,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private val conversationListViewModel: ConversationListViewModel by activityViewModels()
 
     override fun setupView() {
-//        Log.d("DeBugTime", "Start")
         binding.viewModel = viewModel
         initConversationList()
-//        Log.d("DeBugTime", "getConversationDetail End${DateUtils.currentTimestamp()}")
         viewModel.getConversationDetail(
             args.conversationId,
             Gson().fromJson(args.partner, User::class.java)
@@ -265,7 +263,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.rvMessage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
-                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0
+                    && recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
                     if (!isLoading && !noMoreData) {
                         isLoading = true
                         messageAdapter.loadMoreLoading()

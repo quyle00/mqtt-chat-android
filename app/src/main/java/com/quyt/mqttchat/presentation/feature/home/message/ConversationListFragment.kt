@@ -73,7 +73,12 @@ class ConversationListFragment :
 
                 is ConversationListState.NewMessage -> {
                     val conversationId = state.message?.conversation
-                    mConversationAdapter.updateLastMessage(conversationId, state.message)
+                    val isNewConversation = !mConversationAdapter.isExistConversation(conversationId)
+                    if (isNewConversation) {
+                        viewModel.getListConversation()
+                    } else {
+                        mConversationAdapter.updateLastMessage(conversationId, state.message)
+                    }
                 }
                 is ConversationListState.UserStatusChange -> {
                     mConversationAdapter.updateUserStatus(state.userId, state.isOnline)

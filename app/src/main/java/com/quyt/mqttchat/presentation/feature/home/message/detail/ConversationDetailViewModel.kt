@@ -101,9 +101,9 @@ class ConversationDetailViewModel @Inject constructor(
                 }
 
                 is Result.Error -> {
-                    uiState.postValue(
-                        ConversationDetailState.Error(result.exception.message ?: "Error")
-                    )
+//                    uiState.postValue(
+//                        ConversationDetailState.Error(result.exception.message ?: "Error")
+//                    )
                     if ((result.exception as CustomException).code == 422) {
                         mPartner.postValue(partner)
                     }
@@ -266,6 +266,7 @@ class ConversationDetailViewModel @Inject constructor(
         viewModelScope.launch {
             if (mCurrentConversation?.id.isNullOrEmpty()) {
                 mCurrentConversation = createConversation() ?: return@launch
+                subscribeConversation()
             }
             message.reply = messageToReply
             onCloseEditorMessage()

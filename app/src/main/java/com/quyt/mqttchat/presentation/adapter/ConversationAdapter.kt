@@ -43,11 +43,16 @@ class ConversationAdapter(private val currentUserId : String,
     }
 
     fun updateLastMessage(conversationId: String?, lastMessage: Message?) {
-        getItems().indexOfFirst { it.id == conversationId }.let {
-            val conversation = getItem(it)
+        val foundIndex = getItems().indexOfFirst { it.id == conversationId }
+        if (foundIndex!= -1) {
+            val conversation = getItem(foundIndex)
             conversation.lastMessage = lastMessage
-            updateAt(it, conversation)
+            updateAt(foundIndex, conversation)
         }
+    }
+
+    fun isExistConversation(conversationId: String?) : Boolean {
+        return getItems().any { it.id == conversationId }
     }
 
     fun updateUserStatus(userId: String?, isOnline: Boolean) {
@@ -67,11 +72,11 @@ class ConversationAdapter(private val currentUserId : String,
     }
 
     fun markReadLastMessage(conversationId: String?) {
-        getItems().indexOfFirst { it.id == conversationId }.let {
-            if (it == -1) return@let
-            val conversation = getItem(it)
+        val foundIndex = getItems().indexOfFirst { it.id == conversationId }
+        if (foundIndex != -1) {
+            val conversation = getItem(foundIndex)
             conversation.lastMessage?.state = MessageState.SEEN.value
-            updateAt(it, conversation)
+            updateAt(foundIndex, conversation)
         }
     }
 
