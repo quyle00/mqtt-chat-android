@@ -39,7 +39,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                app:cardCornerRadius="32dp">
+                app:cardCornerRadius="16dp">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     setAvatar="@{viewModel.MPartner.avatar}"
