@@ -3,6 +3,7 @@ package com.quyt.mqttchat.data.repository
 import com.google.gson.Gson
 import com.quyt.mqttchat.data.datasource.local.MessageLocalDataSource
 import com.quyt.mqttchat.data.datasource.remote.extension.getError
+import com.quyt.mqttchat.data.datasource.remote.model.response.DeleteMessageResponse
 import com.quyt.mqttchat.data.datasource.remote.service.MessageService
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.Result
@@ -124,22 +125,31 @@ class MessageRepositoryImpl(
         }
     }
 
-    override suspend fun deleteMessage(message: Message, shouldDeleteRemote: Boolean): Result<String> {
-        return try {
+    override suspend fun deleteMessage(message: Message, shouldDeleteRemote: Boolean): Result<DeleteMessageResponse> {
+        try {
             if (shouldDeleteRemote) {
                 val res = messageService.deleteMessage(message.conversation ?: "", message.id ?: "")
-                if (res.isSuccessful) {
+                return if (res.isSuccessful) {
                     messageLocalDatasource.deleteMessage(message)
-                    Result.Success("Success")
+                    Result.Success(res.body()?.data ?: DeleteMessageResponse())
                 } else {
                     Result.Error(res.getError())
                 }
             } else {
-                messageLocalDatasource.deleteMessage(message)
-                Result.Success("Success")
+                val localMessage = messageLocalDatasource.getMessageByPage(message.conversation ?: "", 1)
+                return if (localMessage.size >= 2 && localMessage[0].id == message.id) {
+                    val deleteMessageResponse = DeleteMessageResponse().apply {
+                        this.newLastMessage = localMessage[1].copy()
+                    }
+                    messageLocalDatasource.deleteMessage(message)
+                    Result.Success(deleteMessageResponse)
+                }else{
+                    messageLocalDatasource.deleteMessage(message)
+                    Result.Success(DeleteMessageResponse())
+                }
             }
         } catch (e: Exception) {
-            Result.Error(e)
+            return Result.Error(e)
         }
     }
 }

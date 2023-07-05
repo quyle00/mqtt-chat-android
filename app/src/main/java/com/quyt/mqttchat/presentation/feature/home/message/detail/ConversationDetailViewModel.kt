@@ -49,7 +49,7 @@ sealed class ConversationDetailState {
     data class SendMessageError(val message: Message, var error: String) : ConversationDetailState()
     data class NoMoreData(val message: String) : ConversationDetailState()
     data class EditMessageSuccess(val message: Message) : ConversationDetailState()
-    data class DeleteMessageSuccess(val message: Message) : ConversationDetailState()
+    data class DeleteMessageSuccess(val message: Message,val newLastMessage: Message?) : ConversationDetailState()
 }
 
 @HiltViewModel
@@ -75,7 +75,7 @@ class ConversationDetailViewModel @Inject constructor(
 ) : BaseViewModel<ConversationDetailState>() {
 
     val currentUser: User? by lazy { sharedPreferences.getCurrentUser() }
-    private var mCurrentConversation: Conversation? = null
+    var mCurrentConversation: Conversation? = null
     var isTyping: Boolean = false
     var mPartner = MutableLiveData<User?>()
     var mCurrentPage = 1
@@ -189,6 +189,9 @@ class ConversationDetailViewModel @Inject constructor(
             if (it.publisherId == currentUser?.id) return@listenMessageEventUseCase
             when (it.type) {
                 EventType.NEW_MESSAGE.value -> {
+                    // Update last message
+                    mCurrentConversation?.lastMessage = it.message
+                    //
                     uiState.postValue(ConversationDetailState.NewMessage(it.message!!))
                     //
                     val unSeenMessage = arrayListOf((it.message?.id ?: ""))
@@ -227,7 +230,7 @@ class ConversationDetailViewModel @Inject constructor(
                     viewModelScope.launch {
                         val result = deleteMessageUseCase(it.message!!, false)
                         if (result is Result.Success) {
-                            uiState.postValue(ConversationDetailState.DeleteMessageSuccess(it.message!!))
+                            uiState.postValue(ConversationDetailState.DeleteMessageSuccess(it.message!!,result.data.newLastMessage))
                             clearRetainMessageEventUseCase(
                                 mCurrentConversation?.id ?: "",
                                 currentUser?.id ?: ""
@@ -275,6 +278,8 @@ class ConversationDetailViewModel @Inject constructor(
                 is Result.Success -> {
                     val messageCreated = result.data
                     uiState.postValue(ConversationDetailState.SendMessageSuccess(messageCreated))
+                    // Update last message
+                    mCurrentConversation?.lastMessage = messageCreated
                     // Send Mqtt event
                     sendNewMessageEventUseCase(
                         mCurrentConversation?.id ?: "",
@@ -324,7 +329,7 @@ class ConversationDetailViewModel @Inject constructor(
             val result = deleteMessageUseCase(message, true)
             when (result) {
                 is Result.Success -> {
-                    uiState.postValue(ConversationDetailState.DeleteMessageSuccess(message))
+                    uiState.postValue(ConversationDetailState.DeleteMessageSuccess(message,result.data.newLastMessage))
                     //Send Mqtt event
                     sendDeleteMessageEventUseCase(
                         mCurrentConversation?.id ?: "",

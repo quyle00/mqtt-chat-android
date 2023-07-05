@@ -56,6 +56,7 @@ class ConversationListViewModel @Inject constructor(
     }
 
     fun updateLastMessage(message: Message?) {
+        message?.isMine = message?.sender?.id == currentUser?.id
         uiState.postValue(ConversationListState.NewMessage(message))
     }
 

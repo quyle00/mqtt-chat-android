@@ -1,6 +1,7 @@
 package com.quyt.mqttchat.data.datasource.remote.service
 
 import com.quyt.mqttchat.data.datasource.remote.model.response.BaseResponse
+import com.quyt.mqttchat.data.datasource.remote.model.response.DeleteMessageResponse
 import com.quyt.mqttchat.data.datasource.remote.model.response.MessagePagingResponse
 import com.quyt.mqttchat.domain.model.Message
 import okhttp3.MultipartBody
@@ -57,5 +58,5 @@ interface MessageService {
     suspend fun deleteMessage(
         @Path("conversationId") conversationId: String,
         @Path("messageId") messageId: String
-    ): Response<BaseResponse<String>>
+    ): Response<BaseResponse<DeleteMessageResponse>>
 }

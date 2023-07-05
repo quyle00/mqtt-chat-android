@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
@@ -41,6 +42,7 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     private val listMedia = ArrayList<MediaModel>()
     private lateinit var mLoaderManager: LoaderManager
     private lateinit var imagePickerAdapter: ImagePickerAdapter
+    private var isFromSetting = false
     private var hasMediaPermissionGranted = false
     private val mediaPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
         // check is all permission is granted
@@ -97,6 +99,14 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (isFromSetting) {
+            isFromSetting = false
+            checkMediaPermission()
+        }
+    }
+
     override fun onMediaSelected(mediaSelected: ArrayList<String>) {
         binding.rlSend.visibility = if (mediaSelected.size > 0) View.VISIBLE else View.GONE
         binding.tvSelectedCount.text = mediaSelected.size.toString()
@@ -134,6 +144,7 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
             .setTitle("Media Permission")
             .setMessage("Media permission is required to show media files, Please allow media permission from setting. if you deny the media permission, you will not be able to send media files")
             .setPositiveButton("Go to settings") { _, _ ->
+                isFromSetting = true
                 val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 intent.data = Uri.parse("package:${requireActivity().packageName}")
                 startActivity(intent)

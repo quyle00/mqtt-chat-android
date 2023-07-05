@@ -1,5 +1,6 @@
 package com.quyt.mqttchat.domain.repository
 
+import com.quyt.mqttchat.data.datasource.remote.model.response.DeleteMessageResponse
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.Result
 
@@ -10,5 +11,5 @@ interface MessageRepository {
     suspend fun updateSeenMessage(conversationId: String, messageIds: List<String>): Result<String>
     suspend fun updateLocalMessageState(messageIds: List<String>, newState: Int)
     suspend fun updateMessage(message: Message,shouldUpdateRemote : Boolean = true): Result<Message>
-    suspend fun deleteMessage(message: Message,shouldDeleteRemote : Boolean = true): Result<String>
+    suspend fun deleteMessage(message: Message,shouldDeleteRemote : Boolean = true): Result<DeleteMessageResponse>
 }

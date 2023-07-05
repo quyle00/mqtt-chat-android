@@ -143,7 +143,6 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 is ConversationDetailState.SendMessageSuccess -> {
                     messageAdapter.updateMessageState(state.message)
-                    state.message.isMine = state.message.sender?.id == viewModel.currentUser?.id
                     conversationListViewModel.updateLastMessage(state.message)
                 }
 
@@ -162,10 +161,16 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 is ConversationDetailState.EditMessageSuccess -> {
                     state.message.edited = true
                     messageAdapter.updateMessage(state.message)
+                    if (state.message.id == viewModel.mCurrentConversation?.lastMessage?.id) {
+                        conversationListViewModel.updateLastMessage(state.message)
+                    }
                 }
 
                 is ConversationDetailState.DeleteMessageSuccess -> {
                     messageAdapter.deleteMessage(state.message.id)
+                    if (state.newLastMessage != null) {
+                        conversationListViewModel.updateLastMessage(state.newLastMessage)
+                    }
                 }
 
                 is ConversationDetailState.SendMarkReadMessageSuccess -> {
