@@ -101,7 +101,7 @@ class ConversationAdapter(private val currentUserId : String,
             if (conversation.lastMessage?.isMine == true) {
                 binding.tvContent.setTypeface(null, android.graphics.Typeface.NORMAL)
                 binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.normal_text))
-                binding.tvContent.text = "You: ${conversation.lastMessage?.content}"
+                binding.tvContent.text = "You: ${binding.tvContent.text}"
                 binding.ivState.visibility = View.VISIBLE
                 binding.ivState.setImageResource(
                     when (conversation.lastMessage?.state) {

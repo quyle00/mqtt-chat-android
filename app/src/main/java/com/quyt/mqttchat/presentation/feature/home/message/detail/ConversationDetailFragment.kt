@@ -3,7 +3,6 @@ package com.quyt.mqttchat.presentation.feature.home.message.detail
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -42,7 +41,7 @@ import java.util.Locale
 
 @AndroidEntryPoint
 class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
-    BottomSheetListener, OnMessageClickListener {
+    OnBottomSheetListener, OnMessageClickListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -64,7 +63,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     override fun onMediaClick(imageView: ImageView, url: String?) {
-        val mediaViewerDialog = MediaViewerDialog.newInstance(url)
+        val mediaViewerDialog = MediaViewerDialogFragment.newInstance(url)
         mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
     }
 

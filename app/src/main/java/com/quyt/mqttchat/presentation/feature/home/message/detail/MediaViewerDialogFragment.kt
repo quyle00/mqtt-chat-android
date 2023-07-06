@@ -20,7 +20,7 @@ import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import kotlin.math.abs
 
 
-class MediaViewerDialog : DialogFragment() {
+class MediaViewerDialogFragment : DialogFragment() {
 
     private lateinit var binding: DialogMediaViewerBinding
     private lateinit var url: String
@@ -149,8 +149,8 @@ class MediaViewerDialog : DialogFragment() {
     }
 
     companion object {
-        fun newInstance(url: String?): MediaViewerDialog {
-            val fragment = MediaViewerDialog()
+        fun newInstance(url: String?): MediaViewerDialogFragment {
+            val fragment = MediaViewerDialogFragment()
             fragment.url = url ?: ""
             return fragment
         }

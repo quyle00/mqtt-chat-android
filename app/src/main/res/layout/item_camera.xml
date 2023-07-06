@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.quyt.mqttchat.presentation.view.SquareRelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <com.otaliastudios.cameraview.CameraView
+                android:id="@+id/camera_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:keepScreenOn="true"
+                app:cameraRequestPermissions="true"/>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/iv_camera"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_camera"
+                android:alpha="0.7"
+                android:tint="#FFFFFF"
+                android:layout_centerInParent="true"/>
+            <View
+                android:id="@+id/v_camera"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="@color/transparent"/>
+        </RelativeLayout>
+    </com.quyt.mqttchat.presentation.view.SquareRelativeLayout>
+</layout>
