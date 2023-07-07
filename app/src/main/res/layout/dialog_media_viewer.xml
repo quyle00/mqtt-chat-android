@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/root_container"
+    <FrameLayout
+        android:id="@+id/fl_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <View
-            android:id="@+id/background_view"
+            android:id="@+id/v_bg"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white" />
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:alpha="0.3"/>
 
         <FrameLayout
             android:id="@+id/dismiss_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
             <FrameLayout
-                android:id="@+id/transition_image_container"
+                android:id="@+id/fl_transition_container"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:ignore="UselessParent">
-
-                <ImageView
-                    android:id="@+id/transition_image_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:ignore="ContentDescription" />
-
+                android:layout_height="match_parent">
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/iv_internal_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
                 <VideoView
                     android:id="@+id/vv_video"
+                    android:visibility="gone"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-
+                    android:layout_height="match_parent"/>
+                <ProgressBar
+                    android:id="@+id/pb_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:layout_gravity="center"/>
             </FrameLayout>
-
         </FrameLayout>
 
     </FrameLayout>
+
 </layout>
