@@ -41,7 +41,7 @@ import java.util.Locale
 
 @AndroidEntryPoint
 class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailBinding, ConversationDetailViewModel>(),
-    BottomSheetListener, OnMessageClickListener {
+    OnBottomSheetListener, OnMessageClickListener {
 
     private val args: ConversationDetailFragmentArgs by navArgs()
     private lateinit var messageAdapter: MessageAdapter
@@ -64,7 +64,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
     override fun onMediaClick(imageView: ImageView, url: String?) {
         val mediaViewerDialog = MediaViewerDialog.newInstance(imageView, url?:"")
-        mediaViewerDialog.show(childFragmentManager, "viewDialogFragment")
+        mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
     }
 
     override fun onMessageLongClick(message: Message?, position: Int) {

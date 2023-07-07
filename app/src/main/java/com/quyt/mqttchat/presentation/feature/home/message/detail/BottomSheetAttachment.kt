@@ -13,37 +13,41 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.loader.app.LoaderManager
 import androidx.loader.content.CursorLoader
 import androidx.loader.content.Loader
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.google.android.material.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.otaliastudios.cameraview.CameraView
 import com.quyt.mqttchat.databinding.BottomSheetAttachBinding
 import com.quyt.mqttchat.databinding.BottomSheetAttachBindingImpl
+import com.quyt.mqttchat.databinding.ItemCameraBinding
 import com.quyt.mqttchat.presentation.adapter.ImagePickerAdapter
 import com.quyt.mqttchat.presentation.adapter.MediaModel
 import com.quyt.mqttchat.presentation.adapter.MediaType
 import com.quyt.mqttchat.presentation.adapter.OnImagePickerListener
 
-interface BottomSheetListener {
+interface OnBottomSheetListener {
     fun onDataSelected(data: ArrayList<String>)
 }
 
-class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheetDialogFragment(),
-    LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener {
+class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomSheetDialogFragment(),
+    LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener, OnDialogCameraListener{
     private lateinit var binding: BottomSheetAttachBinding
     private val listMedia = ArrayList<MediaModel>()
     private lateinit var mLoaderManager: LoaderManager
     private lateinit var imagePickerAdapter: ImagePickerAdapter
     private var isFromSetting = false
     private var hasMediaPermissionGranted = false
+    private lateinit var cameraView : CameraView
     private val mediaPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
         // check is all permission is granted
         hasMediaPermissionGranted = permission.entries.all { it.value }
@@ -110,6 +114,12 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     override fun onMediaSelected(mediaSelected: ArrayList<String>) {
         binding.rlSend.visibility = if (mediaSelected.size > 0) View.VISIBLE else View.GONE
         binding.tvSelectedCount.text = mediaSelected.size.toString()
+    }
+
+
+    override fun onSendImage(data: ArrayList<String>) {
+        listener.onDataSelected(data)
+        dismiss()
     }
 
     private fun checkMediaPermission() {
@@ -214,6 +224,26 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
         binding.rvImage.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvImage.addItemDecoration(GridSpacingItemDecoration(3, 10, true))
         (binding.rvImage.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
+        // Set up for camera view
+        binding.rvImage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
+                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
+                    val cameraItemViewHolder = (binding.rvImage.findViewHolderForAdapterPosition(0) as ImagePickerAdapter.CameraViewHolder)
+                    setupCameraViewItem(cameraItemViewHolder.binding)
+                }
+            }
+        })
+    }
+
+    private fun setupCameraViewItem(itemBinding: ItemCameraBinding) {
+        cameraView = itemBinding.cameraView
+        itemBinding.cameraView.setLifecycleOwner(this)
+        itemBinding.vCamera.setOnClickListener {
+            cameraView.close()
+            val cameraDialogFragment = CameraDialogFragment(this)
+            cameraDialogFragment.show(childFragmentManager, "CameraDialogFragment")
+        }
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
@@ -241,6 +271,7 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
+        listMedia.add(MediaModel("", MediaType.CAMERA))
         data?.let {
             val columnIndexData = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
             val columnIndexMediaType = it.getColumnIndexOrThrow(
@@ -261,4 +292,5 @@ class BottomSheetAttach(private val listener: BottomSheetListener) : BottomSheet
 
     override fun onLoaderReset(loader: Loader<Cursor>) {
     }
+
 }
