@@ -23,7 +23,7 @@
                 android:layout_height="match_parent">
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/iv_internal_image"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
                 <VideoView
                     android:id="@+id/vv_video"

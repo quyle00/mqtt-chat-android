@@ -7,7 +7,9 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Rect
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -20,6 +22,9 @@ import androidx.core.animation.addListener
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import kotlinx.coroutines.delay
@@ -34,34 +39,40 @@ class MediaViewerDialog() : DialogFragment() {
     private lateinit var url: String
     private var originalWidth = 0
     private var originalHeight = 0
+    private var imageWidth = 0
+    private var imageHeight = 0
     private var originalX = 0
     private var originalY = 0
     private var translationLimit = 300
     private var isTracking = false
     private var startY: Float = 0f
+    private var screenWidth = 0
+    private var screenHeight = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+        setStyle(STYLE_NORMAL, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         dialog?.window?.setBackgroundDrawableResource(R.color.transparent)
         binding = DataBindingUtil.inflate(inflater, R.layout.dialog_media_viewer, container, true)
-        initValue()
-        animateOpen()
+        initValue {
+            animateOpen()
+        }
         handleSwipeToDismiss()
         return binding.root
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return object : Dialog(requireContext(), theme) {
+        val dialog = object : Dialog(requireContext(), theme) {
             @Deprecated("Deprecated in Java")
             override fun onBackPressed() {
                 animateClose()
             }
         }
+        return dialog
     }
 
     private fun loadMedia() {
@@ -84,11 +95,39 @@ class MediaViewerDialog() : DialogFragment() {
     }
 
 
-    private fun initValue() {
+    private fun initValue(onFinish: () -> Unit) {
+        // Get external image view position
         originalX = getViewXOnScreen(externalImageView)
         originalY = getViewYOnScreen(externalImageView)
+        // Get external image view size
         originalWidth = externalImageView.width
         originalHeight = externalImageView.height
+        // Get screen size
+        screenWidth = resources.displayMetrics.widthPixels
+        screenHeight = resources.displayMetrics.heightPixels
+        // Get bitmap size
+        Glide.with(binding.ivInternalImage).asBitmap().load(url).into(
+            object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    // Resize bitmap if it's too large to fit screen
+                    var resizedBitmap = resource
+                    if (resizedBitmap.width > screenWidth) {
+                        resizedBitmap = resizeImageByWidth(resizedBitmap, screenWidth)
+                    }
+                    if (resizedBitmap.height > screenHeight) {
+                        resizedBitmap = resizeImageByHeight(resizedBitmap, screenHeight)
+                    }
+                    // Set bitmap to internal image view
+                    imageWidth = resizedBitmap.width
+                    imageHeight = resizedBitmap.height
+                    binding.ivInternalImage.setImageBitmap(resizedBitmap)
+                    onFinish.invoke()
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+
+            }
+        )
     }
 
     private fun animateOpen() {
@@ -99,25 +138,20 @@ class MediaViewerDialog() : DialogFragment() {
             it.width = originalWidth
             it.height = originalHeight
         }
-        binding.ivInternalImage.setImageDrawable(externalImageView.drawable)
         //
-        val originalWidth = binding.ivInternalImage.layoutParams.width
-        val originalHeight = binding.ivInternalImage.layoutParams.height
-        //
-        val screenWidth = resources.displayMetrics.widthPixels
-        val screenHeight = resources.displayMetrics.heightPixels
-        //
-        val widthAnimator = ValueAnimator.ofInt(originalWidth, screenWidth)
+        val widthAnimator = ValueAnimator.ofInt(originalWidth, imageWidth)
         widthAnimator.addUpdateListener { animation ->
-            val layoutParams = binding.ivInternalImage.layoutParams
-            layoutParams.width = animation.animatedValue as Int
-            layoutParams.height = (originalHeight * layoutParams.width.toFloat() / originalWidth).toInt()
-            binding.ivInternalImage.layoutParams = layoutParams
+            binding.ivInternalImage.layoutParams.width = animation.animatedValue as Int
             binding.ivInternalImage.requestLayout()
         }
         //
-        val newHeight = (originalHeight * screenWidth.toFloat() / originalWidth).toInt()
-        val middlePos = screenHeight / 2 - newHeight / 2
+        val heightAnimator = ValueAnimator.ofInt(originalHeight, imageHeight)
+        heightAnimator.addUpdateListener { animation ->
+            binding.ivInternalImage.layoutParams.height = animation.animatedValue as Int
+            binding.ivInternalImage.requestLayout()
+        }
+        //
+        val middlePos = (screenHeight / 2 - imageHeight / 2).takeIf { it > 0 } ?: 0
         val moveYAnimator = ValueAnimator.ofInt(binding.ivInternalImage.y.toInt(), middlePos)
         moveYAnimator.addUpdateListener { animation ->
             binding.ivInternalImage.y = (animation.animatedValue as Int).toFloat()
@@ -138,7 +172,7 @@ class MediaViewerDialog() : DialogFragment() {
         val animatorSet = AnimatorSet()
         animatorSet.interpolator = DecelerateInterpolator()
         animatorSet.duration = 300
-        animatorSet.playTogether(widthAnimator, moveXAnimator, moveYAnimator, alphaAnimator)
+        animatorSet.playTogether(widthAnimator, heightAnimator, moveXAnimator, moveYAnimator, alphaAnimator)
         animatorSet.addListener(onEnd = {
             loadMedia()
         })
@@ -146,13 +180,14 @@ class MediaViewerDialog() : DialogFragment() {
     }
 
     private fun animateClose() {
-        val widthAnimator = ValueAnimator.ofInt(binding.ivInternalImage.layoutParams.width, originalWidth)
+        binding.ivInternalImage.setImageDrawable(externalImageView.drawable)
+        val widthAnimator = ValueAnimator.ofInt(imageWidth, originalWidth)
         widthAnimator.addUpdateListener { animation ->
             binding.ivInternalImage.layoutParams.width = animation.animatedValue as Int
             binding.ivInternalImage.requestLayout()
         }
         //
-        val heightAnimator = ValueAnimator.ofInt(binding.ivInternalImage.layoutParams.height, originalHeight)
+        val heightAnimator = ValueAnimator.ofInt(imageHeight, originalHeight)
         heightAnimator.addUpdateListener { animation ->
             binding.ivInternalImage.layoutParams.height = animation.animatedValue as Int
             binding.ivInternalImage.requestLayout()
@@ -189,7 +224,7 @@ class MediaViewerDialog() : DialogFragment() {
         animatorSet.start()
     }
 
-    fun getViewXOnScreen(view: View): Int {
+    private fun getViewXOnScreen(view: View): Int {
         val rect = Rect()
         val coordinates = IntArray(2)
         view.getGlobalVisibleRect(rect)
@@ -218,6 +253,18 @@ class MediaViewerDialog() : DialogFragment() {
         } else {
             0
         }
+    }
+
+    private fun resizeImageByWidth(bitmap: Bitmap, width: Int): Bitmap {
+        val ratio = width.toFloat() / bitmap.width.toFloat()
+        val height = (bitmap.height * ratio).toInt()
+        return Bitmap.createScaledBitmap(bitmap, width, height, false)
+    }
+
+    private fun resizeImageByHeight(bitmap: Bitmap, height: Int): Bitmap {
+        val ratio = height.toFloat() / bitmap.height.toFloat()
+        val width = (bitmap.width * ratio).toInt()
+        return Bitmap.createScaledBitmap(bitmap, width, height, false)
     }
 
     @SuppressLint("ClickableViewAccessibility")

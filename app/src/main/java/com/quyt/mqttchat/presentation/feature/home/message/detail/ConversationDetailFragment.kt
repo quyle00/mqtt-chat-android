@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
@@ -30,6 +31,7 @@ import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
 import com.quyt.mqttchat.utils.DateUtils
+import com.stfalcon.imageviewer.StfalconImageViewer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -65,6 +67,11 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     override fun onMediaClick(imageView: ImageView, url: String?) {
         val mediaViewerDialog = MediaViewerDialog.newInstance(imageView, url?:"")
         mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
+//        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
+//            Glide.with(requireContext())
+//                .load(image)
+//                .into(view)
+//        }.withTransitionFrom(imageView).show()
     }
 
     override fun onMessageLongClick(message: Message?, position: Int) {
