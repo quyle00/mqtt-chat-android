@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <RelativeLayout
+        android:id="@+id/rl_camera"
+        android:elevation="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <VideoView
+            android:id="@+id/video_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.otaliastudios.cameraview.CameraView
+            android:id="@+id/camera_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:keepScreenOn="true"
+            app:cameraRequestPermissions="true" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_close"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/ic_close"
+            android:tint="@color/white"
+            android:animateLayoutChanges="true"
+            android:visibility="gone" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            app:cardBackgroundColor="#80000000"
+            app:cardCornerRadius="6dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:cardElevation="0dp"
+            android:elevation="10dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginVertical="4dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <androidx.cardview.widget.CardView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    app:cardCornerRadius="6dp"
+                    app:cardBackgroundColor="@color/red"
+                    app:cardElevation="0dp"
+                    android:elevation="10dp"/>
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:layout_marginStart="4dp"
+                    android:text="00:01"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <RelativeLayout
+            android:id="@+id/rl_capture"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="30dp">
+
+            <View
+                android:id="@+id/v_capture"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/circle_border" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_type"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_centerInParent="true"
+                android:visibility="gone"
+                app:cardCornerRadius="25dp"
+                tools:visibility="visible" />
+        </RelativeLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/iv_camera"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_centerInParent="true"
+            android:alpha="0.7"
+            android:src="@drawable/ic_camera"
+            android:tint="#FFFFFF" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cv_send"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="30dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:elevation="0dp"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/ic_send_24dp"
+                android:tint="@color/white" />
+        </androidx.cardview.widget.CardView>
+
+        <View
+            android:id="@+id/v_camera"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/transparent"
+            android:clickable="true"
+            android:focusable="true" />
+    </RelativeLayout>
+</layout>

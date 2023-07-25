@@ -17,7 +17,7 @@ import com.quyt.mqttchat.presentation.adapter.base.BaseRecyclerAdapter
 import com.quyt.mqttchat.utils.DateUtils
 
 enum class MediaType {
-    IMAGE, VIDEO,CAMERA
+    IMAGE, VIDEO
 }
 
 data class MediaModel(val uri: String, val type: MediaType)
@@ -28,41 +28,21 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
 ) {
     private val mListImageSelected = ArrayList<MediaModel>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        if (viewType == 1){
-            val binding = DataBindingUtil.inflate<ItemCameraBinding>(
-                LayoutInflater.from(parent.context),
-                R.layout.item_camera,
-                parent,
-                false
-            )
-            return CameraViewHolder(binding)
-        }else{
-            val binding = DataBindingUtil.inflate<ItemImagePickerBinding>(
-                LayoutInflater.from(parent.context),
-                R.layout.item_image_picker,
-                parent,
-                false
-            )
-            return ImagePickerViewHolder(binding)
-        }
+        val binding = DataBindingUtil.inflate<ItemImagePickerBinding>(
+            LayoutInflater.from(parent.context),
+            R.layout.item_image_picker,
+            parent,
+            false
+        )
+        return ImagePickerViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is ImagePickerViewHolder) {
             holder.bind(getItem(position))
         }
-        if (holder is CameraViewHolder){
-            holder.bind()
-        }
     }
 
-    override fun getItemViewType(position: Int): Int {
-        return if (getItem(position).type == MediaType.CAMERA) {
-            1
-        } else {
-            0
-        }
-    }
 
     fun getSelectedMediaUri(): ArrayList<String> {
         return mListImageSelected.map { it.uri } as ArrayList<String>
@@ -105,11 +85,6 @@ class ImagePickerAdapter(private val listener: OnImagePickerListener) : BaseRecy
                 }
                 listener.onMediaSelected(mListImageSelected.map { it.uri } as ArrayList<String>)
             }
-        }
-    }
-
-    inner class CameraViewHolder(val binding : ItemCameraBinding) : RecyclerView.ViewHolder(binding.root){
-        fun bind(){
         }
     }
 }
