@@ -118,7 +118,7 @@ class MediaViewerDialog() : DialogFragment() {
                         resizedBitmap = resizeImageByHeight(resizedBitmap, screenHeight)
                     }
                     // Set bitmap to internal image view
-                    imageWidth = resizedBitmap.width
+                    imageWidth = screenWidth
                     imageHeight = resizedBitmap.height
                     binding.ivInternalImage.setImageBitmap(resizedBitmap)
                     onFinish.invoke()
@@ -180,7 +180,8 @@ class MediaViewerDialog() : DialogFragment() {
     }
 
     private fun animateClose() {
-        binding.ivInternalImage.setImageDrawable(externalImageView.drawable)
+        binding.ivInternalImage.scaleType = ImageView.ScaleType.CENTER_CROP
+//        binding.ivInternalImage.setImageDrawable(externalImageView.drawable)
         val widthAnimator = ValueAnimator.ofInt(imageWidth, originalWidth)
         widthAnimator.addUpdateListener { animation ->
             binding.ivInternalImage.layoutParams.width = animation.animatedValue as Int
@@ -307,16 +308,14 @@ class MediaViewerDialog() : DialogFragment() {
     private fun onTrackingEnd() {
         when {
             binding.dismissContainer.translationY < -translationLimit -> {
-                val oldY = binding.ivInternalImage.y
+                binding.ivInternalImage.y+=binding.dismissContainer.y
                 binding.dismissContainer.y = 0f
-                binding.ivInternalImage.y = oldY - getViewYOnScreen(binding.ivInternalImage)
                 animateClose()
             }
 
             binding.dismissContainer.translationY > translationLimit -> {
-                val oldY = binding.ivInternalImage.y
+                binding.ivInternalImage.y+= binding.dismissContainer.y
                 binding.dismissContainer.y = 0f
-                binding.ivInternalImage.y = oldY + getViewYOnScreen(binding.ivInternalImage)
                 animateClose()
             }
 
