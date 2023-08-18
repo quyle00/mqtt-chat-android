@@ -8,6 +8,7 @@ import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3WillPublishBuilder
+import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.data.datasource.local.db.AppDatabase
 import com.quyt.mqttchat.data.datasource.remote.interceptor.ConnectivityInterceptor
 import com.quyt.mqttchat.data.datasource.remote.interceptor.HeaderInterceptor
@@ -95,7 +96,7 @@ class ApplicationModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://172.17.12.122:3000/")
+            .baseUrl(Constant.API_HOST)
             .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
@@ -106,7 +107,7 @@ class ApplicationModule {
     fun provideMqttClient(sharedPreferences: SharedPreferences): Mqtt3AsyncClient {
         return Mqtt3Client.builder()
             .identifier(sharedPreferences.getCurrentUser()?.id?: UUID.randomUUID().toString())
-            .serverHost("172.17.12.122")
+            .serverHost(Constant.MQTT_HOST)
             .automaticReconnectWithDefaultConfig()
             .buildAsync()
     }

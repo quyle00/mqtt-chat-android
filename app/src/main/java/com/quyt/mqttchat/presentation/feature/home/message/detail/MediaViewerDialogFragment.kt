@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -106,7 +107,7 @@ class MediaViewerDialog() : DialogFragment() {
         screenWidth = resources.displayMetrics.widthPixels
         screenHeight = resources.displayMetrics.heightPixels
         // Get bitmap size
-        Glide.with(binding.ivInternalImage).asBitmap().load(url).into(
+        Glide.with(binding.ivInternalImage).asBitmap().load(Constant.API_HOST+url).into(
             object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     // Resize bitmap if it's too large to fit screen

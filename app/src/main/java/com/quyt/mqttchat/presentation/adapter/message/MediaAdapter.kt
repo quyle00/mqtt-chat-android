@@ -7,7 +7,9 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.databinding.ItemImageBinding
 
 class MediaAdapter(private val listImageUrl: List<String>,private val listener : OnMessageClickListener) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
@@ -37,8 +39,10 @@ class MediaAdapter(private val listImageUrl: List<String>,private val listener :
             binding.cvRoot.setOnClickListener {
                 listener.onMediaClick(binding.ivImage,item)
             }
+//            val url = if (!item.contains("storage")) "${Constant.API_HOST}$item" else item
             Glide.with(binding.root.context)
                 .load(item)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .error(
                     ContextCompat.getDrawable(
                         binding.root.context,
