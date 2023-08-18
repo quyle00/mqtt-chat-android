@@ -6,6 +6,7 @@ import android.view.ViewOutlineProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
+import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.presentation.adapter.message.GroupMessageState
 import com.quyt.mqttchat.presentation.adapter.message.MediaAdapter
@@ -22,12 +23,12 @@ class OtherImageMessageViewHolder(
         binding.message = message
         //
         if (binding.rvImages.adapter == null) {
-            initRecyclerView(message?.images ?: arrayListOf())
+            initRecyclerView(message?.medias ?: arrayListOf())
         }
         binding.tvTime2.text = DateUtils.formatTime(message?.createdAt ?: "", "HH:mm")
     }
 
-    private fun initRecyclerView(imageUrls: List<String>) {
+    private fun initRecyclerView(imageUrls: List<Media>) {
         val imageAdapter = MediaAdapter(imageUrls,listener)
         binding.rvImages.adapter = imageAdapter
         binding.rvImages.layoutManager = GridLayoutManager(binding.root.context, 3)

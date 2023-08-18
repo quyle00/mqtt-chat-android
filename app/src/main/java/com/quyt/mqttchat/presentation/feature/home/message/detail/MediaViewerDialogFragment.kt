@@ -107,7 +107,7 @@ class MediaViewerDialog() : DialogFragment() {
         screenWidth = resources.displayMetrics.widthPixels
         screenHeight = resources.displayMetrics.heightPixels
         // Get bitmap size
-        Glide.with(binding.ivInternalImage).asBitmap().load(Constant.API_HOST+url).into(
+        Glide.with(binding.ivInternalImage).asBitmap().load(url).into(
             object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
                     // Resize bitmap if it's too large to fit screen

@@ -25,7 +25,7 @@ data class Message(
     var isTyping: Boolean,
     var state: Int = MessageState.SENT.value,
     var type: Int = MessageContentType.TEXT.value,
-    var images: List<String>?,
+    var medias: List<Media>?,
     var reply: Message?,
     var edited : Boolean
 ) {
@@ -41,7 +41,7 @@ data class Message(
         isTyping = false,
         state = MessageState.SENT.value,
         type = MessageContentType.TEXT.value,
-        images = listOf(),
+        medias = listOf(),
         reply = null,
         edited = false
     )
@@ -59,7 +59,7 @@ fun Message.toEntity() = MessageEntity(
     isTyping = isTyping,
     state = state,
     type = type,
-    images = Gson().toJson(images),
+    images = Gson().toJson(medias),
     reply = Gson().toJson(reply),
     edited = edited
 )

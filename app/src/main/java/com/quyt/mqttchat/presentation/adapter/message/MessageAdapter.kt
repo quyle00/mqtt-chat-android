@@ -97,13 +97,13 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
             MessageType.LOADING.value
         } else {
             if (mListMessage[position]?.sender?.id == currentUserId) {
-                if (!mListMessage[position]?.images.isNullOrEmpty()) {
+                if (!mListMessage[position]?.medias.isNullOrEmpty()) {
                     MessageType.MY_IMAGE.value
                 } else {
                     MessageType.MY_MESSAGE.value
                 }
             } else {
-                if (!mListMessage[position]?.images.isNullOrEmpty()) {
+                if (!mListMessage[position]?.medias.isNullOrEmpty()) {
                     MessageType.OTHERS_IMAGE.value
                 } else {
                     MessageType.OTHERS_MESSAGE.value

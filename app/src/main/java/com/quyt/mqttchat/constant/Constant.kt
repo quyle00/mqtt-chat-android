@@ -1,6 +1,6 @@
 package com.quyt.mqttchat.constant
 
 object Constant {
-    final val MQTT_HOST = "192.168.1.167"
-    final val API_HOST = "http://$MQTT_HOST:3000/"
+    const val MQTT_HOST = "172.17.12.122"
+    const val API_HOST = "http://$MQTT_HOST:3000/"
 }

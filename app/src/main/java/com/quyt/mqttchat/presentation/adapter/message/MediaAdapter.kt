@@ -11,8 +11,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.databinding.ItemImageBinding
+import com.quyt.mqttchat.domain.model.Media
 
-class MediaAdapter(private val listImageUrl: List<String>,private val listener : OnMessageClickListener) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
+class MediaAdapter(private val listImageUrl: List<Media>,private val listener : OnMessageClickListener) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
         val binding = DataBindingUtil.inflate<ItemImageBinding>(
@@ -35,13 +36,14 @@ class MediaAdapter(private val listImageUrl: List<String>,private val listener :
     inner class MediaViewHolder(private val binding: ItemImageBinding) : RecyclerView.ViewHolder(
         binding.root
     ) {
-        fun bind(item: String) {
+        fun bind(item: Media) {
+            val path = if (item.url.isEmpty()) item.localUri else "${Constant.API_HOST}${item.url}"
             binding.cvRoot.setOnClickListener {
-                listener.onMediaClick(binding.ivImage,item)
+                listener.onMediaClick(binding.ivImage,path)
             }
 //            val url = if (!item.contains("storage")) "${Constant.API_HOST}$item" else item
             Glide.with(binding.root.context)
-                .load(item)
+                .load(path)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .error(
                     ContextCompat.getDrawable(
@@ -50,7 +52,7 @@ class MediaAdapter(private val listImageUrl: List<String>,private val listener :
                     )
                 )
                 .into(binding.ivImage)
-            if (getFileExtensionFromUrl(item) == "mp4") {
+            if (getFileExtensionFromUrl(path) == "mp4") {
                 binding.llDuration.visibility = View.VISIBLE
             }else
                 binding.llDuration.visibility = View.GONE

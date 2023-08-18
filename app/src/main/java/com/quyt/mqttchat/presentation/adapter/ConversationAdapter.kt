@@ -93,8 +93,8 @@ class ConversationAdapter(private val currentUserId : String,
             binding.tvTime.setShortTime(conversation.lastMessage?.createdAt?:"")
             binding.cvOnlineStatus.visibility = if (partner?.isOnline == true) View.VISIBLE else View.GONE
             // Show last message
-            if (conversation.lastMessage?.images?.isNotEmpty() == true) {
-                binding.tvContent.text = "Sent ${conversation.lastMessage?.images?.size} images"
+            if (conversation.lastMessage?.medias?.isNotEmpty() == true) {
+                binding.tvContent.text = "Sent ${conversation.lastMessage?.medias?.size} images"
             } else {
                 binding.tvContent.text = conversation.lastMessage?.content
             }

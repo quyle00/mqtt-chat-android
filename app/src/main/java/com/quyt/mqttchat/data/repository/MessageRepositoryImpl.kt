@@ -56,10 +56,10 @@ class MessageRepositoryImpl(
 
     override suspend fun createMessage(conversationId: String, message: Message): Result<Message> {
         return try {
-            val res = if (message.images?.isNotEmpty() == true) {
+            val res = if (message.medias?.isNotEmpty() == true) {
                 val files = mutableListOf<MultipartBody.Part>()
-                message.images?.forEach { image ->
-                    val file = File(image)
+                message.medias?.forEach { image ->
+                    val file = File(image.localUri)
                     val requestFile = RequestBody.create(MediaType.parse("image/*"), file)
                     val part = MultipartBody.Part.createFormData("images", file.name, requestFile)
                     files.add(part)

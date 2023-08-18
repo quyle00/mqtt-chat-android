@@ -30,24 +30,24 @@ import com.otaliastudios.cameraview.CameraView
 import com.quyt.mqttchat.databinding.BottomSheetAttachBinding
 import com.quyt.mqttchat.databinding.BottomSheetAttachBindingImpl
 import com.quyt.mqttchat.databinding.ItemCameraBinding
+import com.quyt.mqttchat.domain.model.Media
+import com.quyt.mqttchat.domain.model.MediaType
 import com.quyt.mqttchat.presentation.adapter.ImagePickerAdapter
-import com.quyt.mqttchat.presentation.adapter.MediaModel
-import com.quyt.mqttchat.presentation.adapter.MediaType
 import com.quyt.mqttchat.presentation.adapter.OnImagePickerListener
 
 interface OnBottomSheetListener {
-    fun onDataSelected(data: ArrayList<String>)
+    fun onDataSelected(data: ArrayList<Media>)
 }
 
 class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomSheetDialogFragment(),
-    LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener, OnDialogCameraListener{
+    LoaderManager.LoaderCallbacks<Cursor>, OnImagePickerListener, OnDialogCameraListener {
     private lateinit var binding: BottomSheetAttachBinding
-    private val listMedia = ArrayList<MediaModel>()
+    private val listMedia = ArrayList<Media?>()
     private lateinit var mLoaderManager: LoaderManager
     private lateinit var imagePickerAdapter: ImagePickerAdapter
     private var isFromSetting = false
     private var hasMediaPermissionGranted = false
-    private lateinit var cameraView : CameraView
+    private lateinit var cameraView: CameraView
     private val mediaPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permission ->
         // check is all permission is granted
         hasMediaPermissionGranted = permission.entries.all { it.value }
@@ -111,13 +111,13 @@ class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomShe
         }
     }
 
-    override fun onMediaSelected(mediaSelected: ArrayList<String>) {
+    override fun onMediaSelected(mediaSelected: ArrayList<Media>) {
         binding.rlSend.visibility = if (mediaSelected.size > 0) View.VISIBLE else View.GONE
         binding.tvSelectedCount.text = mediaSelected.size.toString()
     }
 
 
-    override fun onSendImage(data: ArrayList<String>) {
+    override fun onSendImage(data: ArrayList<Media>) {
         listener.onDataSelected(data)
         dismiss()
     }
@@ -271,7 +271,7 @@ class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomShe
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
-        listMedia.add(MediaModel("", MediaType.CAMERA))
+        listMedia.add(null)
         data?.let {
             val columnIndexData = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
             val columnIndexMediaType = it.getColumnIndexOrThrow(
@@ -281,9 +281,9 @@ class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomShe
                 val mediaType = it.getInt(columnIndexMediaType)
                 val mediaData = it.getString(columnIndexData)
                 if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-                    listMedia.add(MediaModel(mediaData, MediaType.IMAGE))
+                    listMedia.add(Media(localUri = mediaData, type = MediaType.IMAGE.value))
                 } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
-                    listMedia.add(MediaModel(mediaData, MediaType.VIDEO))
+                    listMedia.add(Media(localUri = mediaData, type = MediaType.VIDEO.value))
                 }
             }
             imagePickerAdapter.setItems(listMedia)

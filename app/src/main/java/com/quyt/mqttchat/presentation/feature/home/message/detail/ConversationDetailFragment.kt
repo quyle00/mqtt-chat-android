@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
+import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
@@ -31,7 +31,6 @@ import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
 import com.quyt.mqttchat.utils.DateUtils
-import com.stfalcon.imageviewer.StfalconImageViewer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -287,7 +286,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         })
     }
 
-    override fun onDataSelected(data: ArrayList<String>) {
+    override fun onDataSelected(data: ArrayList<Media>) {
         val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
         // Create message model
         val newMessage = Message().apply {
@@ -295,7 +294,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             this.state = MessageState.SENDING.value
             this.createdAt = sdf.format(Date())
             this.sendTime = Date().time
-            this.images = data
+            this.medias = data
             this.type = MessageContentType.IMAGE.value
         }
         messageAdapter.addNewMessage(newMessage)

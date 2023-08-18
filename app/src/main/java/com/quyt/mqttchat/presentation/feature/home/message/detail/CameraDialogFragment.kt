@@ -24,6 +24,8 @@ import com.otaliastudios.cameraview.VideoResult
 import com.otaliastudios.cameraview.controls.Mode
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogCameraBinding
+import com.quyt.mqttchat.domain.model.Media
+import com.quyt.mqttchat.domain.model.MediaType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +35,7 @@ import java.io.File
 
 
 interface OnDialogCameraListener {
-    fun onSendImage(data: ArrayList<String>)
+    fun onSendImage(data: ArrayList<Media>)
 }
 
 
@@ -146,8 +148,8 @@ class CameraDialogFragment(private var listener: OnDialogCameraListener) : Dialo
     private fun sendData() {
         if (isVideo) {
             videoPath?.let {
-                val uriData = ArrayList<String>()
-                uriData.add(it)
+                val uriData = ArrayList<Media>()
+                uriData.add(Media(localUri = it, type = MediaType.VIDEO.value))
                 listener.onSendImage(uriData)
                 dismiss()
             }
@@ -155,8 +157,8 @@ class CameraDialogFragment(private var listener: OnDialogCameraListener) : Dialo
             pictureResult?.let {
                 val imageFile = File(requireContext().cacheDir, "image-${System.currentTimeMillis()}.jpg")
                 pictureResult?.toFile(imageFile) {
-                    val uriData = ArrayList<String>()
-                    uriData.add(imageFile.absolutePath)
+                    val uriData = ArrayList<Media>()
+                    uriData.add(Media(localUri = imageFile.absolutePath, type = MediaType.IMAGE.value))
                     listener.onSendImage(uriData)
                     dismiss()
                 }

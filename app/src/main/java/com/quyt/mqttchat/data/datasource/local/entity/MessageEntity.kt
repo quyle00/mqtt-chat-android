@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
@@ -41,7 +42,7 @@ fun MessageEntity.toMessage() = Message(
     isTyping = isTyping,
     state = state ?: MessageState.SENT.value,
     type = type,
-    images = Gson().fromJson(images, Array<String>::class.java).toList(),
+    medias = Gson().fromJson(images, Array<Media>::class.java).toList(),
     reply = Gson().fromJson(reply, Message::class.java),
     edited = edited
 )
