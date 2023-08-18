@@ -64,7 +64,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     override fun onMediaClick(imageView: ImageView, url: String?) {
-        val mediaViewerDialog = MediaViewerDialog.newInstance(imageView, url?:"")
+        val mediaViewerDialog = MediaViewerDialogFragment.newInstance(imageView, url?:"")
         mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
 //        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
 //            Glide.with(requireContext())

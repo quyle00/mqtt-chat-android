@@ -4,6 +4,8 @@ class Media(
     var localUri: String = "",
     var url: String = "",
     var type: Int = 0,
+    var width: Int = 0,
+    var height: Int = 0,
 )
 
 enum class MediaType(val value: Int) {

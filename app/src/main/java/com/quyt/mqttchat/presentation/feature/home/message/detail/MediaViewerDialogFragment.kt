@@ -26,14 +26,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.quyt.mqttchat.R
-import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 
-class MediaViewerDialog() : DialogFragment() {
+class MediaViewerDialogFragment() : DialogFragment() {
 
     private lateinit var binding: DialogMediaViewerBinding
     private lateinit var externalImageView: ImageView
@@ -353,8 +352,8 @@ class MediaViewerDialog() : DialogFragment() {
 
 
     companion object {
-        fun newInstance(imageView: ImageView, url: String): MediaViewerDialog {
-            val fragment = MediaViewerDialog()
+        fun newInstance(imageView: ImageView, url: String): MediaViewerDialogFragment {
+            val fragment = MediaViewerDialogFragment()
             fragment.externalImageView = imageView
             fragment.url = url
             return fragment

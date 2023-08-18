@@ -3,6 +3,7 @@ package com.quyt.mqttchat.presentation.feature.home.message.detail
 import android.app.Dialog
 import android.content.Intent
 import android.database.Cursor
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -251,7 +252,9 @@ class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomShe
         val projection = arrayOf(
             MediaStore.MediaColumns.DATA,
             MediaStore.Files.FileColumns.MEDIA_TYPE,
-            MediaStore.Images.Media.BUCKET_DISPLAY_NAME
+            MediaStore.Images.Media.BUCKET_DISPLAY_NAME,
+            MediaStore.Images.Media.WIDTH,
+            MediaStore.Images.Media.HEIGHT,
         )
         val selection = "${MediaStore.Files.FileColumns.MEDIA_TYPE}=? OR ${MediaStore.Files.FileColumns.MEDIA_TYPE}=?" // Tiêu chí tìm kiếm
         val selectionArgs = arrayOf(
@@ -272,18 +275,33 @@ class BottomSheetAttach(private val listener: OnBottomSheetListener) : BottomShe
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor?) {
         listMedia.add(null)
-        data?.let {
-            val columnIndexData = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
-            val columnIndexMediaType = it.getColumnIndexOrThrow(
+        data?.let {cursor ->
+            val dataIndex = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA)
+            val mediaTypeIndex = cursor.getColumnIndexOrThrow(
                 MediaStore.Files.FileColumns.MEDIA_TYPE
             )
-            while (it.moveToNext()) {
-                val mediaType = it.getInt(columnIndexMediaType)
-                val mediaData = it.getString(columnIndexData)
+            val widthIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.WIDTH)
+            val heightIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.HEIGHT)
+            while (cursor.moveToNext()) {
+                val mediaPath = cursor.getString(dataIndex)
+                var width = cursor.getInt(widthIndex)
+                var height = cursor.getInt(heightIndex)
+                //
+                val exif = ExifInterface(mediaPath)
+                val orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_90 || orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                    val temp = width
+                    width = height
+                    height = temp
+                }
+                //
+                val mediaType = cursor.getInt(mediaTypeIndex)
                 if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE) {
-                    listMedia.add(Media(localUri = mediaData, type = MediaType.IMAGE.value))
+                    val image = Media(localUri = mediaPath, type = MediaType.IMAGE.value, width = width, height = height)
+                    listMedia.add(image)
                 } else if (mediaType == MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO) {
-                    listMedia.add(Media(localUri = mediaData, type = MediaType.VIDEO.value))
+                    val video = Media(localUri = mediaPath, type = MediaType.VIDEO.value, width = width, height = height)
+                    listMedia.add(video)
                 }
             }
             imagePickerAdapter.setItems(listMedia)
