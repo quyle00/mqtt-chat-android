@@ -37,13 +37,11 @@ class MediaAdapter(private val listImageUrl: List<Media>,private val listener : 
         binding.root
     ) {
         fun bind(item: Media) {
-            val path = if (item.url.isEmpty()) item.localUri else "${Constant.API_HOST}${item.url}"
             binding.cvRoot.setOnClickListener {
-                listener.onMediaClick(binding.ivImage,path)
+                listener.onMediaClick(binding.ivImage,item)
             }
-//            val url = if (!item.contains("storage")) "${Constant.API_HOST}$item" else item
             Glide.with(binding.root.context)
-                .load(path)
+                .load(item.getFullUrl())
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .error(
                     ContextCompat.getDrawable(
@@ -52,7 +50,7 @@ class MediaAdapter(private val listImageUrl: List<Media>,private val listener : 
                     )
                 )
                 .into(binding.ivImage)
-            if (getFileExtensionFromUrl(path) == "mp4") {
+            if (getFileExtensionFromUrl(item.getFullUrl()) == "mp4") {
                 binding.llDuration.visibility = View.VISIBLE
             }else
                 binding.llDuration.visibility = View.GONE

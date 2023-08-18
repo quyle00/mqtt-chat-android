@@ -27,6 +27,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.DialogMediaViewerBinding
+import com.quyt.mqttchat.domain.model.Media
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -36,7 +37,7 @@ class MediaViewerDialogFragment() : DialogFragment() {
 
     private lateinit var binding: DialogMediaViewerBinding
     private lateinit var externalImageView: ImageView
-    private lateinit var url: String
+    private lateinit var media: Media
     private var originalWidth = 0
     private var originalHeight = 0
     private var imageWidth = 0
@@ -48,6 +49,7 @@ class MediaViewerDialogFragment() : DialogFragment() {
     private var startY: Float = 0f
     private var screenWidth = 0
     private var screenHeight = 0
+    private var isFullImageLoaded = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,11 +78,11 @@ class MediaViewerDialogFragment() : DialogFragment() {
     }
 
     private fun loadMedia() {
-        if (getFileExtensionFromUrl(url) == "mp4") {
+        if (getFileExtensionFromUrl(media.getFullUrl()) == "mp4") {
             binding.pbLoading.visibility = View.VISIBLE
             binding.ivInternalImage.visibility = View.GONE
             binding.vvVideo.visibility = View.VISIBLE
-            binding.vvVideo.setVideoPath(url)
+            binding.vvVideo.setVideoPath(media.getFullUrl())
             binding.vvVideo.setOnPreparedListener {
                 binding.pbLoading.visibility = View.GONE
                 binding.vvVideo.start()
@@ -105,29 +107,49 @@ class MediaViewerDialogFragment() : DialogFragment() {
         // Get screen size
         screenWidth = resources.displayMetrics.widthPixels
         screenHeight = resources.displayMetrics.heightPixels
-        // Get bitmap size
-        Glide.with(binding.ivInternalImage).asBitmap().load(url).into(
+        //
+        val size = media.getSizeOnScreen(screenWidth, screenHeight)
+        imageWidth = screenWidth
+        imageHeight = size.second
+        // Load thumbnail
+        Glide.with(binding.ivInternalImage)
+            .load(media.getFullUrl())
+            .override(media.getThumbnailSize().first, media.getThumbnailSize().second)
+            .into(binding.ivInternalImage)
+        // Load image screen size
+        val sizeOnScreen = media.getSizeOnScreen(screenWidth, screenHeight)
+        Glide.with(binding.ivInternalImage)
+            .asBitmap()
+            .load(media.getFullUrl())
+            .override(sizeOnScreen.first, sizeOnScreen.second)
+            .into(
             object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                    // Resize bitmap if it's too large to fit screen
-                    var resizedBitmap = resource
-                    if (resizedBitmap.width > screenWidth) {
-                        resizedBitmap = resizeImageByWidth(resizedBitmap, screenWidth)
-                    }
-                    if (resizedBitmap.height > screenHeight) {
-                        resizedBitmap = resizeImageByHeight(resizedBitmap, screenHeight)
-                    }
-                    // Set bitmap to internal image view
-                    imageWidth = screenWidth
-                    imageHeight = resizedBitmap.height
-                    binding.ivInternalImage.setImageBitmap(resizedBitmap)
-                    onFinish.invoke()
+                    if (isFullImageLoaded) return
+                    binding.ivInternalImage.setImageBitmap(resource)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {}
 
             }
         )
+        // Load full image
+        Glide.with(binding.ivInternalImage)
+            .asBitmap()
+            .load(media.getFullUrl())
+            .into(
+                object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        isFullImageLoaded = true
+                        binding.ivInternalImage.setImageBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {}
+
+                }
+            )
+        //
+        onFinish.invoke()
     }
 
     private fun animateOpen() {
@@ -352,10 +374,10 @@ class MediaViewerDialogFragment() : DialogFragment() {
 
 
     companion object {
-        fun newInstance(imageView: ImageView, url: String): MediaViewerDialogFragment {
+        fun newInstance(imageView: ImageView, media: Media): MediaViewerDialogFragment {
             val fragment = MediaViewerDialogFragment()
             fragment.externalImageView = imageView
-            fragment.url = url
+            fragment.media = media
             return fragment
         }
     }

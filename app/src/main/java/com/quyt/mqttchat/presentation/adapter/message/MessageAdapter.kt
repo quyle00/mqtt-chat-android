@@ -12,6 +12,7 @@ import com.quyt.mqttchat.databinding.ItemMyImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemMyMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
+import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyImageMessageViewHolder
@@ -21,7 +22,7 @@ import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageVie
 
 
 interface OnMessageClickListener {
-    fun onMediaClick(imageView : ImageView, url: String?)
+    fun onMediaClick(imageView : ImageView,media: Media)
     fun onMessageLongClick(message: Message?, position: Int)
 }
 

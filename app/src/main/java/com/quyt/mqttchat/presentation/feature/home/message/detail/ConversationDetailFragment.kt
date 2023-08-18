@@ -63,8 +63,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         handleAction()
     }
 
-    override fun onMediaClick(imageView: ImageView, url: String?) {
-        val mediaViewerDialog = MediaViewerDialogFragment.newInstance(imageView, url?:"")
+    override fun onMediaClick(imageView: ImageView, media: Media) {
+        val mediaViewerDialog = MediaViewerDialogFragment.newInstance(imageView, media)
         mediaViewerDialog.show(childFragmentManager, "mediaViewerDialog")
 //        StfalconImageViewer.Builder<String>(requireContext(), listOf(url)) { view, image ->
 //            Glide.with(requireContext())
@@ -180,6 +180,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
 
                 is ConversationDetailState.SendMarkReadMessageSuccess -> {
                     conversationListViewModel.updateMarkReadMyLastMessage(state.conversationId)
+                }
+                else -> {
                 }
             }
         }
