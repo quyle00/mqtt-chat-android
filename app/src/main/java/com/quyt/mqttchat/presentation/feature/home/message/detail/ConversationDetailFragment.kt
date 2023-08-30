@@ -1,10 +1,15 @@
 package com.quyt.mqttchat.presentation.feature.home.message.detail
 
+import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -23,8 +28,9 @@ import com.quyt.mqttchat.domain.model.Message
 import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
-import com.quyt.mqttchat.emoji.EmojiPopup
+import com.quyt.mqttchat.extensions.hideKeyboard
 import com.quyt.mqttchat.extensions.showKeyboard
+import com.quyt.mqttchat.helper.EmojiHelper
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
@@ -48,6 +54,22 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     private lateinit var messageAdapter: MessageAdapter
     private var isLoading = false
     private var noMoreData = false
+
+    private var keyboardHeight = 900
+    private var emojiShowing = false
+    private var keyboardShowing = false
+    private var onKeyListener = View.OnKeyListener { _, keyCode, event ->
+        if (event.action == android.view.KeyEvent.ACTION_UP && keyCode == android.view.KeyEvent.KEYCODE_BACK) {
+            if (emojiShowing && !keyboardShowing) {
+                emojiShowing = false
+                binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
+                binding.llEmoji.layoutParams.height = 0
+                return@OnKeyListener true
+            }
+            return@OnKeyListener false
+        }
+        false
+    }
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
     private val conversationListViewModel: ConversationListViewModel by activityViewModels()
@@ -61,6 +83,15 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         )
         observeState()
         handleAction()
+        handleShowKeyboard()
+        handleEmoji()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        view?.isFocusableInTouchMode = true
+        view?.requestFocus()
+        view?.setOnKeyListener(onKeyListener)
     }
 
     override fun onMediaClick(imageView: ImageView, media: Media) {
@@ -188,10 +219,6 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
     }
 
     private fun handleAction() {
-        val emojiPopup = EmojiPopup(binding.root, binding.etMessage)
-        binding.ivEmoji.setOnClickListener {
-            emojiPopup.toggle()
-        }
         binding.ivBack.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -235,6 +262,61 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.ivCloseEditor.setOnClickListener {
             binding.etMessage.requestFocus()
             viewModel.onCloseEditorMessage()
+        }
+    }
+
+    private fun handleEmoji(){
+        val heightAnimator = ValueAnimator.ofInt(0, keyboardHeight)
+        heightAnimator.addUpdateListener { animation ->
+            binding.llEmoji.layoutParams.height = animation.animatedValue as Int
+            binding.llEmoji.requestLayout()
+        }
+        heightAnimator.interpolator = DecelerateInterpolator()
+        heightAnimator.duration = 300
+        EmojiHelper(binding.llEmoji, binding.etMessage)
+        binding.ivEmoji.setOnClickListener {
+            emojiShowing = !emojiShowing
+            if (emojiShowing) {
+                binding.ivEmoji.setImageResource(R.drawable.ic_keyboard)
+                if (keyboardShowing) {
+                    view?.setOnKeyListener(null)
+                    binding.etMessage.hideKeyboard()
+                    view?.requestFocus()
+                    view?.setOnKeyListener(onKeyListener)
+                } else {
+                    heightAnimator.start()
+                }
+            } else {
+                binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
+                binding.etMessage.showKeyboard()
+            }
+        }
+    }
+
+    private fun handleShowKeyboard(){
+        ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { v: View?, insets: WindowInsetsCompat ->
+            val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom - insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
+            if (keyboardHeight > 0) {
+                this.keyboardHeight = keyboardHeight
+            }
+            keyboardShowing = isKeyboardVisible
+            if (isKeyboardVisible) {
+                binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
+                binding.llEmoji.layoutParams.height = keyboardHeight
+                binding.llEmoji.requestLayout()
+            } else {
+                if (emojiShowing) {
+                    binding.ivEmoji.setImageResource(R.drawable.ic_keyboard)
+                } else {
+                    binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
+                }
+                if (!emojiShowing){
+                    binding.llEmoji.layoutParams.height = 0
+                    binding.llEmoji.requestLayout()
+                }
+            }
+            ViewCompat.onApplyWindowInsets(v!!, insets)
         }
     }
 
