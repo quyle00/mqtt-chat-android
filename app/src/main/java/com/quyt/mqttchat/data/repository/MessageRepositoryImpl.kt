@@ -6,6 +6,7 @@ import com.quyt.mqttchat.data.datasource.remote.extension.getError
 import com.quyt.mqttchat.data.datasource.remote.model.response.DeleteMessageResponse
 import com.quyt.mqttchat.data.datasource.remote.service.MessageService
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.Result
 import com.quyt.mqttchat.domain.repository.MessageRepository
 import okhttp3.MediaType
@@ -18,17 +19,15 @@ class MessageRepositoryImpl(
     private val messageLocalDatasource: MessageLocalDataSource
 ) : MessageRepository {
     override suspend fun getListMessage(
-        conversationId: String,
-        page: Int,
-        lastMessageId: String?
+        conversationId: String, page: Int, lastMessageId: String?
     ): Result<List<Message>> {
         return try {
             if (page == 1) {
 //                if (lastMessageId != null) {
-                    val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
-                    if (localLatestMessage != null && localLatestMessage.id != lastMessageId) {
-                        messageLocalDatasource.clearMessage(conversationId)
-                    }
+                val localLatestMessage = messageLocalDatasource.getLatestMessage(conversationId)
+                if (localLatestMessage != null && localLatestMessage.id != lastMessageId) {
+                    messageLocalDatasource.clearMessage(conversationId)
+                }
 //                }
             }
 
@@ -56,7 +55,7 @@ class MessageRepositoryImpl(
 
     override suspend fun createMessage(conversationId: String, message: Message): Result<Message> {
         return try {
-            val res = if (message.medias?.isNotEmpty() == true) {
+            val res = if (message.medias?.isNotEmpty() == true && message.type != MessageContentType.STICKER.value) {
                 val files = mutableListOf<MultipartBody.Part>()
                 message.medias?.forEach { image ->
                     val file = File(image.localUri)
@@ -143,7 +142,7 @@ class MessageRepositoryImpl(
                     }
                     messageLocalDatasource.deleteMessage(message)
                     Result.Success(deleteMessageResponse)
-                }else{
+                } else {
                     messageLocalDatasource.deleteMessage(message)
                     Result.Success(DeleteMessageResponse())
                 }

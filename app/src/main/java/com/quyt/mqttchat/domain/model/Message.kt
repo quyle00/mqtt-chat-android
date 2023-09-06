@@ -73,5 +73,6 @@ enum class MessageState(val value: Int) {
 
 enum class MessageContentType(val value: Int) {
     TEXT(0),
-    IMAGE(1)
+    IMAGE(1),
+    STICKER(2),
 }

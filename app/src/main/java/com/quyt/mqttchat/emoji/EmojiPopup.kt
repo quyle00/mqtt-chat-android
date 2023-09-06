@@ -8,7 +8,6 @@ import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
@@ -19,6 +18,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.PopupEmojiBinding
+import com.quyt.mqttchat.domain.model.Emoji
+import com.quyt.mqttchat.domain.model.EmojiCategory
+import com.quyt.mqttchat.presentation.adapter.emoji.EmojiAdapter
+import com.quyt.mqttchat.presentation.adapter.emoji.EmojiCategoryAdapter
 
 class EmojiPopup(private val rootView: View, private val editText: EditText) {
     private lateinit var binding: PopupEmojiBinding
@@ -40,22 +43,22 @@ class EmojiPopup(private val rootView: View, private val editText: EditText) {
         popupWindow = PopupWindow(rootView.context)
         popupWindow?.contentView = createPopupView()
         val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        KeyboardHeightProvider(context, windowManager, rootView) { keyboardHeight, keyboardOpen, isLandscape ->
-            this.keyboardOpen = keyboardOpen
-            if (keyboardOpen) {
-                popupWindow?.width = LinearLayout.LayoutParams.MATCH_PARENT
-                popupWindow?.height = keyboardHeight
-                popupWindow?.setBackgroundDrawable(null)
-                binding.rvEmoji.scrollToPosition(0)
-            }
-            if (keyboardOpen && showWhenOpenKeyboard) {
-                showPopupWindow()
-                showWhenOpenKeyboard = false
-            }
-            if (!keyboardOpen) {
-                dismissPopupWindow()
-            }
-        }
+//        KeyboardHeightProvider(context, windowManager, rootView) { keyboardHeight, keyboardOpen, isLandscape ->
+//            this.keyboardOpen = keyboardOpen
+//            if (keyboardOpen) {
+//                popupWindow?.width = LinearLayout.LayoutParams.MATCH_PARENT
+//                popupWindow?.height = keyboardHeight
+//                popupWindow?.setBackgroundDrawable(null)
+//                binding.rvEmoji.scrollToPosition(0)
+//            }
+//            if (keyboardOpen && showWhenOpenKeyboard) {
+//                showPopupWindow()
+//                showWhenOpenKeyboard = false
+//            }
+//            if (!keyboardOpen) {
+//                dismissPopupWindow()
+//            }
+//        }
     }
 
     fun toggle() {

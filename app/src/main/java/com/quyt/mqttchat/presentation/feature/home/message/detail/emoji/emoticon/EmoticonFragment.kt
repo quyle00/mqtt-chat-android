@@ -1,42 +1,52 @@
-package com.quyt.mqttchat.helper
+package com.quyt.mqttchat.presentation.feature.home.message.detail.emoji.emoticon
 
 import android.content.Context
 import android.view.KeyEvent
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
-import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.quyt.mqttchat.R
-import com.quyt.mqttchat.databinding.PopupEmojiBinding
+import com.quyt.mqttchat.databinding.FragmentEmoticonBinding
 import com.quyt.mqttchat.domain.model.Emoji
 import com.quyt.mqttchat.presentation.adapter.emoji.EmojiAdapter
 import com.quyt.mqttchat.domain.model.EmojiCategory
 import com.quyt.mqttchat.presentation.adapter.emoji.EmojiCategoryAdapter
+import com.quyt.mqttchat.presentation.base.BaseBindingFragment
+import dagger.hilt.android.AndroidEntryPoint
 
-class EmojiHelper(private val container : ViewGroup,private val editText: EditText) {
-    private val context = container.context
-    private var binding: PopupEmojiBinding = DataBindingUtil.inflate(LayoutInflater.from(context), R.layout.popup_emoji, null, false)
+@AndroidEntryPoint
+class EmoticonFragment(private val editText: EditText) : BaseBindingFragment<FragmentEmoticonBinding, EmoticonViewModel>() {
+
     private lateinit var emojiAdapter: EmojiAdapter
     private var listEmoji = ArrayList<Emoji>()
     private val listEmojiCategory = ArrayList<EmojiCategory>()
     private var listRecentEmoji = ArrayList<Emoji>()
     private var selectedCategoryIndex = 0
-    private val sharedPreferences by lazy { context.getSharedPreferences("quyt_emoji", Context.MODE_PRIVATE) }
+    private val sharedPreferences by lazy { requireContext().getSharedPreferences("quyt_emoji", Context.MODE_PRIVATE) }
+    override fun layoutId(): Int = R.layout.fragment_emoticon
 
-    init{
-        getEmoji()
-        getRecentEmoji()
-        setupCategoryRecyclerView()
-        setupEmojiRecyclerView()
+    override val viewModel: EmoticonViewModel by viewModels()
+
+    override fun setupView() {
+        observeState()
         handleBackSpace()
-        container.addView(binding.root)
+        viewModel.getEmoji(requireContext())
+    }
+
+    private fun observeState() {
+        viewModel.uiState().observe(viewLifecycleOwner) {state ->
+            when (state) {
+                is EmoticonState.Success -> {
+                    listEmoji = state.data
+                    setupCategoryRecyclerView()
+                    setupEmojiRecyclerView()
+                }
+            }
+        }
     }
 
     private fun setupCategoryRecyclerView() {
@@ -65,7 +75,6 @@ class EmojiHelper(private val container : ViewGroup,private val editText: EditTe
     private fun setupEmojiRecyclerView() {
         emojiAdapter = EmojiAdapter(listEmoji) {
             editText.text.insert(editText.selectionStart, it.emoji)
-            updateRecent(it)
         }
         emojiAdapter.setHasStableIds(true)
         val gridLayoutManager = GridLayoutManager(context, 8)
@@ -112,69 +121,5 @@ class EmojiHelper(private val container : ViewGroup,private val editText: EditTe
             val event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL)
             editText.dispatchKeyEvent(event)
         }
-    }
-
-    private fun getEmoji() {
-        val emojis = sharedPreferences.getString("emojis", "")
-        listEmoji = if (emojis.isNullOrEmpty()) {
-            val data = readEmojiFromJson()
-            // Add header
-            data.add(0, Emoji(data[0].category))
-            for (i in 1 until data.size) {
-                if (listRecentEmoji.size < 16) {
-                    val recentTmp = data[i * 2].copy()
-                    recentTmp.category = "Recent"
-                    listRecentEmoji.add(recentTmp)
-                }
-                if (data[i].category != data[i - 1].category) {
-                    data.add(i, Emoji(data[i].category))
-                }
-            }
-            val json = Gson().toJson(data)
-            sharedPreferences.edit().putString("emojis", json).apply()
-            saveRecent()
-            data
-        } else {
-            Gson().fromJson(emojis, object : TypeToken<ArrayList<Emoji>>() {}.type)
-        }
-    }
-
-    private fun getRecentEmoji() {
-        val recent = sharedPreferences.getString("recent", "")
-        listRecentEmoji = if (recent.isNullOrEmpty()) {
-            arrayListOf()
-        } else {
-            Gson().fromJson(recent, object : TypeToken<ArrayList<Emoji>>() {}.type)
-        }
-    }
-
-    private fun updateRecent(emoji: Emoji) {
-        emoji.category = "Recent"
-        listRecentEmoji.removeIf { it.emoji == emoji.emoji }
-        listRecentEmoji.add(0, emoji)
-        if (listRecentEmoji.size > 16) {
-            listRecentEmoji.removeLast()
-        }
-    }
-
-    private fun saveRecent() {
-        val json = Gson().toJson(listRecentEmoji)
-        sharedPreferences.edit().putString("recent", json).apply()
-    }
-
-    private fun readEmojiFromJson(): ArrayList<Emoji> {
-        var json: ArrayList<Emoji>? = null
-        try {
-            val inputStream = context.assets.open("emoji.json")
-            val size = inputStream.available()
-            val buffer = ByteArray(size)
-            inputStream.read(buffer)
-            inputStream.close()
-            val jsonStr = String(buffer, Charsets.UTF_8)
-            json = Gson().fromJson(jsonStr, object : TypeToken<ArrayList<Emoji>>() {}.type)
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-        return json ?: arrayListOf()
     }
 }

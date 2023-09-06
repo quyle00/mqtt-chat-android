@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.emoji
+package com.quyt.mqttchat.presentation.adapter.emoji
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemEmojiCategoryBinding
+import com.quyt.mqttchat.domain.model.EmojiCategory
 
 class EmojiCategoryAdapter(
     private val listCategory: ArrayList<EmojiCategory>,

@@ -10,23 +10,28 @@ import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemLoadingBinding
 import com.quyt.mqttchat.databinding.ItemMyImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemMyMessageBinding
+import com.quyt.mqttchat.databinding.ItemMyStickerBinding
 import com.quyt.mqttchat.databinding.ItemOtherImageMessageBinding
 import com.quyt.mqttchat.databinding.ItemOtherMessageBinding
+import com.quyt.mqttchat.databinding.ItemOtherStickerBinding
 import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyImageMessageViewHolder
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.MyStickerViewHolder
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherImageMessageViewHolder
 import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherMessageViewHolder
+import com.quyt.mqttchat.presentation.adapter.message.viewHolder.OtherStickerViewHolder
 
 
 interface OnMessageClickListener {
-    fun onMediaClick(imageView : ImageView,media: Media)
+    fun onMediaClick(imageView: ImageView, media: Media)
     fun onMessageLongClick(message: Message?, position: Int)
 }
 
-class MessageAdapter(private val currentUserId: String?,private val listener : OnMessageClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MessageAdapter(private val currentUserId: String?, private val listener: OnMessageClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val mListMessage = mutableListOf<Message?>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -38,7 +43,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
                     parent,
                     false
                 )
-                MyMessageViewHolder(binding,listener)
+                MyMessageViewHolder(binding, listener)
             }
 
             MessageType.OTHERS_MESSAGE.value -> {
@@ -68,7 +73,7 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
                     parent,
                     false
                 )
-                MyImageMessageViewHolder(binding,listener)
+                MyImageMessageViewHolder(binding, listener)
             }
 
             MessageType.OTHERS_IMAGE.value -> {
@@ -78,7 +83,27 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
                     parent,
                     false
                 )
-                OtherImageMessageViewHolder(binding,listener)
+                OtherImageMessageViewHolder(binding, listener)
+            }
+
+            MessageType.MY_STICKER.value -> {
+                val binding = DataBindingUtil.inflate<ItemMyStickerBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_my_sticker,
+                    parent,
+                    false
+                )
+                MyStickerViewHolder(binding, listener)
+            }
+
+            MessageType.OTHERS_STICKER.value -> {
+                val binding = DataBindingUtil.inflate<ItemOtherStickerBinding>(
+                    LayoutInflater.from(parent.context),
+                    R.layout.item_other_sticker,
+                    parent,
+                    false
+                )
+                OtherStickerViewHolder(binding, listener)
             }
 
             else -> {
@@ -98,16 +123,18 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
             MessageType.LOADING.value
         } else {
             if (mListMessage[position]?.sender?.id == currentUserId) {
-                if (!mListMessage[position]?.medias.isNullOrEmpty()) {
-                    MessageType.MY_IMAGE.value
-                } else {
-                    MessageType.MY_MESSAGE.value
+                when (mListMessage[position]?.type) {
+                    MessageContentType.TEXT.value -> MessageType.MY_MESSAGE.value
+                    MessageContentType.IMAGE.value -> MessageType.MY_IMAGE.value
+                    MessageContentType.STICKER.value -> MessageType.MY_STICKER.value
+                    else -> MessageType.MY_MESSAGE.value
                 }
             } else {
-                if (!mListMessage[position]?.medias.isNullOrEmpty()) {
-                    MessageType.OTHERS_IMAGE.value
-                } else {
-                    MessageType.OTHERS_MESSAGE.value
+                when (mListMessage[position]?.type) {
+                    MessageContentType.TEXT.value -> MessageType.OTHERS_MESSAGE.value
+                    MessageContentType.IMAGE.value -> MessageType.OTHERS_IMAGE.value
+                    MessageContentType.STICKER.value -> MessageType.MY_STICKER.value
+                    else -> MessageType.OTHERS_MESSAGE.value
                 }
             }
         }
@@ -147,6 +174,13 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
 
             is OtherImageMessageViewHolder -> {
                 holder.bind(message, messageGroupState)
+            }
+
+            is MyStickerViewHolder -> {
+                holder.bind(message)
+            }
+            is OtherStickerViewHolder -> {
+                holder.bind(message)
             }
         }
     }
@@ -204,13 +238,13 @@ class MessageAdapter(private val currentUserId: String?,private val listener : O
         }
     }
 
-    fun deleteMessage(messageId: String){
+    fun deleteMessage(messageId: String) {
         mListMessage.find { it?.id == messageId }?.let {
             val index = mListMessage.indexOf(it)
             mListMessage.remove(it)
             notifyItemRemoved(index)
             notifyItemChanged(index)
-            notifyItemChanged(index-1)
+            notifyItemChanged(index - 1)
         }
     }
 
@@ -259,5 +293,11 @@ enum class GroupMessageState {
 }
 
 enum class MessageType(val value: Int) {
-    MY_MESSAGE(0), OTHERS_MESSAGE(1), LOADING(2), MY_IMAGE(3), OTHERS_IMAGE(4),
+    MY_MESSAGE(0),
+    OTHERS_MESSAGE(1),
+    LOADING(2),
+    MY_IMAGE(3),
+    OTHERS_IMAGE(4),
+    MY_STICKER(5),
+    OTHERS_STICKER(6)
 }

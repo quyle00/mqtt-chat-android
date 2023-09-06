@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.emoji
+package com.quyt.mqttchat.domain.model
 
 class EmojiCategory(
     var name: String,

@@ -1,4 +1,4 @@
-package com.quyt.mqttchat.emoji
+package com.quyt.mqttchat.presentation.adapter.emoji
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemEmojiBinding
 import com.quyt.mqttchat.databinding.ItemEmojiHeaderBinding
+import com.quyt.mqttchat.domain.model.Emoji
 
 class EmojiAdapter(private var emojis: ArrayList<Emoji>, private val onClickEmoji: (Emoji) -> Unit) :
     RecyclerView.Adapter<RecyclerView.ViewHolder>() {

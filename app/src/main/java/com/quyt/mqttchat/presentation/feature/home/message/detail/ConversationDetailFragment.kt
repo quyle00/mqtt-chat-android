@@ -20,6 +20,8 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
@@ -30,12 +32,15 @@ import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.extensions.hideKeyboard
 import com.quyt.mqttchat.extensions.showKeyboard
-import com.quyt.mqttchat.helper.EmojiHelper
+import com.quyt.mqttchat.presentation.adapter.emoji.EmojiViewPagerAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageAdapter
 import com.quyt.mqttchat.presentation.adapter.message.MessageSwipeController
 import com.quyt.mqttchat.presentation.adapter.message.OnMessageClickListener
 import com.quyt.mqttchat.presentation.base.BaseBindingFragment
 import com.quyt.mqttchat.presentation.feature.home.message.ConversationListViewModel
+import com.quyt.mqttchat.presentation.feature.home.message.detail.emoji.emoticon.EmoticonFragment
+import com.quyt.mqttchat.presentation.feature.home.message.detail.emoji.gif.GifFragment
+import com.quyt.mqttchat.presentation.feature.home.message.detail.emoji.sticker.StickerFragment
 import com.quyt.mqttchat.utils.DateUtils
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
@@ -63,13 +68,14 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             if (emojiShowing && !keyboardShowing) {
                 emojiShowing = false
                 binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
-                binding.llEmoji.layoutParams.height = 0
+                binding.rlEmoji.layoutParams.height = 0
                 return@OnKeyListener true
             }
             return@OnKeyListener false
         }
         false
     }
+
     override fun layoutId(): Int = R.layout.fragment_conversion_detail
     override val viewModel: ConversationDetailViewModel by viewModels()
     private val conversationListViewModel: ConversationListViewModel by activityViewModels()
@@ -84,7 +90,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         observeState()
         handleAction()
         handleShowKeyboard()
-        handleEmoji()
+        initEmoji()
     }
 
     override fun onResume() {
@@ -212,6 +218,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 is ConversationDetailState.SendMarkReadMessageSuccess -> {
                     conversationListViewModel.updateMarkReadMyLastMessage(state.conversationId)
                 }
+
                 else -> {
                 }
             }
@@ -265,15 +272,65 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         }
     }
 
-    private fun handleEmoji(){
+    private fun initEmoji() {
+        val emojiViewPagerAdapter = EmojiViewPagerAdapter(requireActivity())
+        emojiViewPagerAdapter.addFragment(EmoticonFragment(binding.etMessage))
+        emojiViewPagerAdapter.addFragment(StickerFragment {
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            // Create message model
+            val newMessage = Message().apply {
+                this.sender = viewModel.currentUser
+                this.state = MessageState.SENDING.value
+                this.createdAt = sdf.format(Date())
+                this.sendTime = Date().time
+                this.medias = listOf(Media().apply {
+                    this.url = it.url
+                    this.type = MessageContentType.IMAGE.value
+                })
+                this.type = MessageContentType.STICKER.value
+            }
+            messageAdapter.addNewMessage(newMessage)
+            scrollToBottom()
+            viewModel.sendMessage(newMessage)
+        })
+        emojiViewPagerAdapter.addFragment(GifFragment())
+        binding.vpEmoji.adapter = emojiViewPagerAdapter
+        TabLayoutMediator(binding.tlEmoji, binding.vpEmoji) { tab, position ->
+            when (position) {
+                0 -> {
+                    tab.text = "Emoticon"
+                }
+
+                1 -> {
+                    tab.text = "Sticker"
+                }
+
+                2 -> {
+                    tab.text = "Gif"
+                }
+            }
+        }.attach()
+        binding.tlEmoji.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+
+            }
+        })
         val heightAnimator = ValueAnimator.ofInt(0, keyboardHeight)
         heightAnimator.addUpdateListener { animation ->
-            binding.llEmoji.layoutParams.height = animation.animatedValue as Int
-            binding.llEmoji.requestLayout()
+            binding.rlEmoji.layoutParams.height = animation.animatedValue as Int
+            binding.rlEmoji.requestLayout()
         }
         heightAnimator.interpolator = DecelerateInterpolator()
         heightAnimator.duration = 300
-        EmojiHelper(binding.llEmoji, binding.etMessage)
+//        EmojiHelper(binding.rlEmoji, binding.etMessage)
         binding.ivEmoji.setOnClickListener {
             emojiShowing = !emojiShowing
             if (emojiShowing) {
@@ -293,7 +350,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         }
     }
 
-    private fun handleShowKeyboard(){
+    private fun handleShowKeyboard() {
         ViewCompat.setOnApplyWindowInsetsListener(requireActivity().window.decorView) { v: View?, insets: WindowInsetsCompat ->
             val isKeyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
             val keyboardHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom - insets.getInsets(WindowInsetsCompat.Type.systemBars()).bottom;
@@ -303,17 +360,17 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             keyboardShowing = isKeyboardVisible
             if (isKeyboardVisible) {
                 binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
-                binding.llEmoji.layoutParams.height = keyboardHeight
-                binding.llEmoji.requestLayout()
+                binding.rlEmoji.layoutParams.height = keyboardHeight
+                binding.rlEmoji.requestLayout()
             } else {
                 if (emojiShowing) {
                     binding.ivEmoji.setImageResource(R.drawable.ic_keyboard)
                 } else {
                     binding.ivEmoji.setImageResource(R.drawable.ic_emoji)
                 }
-                if (!emojiShowing){
-                    binding.llEmoji.layoutParams.height = 0
-                    binding.llEmoji.requestLayout()
+                if (!emojiShowing) {
+                    binding.rlEmoji.layoutParams.height = 0
+                    binding.rlEmoji.requestLayout()
                 }
             }
             ViewCompat.onApplyWindowInsets(v!!, insets)
@@ -332,7 +389,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         handleLayoutChange()
     }
 
-    private fun swipeToReply(){
+    private fun swipeToReply() {
         val messageSwipeController = MessageSwipeController(requireContext()) {
             messageAdapter.getMessage(it)?.let { message ->
                 viewModel.setReplyMessage(message)
@@ -358,7 +415,8 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
                 if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0
-                    && recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    && recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING
+                ) {
                     if (!isLoading && !noMoreData) {
                         isLoading = true
                         messageAdapter.loadMoreLoading()
