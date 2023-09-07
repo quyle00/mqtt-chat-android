@@ -13,12 +13,9 @@
             android:layout_margin="16dp">
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_centerInParent="true"
                 android:text="Contacts"
-                android:textColor="@color/title_text"
-                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <androidx.appcompat.widget.AppCompatImageView

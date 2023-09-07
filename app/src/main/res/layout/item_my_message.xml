@@ -45,8 +45,7 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_below="@id/layout_reply"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
@@ -55,7 +54,6 @@
                 android:text="@{message.content}"
                 android:textAlignment="center"
                 android:textColor="@color/white"
-                android:textSize="16sp"
                 tools:text="This is a long messsage" />
 
             <LinearLayout
@@ -69,20 +67,16 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_edited"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/SmallText"
                     android:text="edited"
                     android:textColor="#B3FFFFFF"
-                    android:textSize="12sp"
                     android:visibility="gone"/>
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_time_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/SmallText"
                     android:layout_marginStart="4dp"
                     android:textColor="#B3FFFFFF"
-                    android:textSize="12sp"
                     tools:text="00:00" />
 
                 <androidx.appcompat.widget.AppCompatImageView

@@ -17,21 +17,17 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_message_owner"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/NormalText"
             android:text="Sender"
-            android:textColor="#ffffff"
-            android:textSize="14sp" />
+            android:textColor="#ffffff" />
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_message_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/SmallText"
             android:maxLines="1"
             android:singleLine="true"
             android:text="This is a message"
-            android:textColor="#D8D8D8"
-            android:textSize="12sp" />
+            android:textColor="#D8D8D8"/>
     </LinearLayout>
 
 </LinearLayout>

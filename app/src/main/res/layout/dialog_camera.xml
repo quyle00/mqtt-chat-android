@@ -92,8 +92,7 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/NormalText"
                     android:textColor="@color/white"
                     android:layout_marginStart="4dp"
                     android:text="00:01"/>

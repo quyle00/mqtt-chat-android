@@ -29,6 +29,8 @@ class MainActivity : BaseBindingActivity<ActivityMainBinding>() {
     override fun getLayoutId(): Int = R.layout.activity_main
 
     override fun onViewReady(savedInstance: Bundle?) {
+        window.statusBarColor = resources.getColor(R.color.purple_7e)
+        window.decorView.systemUiVisibility = 0
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         val navGraph = navController.navInflater.inflate(R.navigation.nav_graph)

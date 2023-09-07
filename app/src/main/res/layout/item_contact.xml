@@ -55,28 +55,19 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 tools:text="Quý Lê"
-                android:text="@{contact.fullname}"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:text="@{contact.fullname}" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/NormalText"
                 android:text="Active now"
-                android:visibility="@{contact.isOnline ? View.VISIBLE : View.GONE}"
-                android:textColor="@color/normal_text"
-                android:textSize="14sp" />
+                android:visibility="@{contact.isOnline ? View.VISIBLE : View.GONE}" />
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/NormalText"
                 android:visibility="@{contact.isOnline ? View.GONE : View.VISIBLE}"
                 setTimeAgo="@{contact.lastSeen}"
-                android:text="last seen 1 hour ago"
-                android:textColor="@color/normal_text"
-                android:textSize="14sp" />
+                android:text="last seen 1 hour ago" />
         </LinearLayout>
 
     </LinearLayout>

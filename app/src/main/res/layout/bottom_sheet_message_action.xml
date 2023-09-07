@@ -26,12 +26,9 @@
                 app:tint="@color/colorPrimary" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_marginStart="16dp"
-                android:text="Reply"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:text="Reply" />
         </LinearLayout>
 
         <LinearLayout
@@ -51,12 +48,9 @@
                 app:tint="@color/colorPrimary" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_marginStart="16dp"
-                android:text="Copy"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:text="Copy" />
         </LinearLayout>
 
         <LinearLayout
@@ -76,12 +70,9 @@
                 app:tint="@color/colorPrimary" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_marginStart="16dp"
-                android:text="Edit"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:text="Edit" />
         </LinearLayout>
 
         <LinearLayout
@@ -102,12 +93,9 @@
                 app:tint="@color/colorPrimary" />
 
             <androidx.appcompat.widget.AppCompatTextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/TitleText"
                 android:layout_marginStart="16dp"
-                android:text="Delete"
-                android:textColor="@color/title_text"
-                android:textSize="16sp" />
+                android:text="Delete" />
         </LinearLayout>
     </LinearLayout>
 </layout>

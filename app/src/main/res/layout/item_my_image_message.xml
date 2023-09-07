@@ -50,10 +50,7 @@
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tv_time_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="12sp"
+                    style="@style/SmallText"
                     android:visibility="visible"
                     tools:text="00:00" />
 

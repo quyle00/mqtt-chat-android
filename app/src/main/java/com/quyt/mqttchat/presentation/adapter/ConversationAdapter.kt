@@ -100,7 +100,7 @@ class ConversationAdapter(private val currentUserId : String,
             }
             if (conversation.lastMessage?.isMine == true) {
                 binding.tvContent.setTypeface(null, android.graphics.Typeface.NORMAL)
-                binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.normal_text))
+                binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.purple_af))
                 binding.tvContent.text = "You: ${binding.tvContent.text}"
                 binding.ivState.visibility = View.VISIBLE
                 binding.ivState.setImageResource(
@@ -114,10 +114,10 @@ class ConversationAdapter(private val currentUserId : String,
                 binding.ivState.visibility = View.GONE
                 if (conversation.lastMessage?.state == MessageState.SEEN.value) {
                     binding.tvContent.setTypeface(null, android.graphics.Typeface.NORMAL)
-                    binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.normal_text))
+                    binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.purple_af))
                 } else {
                     binding.tvContent.setTypeface(null, android.graphics.Typeface.BOLD)
-                    binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.title_text))
+                    binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.purple_af))
                 }
             }
 

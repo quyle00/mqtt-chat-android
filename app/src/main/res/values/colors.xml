@@ -11,6 +11,10 @@
     <color name="transparent">#00000000</color>
     <color name="title_text">#2C3B5A</color>
     <color name="normal_text">#777A7D</color>
-    <color name="colorPrimary">#0795FF</color>
+    <color name="colorPrimary">#5374EB</color>
     <color name="red">#FF0000</color>
+    <color name="purple_7e">#7E7A9B</color>
+    <color name="purple_af">#AFAEC0</color>
+    <color name="red_f8">#F8A2A1</color>
+    <color name="grey_f1">#F1F0F5</color>
 </resources>
