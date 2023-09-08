@@ -34,7 +34,7 @@
 
             <include
                 android:id="@+id/layout_reply"
-                layout="@layout/layout_reply_message"
+                layout="@layout/layout_reply_my_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
@@ -45,8 +45,9 @@
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/tv_message"
-                style="@style/TitleText"
+                style="@style/NormalText"
                 android:layout_below="@id/layout_reply"
+                android:fontFamily="@font/manrope_semi_bold"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="4dp"

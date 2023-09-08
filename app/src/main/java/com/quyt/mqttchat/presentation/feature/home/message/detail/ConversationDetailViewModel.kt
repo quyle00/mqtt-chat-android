@@ -104,7 +104,8 @@ class ConversationDetailViewModel @Inject constructor(
 //                    uiState.postValue(
 //                        ConversationDetailState.Error(result.exception.message ?: "Error")
 //                    )
-                    if ((result.exception as CustomException).code == 422) {
+                    Log.e("ConversationDetail", "Error: ${result.exception.message}")
+                    if (result.exception is CustomException && result.exception.code == 422) {
                         mPartner.postValue(partner)
                     }
                 }

@@ -14,7 +14,7 @@
 
         <include
             android:id="@+id/layout_reply"
-            layout="@layout/layout_reply_message"
+            layout="@layout/layout_reply_other_message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
@@ -24,14 +24,15 @@
 
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_message"
-            style="@style/TitleText"
+            style="@style/NormalText"
+            android:fontFamily="@font/manrope_semi_bold"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="8dp"
             android:layout_below="@id/layout_reply"
             android:maxWidth="230dp"
-            android:textColor="@color/white"
+            android:textColor="@color/purple_66"
             android:visibility="visible"
             tools:text="This is a message" />
 
@@ -39,7 +40,7 @@
             android:id="@+id/tv_edited"
             style="@style/SmallText"
             android:text="edited"
-            android:textColor="#B3FFFFFF"
+            android:textColor="@color/purple_66"
             android:layout_alignBottom="@id/tv_message"
             android:layout_marginEnd="4dp"
             android:layout_toEndOf="@id/tv_message"
@@ -51,7 +52,7 @@
             android:layout_alignBottom="@id/tv_message"
             android:layout_marginEnd="16dp"
             android:layout_toEndOf="@id/tv_edited"
-            android:textColor="#B3FFFFFF"
+            android:textColor="@color/purple_66"
             android:visibility="visible"
             tools:text="00:00" />
 

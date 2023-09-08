@@ -168,62 +168,68 @@
             <RelativeLayout
                 android:id="@+id/rl_message_type"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/iv_attach"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="8dp"
-                    android:rotation="45"
-                    android:src="@drawable/ic_attach_24"
-                    android:tint="@color/colorPrimary" />
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toStartOf="@id/iv_send"
-                    android:layout_toEndOf="@id/iv_attach"
+                    android:layout_toStartOf="@id/cv_send"
                     android:background="@drawable/bg_message_type">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_attach"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/ic_attach"
+                        android:tint="@color/purple_8b" />
 
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/et_message"
                         style="@style/NormalText"
-                        android:layout_alignParentStart="true"
+                        android:textColor="@color/purple_8b"
+                        android:textColorHint="@color/purple_8b"
                         android:layout_centerVertical="true"
                         android:layout_toStartOf="@id/iv_emoji"
+                        android:layout_toEndOf="@id/iv_attach"
                         android:background="@color/transparent"
-                        android:hint="Message"
-                        android:minHeight="40dp"
-                        android:paddingStart="16dp"
+                        android:hint="Type your message..."
+                        android:minHeight="44dp"
+                        android:paddingStart="12dp"
                         android:paddingEnd="0dp"
                         android:text="@={viewModel.messageInputValue}" />
 
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/iv_emoji"
-                        android:layout_width="30dp"
-                        android:layout_height="30dp"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:layout_marginEnd="3dp"
-                        android:padding="5dp"
-                        android:src="@drawable/ic_emoji"
-                        android:tint="@color/colorPrimary" />
+                        android:layout_marginEnd="12dp"
+                        android:src="@drawable/ic_smiley"
+                        android:tint="@color/purple_8b" />
                 </RelativeLayout>
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/iv_send"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/cv_send"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    app:cardCornerRadius="22dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@color/red_f8"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_send_24dp"
-                    android:tint="@color/colorPrimary" />
+                    android:layout_marginStart="8dp">
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/iv_send"
+                        android:layout_width="20dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_send_stroke"/>
+                </androidx.cardview.widget.CardView>
             </RelativeLayout>
 
             <RelativeLayout
