@@ -21,10 +21,8 @@
         <LinearLayout
             android:id="@+id/ll_action_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
+            android:layout_height="56dp"
+            android:background="@color/purple_7e"
             android:gravity="center_vertical">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -34,7 +32,7 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="4dp"
                 android:src="@drawable/baseline_arrow_back_ios_24"
-                android:tint="@color/normal_text" />
+                android:tint="@color/white" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="32dp"
@@ -58,7 +56,8 @@
                     android:id="@+id/tv_name"
                     style="@style/NormalText"
                     android:text="@{viewModel.MPartner.fullname}"
-                    android:textColor="@color/title_text"
+                    android:textColor="@color/white"
+                    android:fontFamily="@font/manrope_semi_bold"
                     tools:text="Thanh Quý" />
 
                 <LinearLayout
@@ -78,11 +77,13 @@
                     <androidx.appcompat.widget.AppCompatTextView
                         style="@style/SmallText"
                         android:text="Active"
+                        android:textColor="@color/white"
                         android:visibility="@{viewModel.MPartner.isOnline ? View.VISIBLE : View.GONE}" />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         setTimeAgo="@{viewModel.MPartner.lastSeen}"
                         style="@style/SmallText"
+                        android:textColor="@color/white"
                         android:visibility="@{viewModel.MPartner.isOnline ? View.GONE : View.VISIBLE}" />
                 </LinearLayout>
             </LinearLayout>
@@ -190,7 +191,7 @@
                     <androidx.appcompat.widget.AppCompatEditText
                         android:id="@+id/et_message"
                         style="@style/NormalText"
-                        android:textColor="@color/purple_8b"
+                        android:textColor="@color/purple_66"
                         android:textColorHint="@color/purple_8b"
                         android:layout_centerVertical="true"
                         android:layout_toStartOf="@id/iv_emoji"

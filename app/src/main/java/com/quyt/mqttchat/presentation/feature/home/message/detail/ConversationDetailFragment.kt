@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
@@ -24,6 +25,7 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.gson.Gson
 import com.quyt.mqttchat.R
+import com.quyt.mqttchat.constant.Constant
 import com.quyt.mqttchat.databinding.FragmentConversionDetailBinding
 import com.quyt.mqttchat.domain.model.Media
 import com.quyt.mqttchat.domain.model.Message
@@ -240,7 +242,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
                 viewModel.sendTyping(false)
             }
         }
-        binding.ivSend.setOnClickListener {
+        binding.cvSend.setOnClickListener {
             viewModel.isTyping = false
             val messageContent = binding.etMessage.text.toString().trim()
             if (messageContent.isNotEmpty()) {
@@ -414,9 +416,7 @@ class ConversationDetailFragment : BaseBindingFragment<FragmentConversionDetailB
         binding.rvMessage.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 val linearLayoutManager = recyclerView.layoutManager as LinearLayoutManager
-                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0
-                    && recyclerView.scrollState == RecyclerView.SCROLL_STATE_DRAGGING
-                ) {
+                if (linearLayoutManager.findFirstCompletelyVisibleItemPosition() == 0) {
                     if (!isLoading && !noMoreData) {
                         isLoading = true
                         messageAdapter.loadMoreLoading()

@@ -133,7 +133,7 @@ class MessageAdapter(private val currentUserId: String?, private val listener: O
                 when (mListMessage[position]?.type) {
                     MessageContentType.TEXT.value -> MessageType.OTHERS_MESSAGE.value
                     MessageContentType.IMAGE.value -> MessageType.OTHERS_IMAGE.value
-                    MessageContentType.STICKER.value -> MessageType.MY_STICKER.value
+                    MessageContentType.STICKER.value -> MessageType.OTHERS_STICKER.value
                     else -> MessageType.OTHERS_MESSAGE.value
                 }
             }

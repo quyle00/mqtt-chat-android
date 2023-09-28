@@ -10,6 +10,7 @@ import com.quyt.mqttchat.R
 import com.quyt.mqttchat.databinding.ItemConversationBinding
 import com.quyt.mqttchat.domain.model.Conversation
 import com.quyt.mqttchat.domain.model.Message
+import com.quyt.mqttchat.domain.model.MessageContentType
 import com.quyt.mqttchat.domain.model.MessageState
 import com.quyt.mqttchat.domain.model.User
 import com.quyt.mqttchat.extensions.setAvatar
@@ -21,8 +22,10 @@ interface OnConversationListener {
     fun onConversationClick(conversation: Conversation?)
 }
 
-class ConversationAdapter(private val currentUserId : String,
-                          private val listener: OnConversationListener) : BaseRecyclerAdapter<Conversation>(
+class ConversationAdapter(
+    private val currentUserId: String,
+    private val listener: OnConversationListener
+) : BaseRecyclerAdapter<Conversation>(
     itemSameChecker = { oldItem, newItem -> oldItem.id == newItem.id },
     contentSameChecker = { oldItem, newItem -> oldItem == newItem }
 ) {
@@ -44,14 +47,14 @@ class ConversationAdapter(private val currentUserId : String,
 
     fun updateLastMessage(conversationId: String?, lastMessage: Message?) {
         val foundIndex = getItems().indexOfFirst { it.id == conversationId }
-        if (foundIndex!= -1) {
+        if (foundIndex != -1) {
             val conversation = getItem(foundIndex)
             conversation.lastMessage = lastMessage
             updateAt(foundIndex, conversation)
         }
     }
 
-    fun isExistConversation(conversationId: String?) : Boolean {
+    fun isExistConversation(conversationId: String?): Boolean {
         return getItems().any { it.id == conversationId }
     }
 
@@ -90,14 +93,25 @@ class ConversationAdapter(private val currentUserId : String,
             val partner = conversation.participants?.getPartner()
             binding.tvName.text = partner?.fullname
             binding.ivAvatar.setAvatar(partner?.avatar)
-            binding.tvTime.setShortTime(conversation.lastMessage?.createdAt?:"")
+            binding.tvTime.setShortTime(conversation.lastMessage?.createdAt ?: "")
             binding.cvOnlineStatus.visibility = if (partner?.isOnline == true) View.VISIBLE else View.GONE
             // Show last message
-            if (conversation.lastMessage?.medias?.isNotEmpty() == true) {
-                binding.tvContent.text = "Sent ${conversation.lastMessage?.medias?.size} images"
-            } else {
-                binding.tvContent.text = conversation.lastMessage?.content
+            when (conversation.lastMessage?.type) {
+                MessageContentType.TEXT.value -> {
+                    binding.tvContent.text = conversation.lastMessage?.content
+                }
+                MessageContentType.IMAGE.value -> {
+                    binding.tvContent.text = "Sent ${conversation.lastMessage?.medias?.size} images"
+                }
+                MessageContentType.STICKER.value -> {
+                    binding.tvContent.text = "Sent a sticker"
+                }
             }
+//            if (conversation.lastMessage?.medias?.isNotEmpty() == true) {
+//                binding.tvContent.text = "Sent ${conversation.lastMessage?.medias?.size} images"
+//            } else {
+//                binding.tvContent.text = conversation.lastMessage?.content
+//            }
             if (conversation.lastMessage?.isMine == true) {
                 binding.tvContent.setTypeface(null, android.graphics.Typeface.NORMAL)
                 binding.tvContent.setTextColor(ContextCompat.getColor(binding.root.context, R.color.purple_af))
@@ -125,6 +139,7 @@ class ConversationAdapter(private val currentUserId : String,
                 listener.onConversationClick(conversation)
             }
         }
+
         private fun List<User>?.getPartner(): User? {
             return this?.firstOrNull { user -> user.id != currentUserId }
         }
